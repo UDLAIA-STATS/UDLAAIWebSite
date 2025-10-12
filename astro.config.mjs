@@ -15,7 +15,7 @@ export default defineConfig({
   integrations: [solidJs()],
   site: 'https://udlaia-stats.netlify.app',
   base: '/',
-  trailingSlash: 'always',
+  trailingSlash: 'ignore',
   output: 'static',
   adapter: netlify()
 });

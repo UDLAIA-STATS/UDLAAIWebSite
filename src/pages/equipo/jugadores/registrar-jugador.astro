@@ -14,7 +14,6 @@ const inputClass =
     class="h-fit md:w-svw lg:w-shw w-shw min-h-[100vh] text-white flex flex-wrap justify-self-center-safe flex-col mt-16">
     <!-- Contenedor principal -->
     <div id="container" class="flex flex-col flex-wrap items-center justify-center gap-5 bg-[#C10230] self-center w-shw px-10 pt-4 pb-8 rounded-lg shadow-lg">
-        
         <!-- Título -->
         <div class="font-bold text-3xl flex pb-3">
             <h1>Agregar Jugador</h1>
@@ -23,14 +22,13 @@ const inputClass =
         <!-- Formulario -->
         <div id="player-form" class="flex flex-col w-full max-w-md">
             <form action="" method="post" enctype="multipart/form-data">
-                
                 <!-- Nombres -->
                 <div class="flex gap-2 flex-col mb-4">
                     <label class="text-base font-medium" for="nombre">Nombres</label>
                     <input
                       type="text"
-                      id="nombre"
-                      name="nombre"
+                      id="name"
+                      name="name"
                       maxlength="50"
                       class={inputClass}
                       required
@@ -42,8 +40,8 @@ const inputClass =
                     <label class="text-base font-medium" for="apellidos">Apellidos</label>
                     <input
                       type="text"
-                      id="apellidos"
-                      name="apellidos"
+                      id="lastname"
+                      name="lastname"
                       maxlength="50"
                       class={inputClass}
                       required
@@ -55,8 +53,8 @@ const inputClass =
                     <label class="text-base font-medium" for="numero">Número de Camiseta</label>
                     <input
                       type="number"
-                      id="numero"
-                      name="numero"
+                      id="shirtNumber"
+                      name="shirtNumber"
                       min="1"
                       max="99"
                       class={inputClass}
@@ -66,8 +64,8 @@ const inputClass =
 
                 <!-- Posición -->
                 <div class="flex gap-2 flex-col mb-4">
-                    <label class="text-base font-medium" for="posicion">Posición</label>
-                    <select id="posicion" name="posicion" class={inputClass} required>
+                    <label class="text-base font-medium" for="position">Posición</label>
+                    <select id="position" name="position" class={inputClass} required>
                         <option value="">-- Selecciona --</option>
                         <option value="Portero">Portero</option>
                         <option value="Defensa">Defensa</option>
@@ -78,11 +76,11 @@ const inputClass =
 
                 <!-- Foto -->
                 <div class="flex gap-2 flex-col mb-4">
-                    <label class="text-base font-medium" for="foto">Foto del Jugador</label>
+                    <label class="text-base font-medium" for="photo">Foto del Jugador</label>
                     <input
                       type="file"
-                      id="foto"
-                      name="foto"
+                      id="photo"
+                      name="photo"
                       accept="image/*"
                       class={inputClass}
                       required
@@ -101,3 +99,30 @@ const inputClass =
     </div>
   </section>
 </Layout>
+
+<script>
+  import { actions } from "astro:actions";
+
+  const form = document.querySelector("form");
+  const btnSubmit = form!.querySelector("button[type='submit']");
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+
+    const photo = formData.get("photo");
+    console.log(photo);
+
+    const { data, error } = await actions.registerPlayer(formData);
+
+    if (error) {
+      console.error("Error:", error);
+      alert("Error: " + error.message);
+    } else {
+      console.log("Success:", data);
+      alert("Jugador registrado exitosamente");
+      form.reset();
+    }
+  });
+</script>

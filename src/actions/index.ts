@@ -1,15 +1,7 @@
-import { defineAction } from "astro:actions";
-import { z } from "astro:schema";
+import { login } from "./auth";
+import { registerPlayer } from "./players";
 
 export const server = {
-    myAction: defineAction({
-        input: z.object({
-            name: z.string(),
-            age: z.number().min(0).optional(),
-        }),
-        handler: async ( input ) => {
-            // Your action logic here
-            return { message: `Hello, ${input.name}!` };
-        },
-    })
+    login,
+    registerPlayer
 }
