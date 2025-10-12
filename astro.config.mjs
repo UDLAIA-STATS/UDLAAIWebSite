@@ -10,10 +10,9 @@ import netlify from "@astrojs/netlify";
 export default defineConfig({
   vite: {
       plugins: [tailwindcss()],
-  },
-
+  },  
   integrations: [solidJs()],
-  site: 'https://udlaia-stats.netlify.app',
+  site: "http://localhost:4321",//'https://udlaia-stats.netlify.app',
   base: '/',
   trailingSlash: 'ignore',
   output: 'static',
