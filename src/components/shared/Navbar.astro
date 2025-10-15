@@ -1,11 +1,13 @@
 ---
 import "@styles/global.css";
-import { navbarLinks } from "@consts/navbar-links";
+import { getNavbarLinks, navbarLinks } from "@consts/navbar-links";
 import LogoUdla from "@assets/logo_udla_corto.png";
-
-const links = navbarLinks;
+import type { User } from "@interfaces/user.interface";
+import VerticalChevron from "@assets/vertical_chevron.svg";
 
 const currentPath = Astro.url.pathname;
+const { user } = Astro.locals;
+const links = getNavbarLinks(user as User);
 ---
 
 <section class="w-full relative top-0 right-0 left-0">
@@ -41,6 +43,18 @@ const currentPath = Astro.url.pathname;
           ))
         }
       </ul>
+    </div>
+    <div
+    class="flex flex-grow justify-end mr-5">
+    <div class="flex flex-row gap-2">
+      <span>{user ? `Hola, ${user.name}` : "Iniciar sesión"}</span>
+      { user ? (
+        <button id=""><img src={VerticalChevron.src} alt="Vertical Chevron" class="rotate-180"></a>
+      ) : false
+      }
+    </div>
+
+
     </div>
   </nav>
 </section>
