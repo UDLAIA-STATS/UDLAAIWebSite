@@ -1,12 +1,8 @@
-export const adminRoutesMap = {
-    AUTH_ADMIN: "/auth/admin",
-}
-
-
 export const privateRoutesMap = {
     REGISTER_PLAYER: "/equipo/jugadores/registrar-jugador",
     VIDEO_ANALYSIS: "/equipo/jugadores/analisis-video",
     AUTH_REGISTER: "/auth/register",
+    AUTH_ADMIN: "/auth/admin",
 }
 
 

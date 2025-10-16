@@ -3,7 +3,6 @@
 Sistema de gestión y análisis de estadísticas para equipos deportivos desarrollado con Astro, React, Solid.js y Tailwind CSS.
 
 ## Índice
-## Índice
 
 - [📋 Requisitos del Sistema](#-requisitos-del-sistema)
   - [Requisitos Obligatorios](#requisitos-obligatorios)
@@ -202,7 +201,7 @@ Todos los comandos se ejecutan desde la raíz del proyecto en una terminal:
 | Comando            | Acción                                                      |
 | :----------------- | :---------------------------------------------------------- |
 | `yarn test`        | Ejecuta las pruebas en modo watch                          |
-| `yarn test run`    | Ejecuta las pruebas una sola vez                           |
+| `yarn test`    | Ejecuta las pruebas una sola vez                           |
 | `yarn coverage`    | Genera el reporte de cobertura de pruebas                   |
 
 ### Comandos Utilitarios

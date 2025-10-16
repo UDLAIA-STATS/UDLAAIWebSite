@@ -1,6 +1,6 @@
 import type { Link } from "@interfaces/link.interface";
 import { roles } from "@consts/roles"
-import {  privateRoutesMap, publicRoutesMap, adminRoutesMap } from "@consts/routes"
+import {  privateRoutesMap, publicRoutesMap } from "@consts/routes"
 import type { User } from "@interfaces/user.interface";
 
 export const getNavbarLinks = (user?: User) => {
@@ -11,14 +11,10 @@ export const getNavbarLinks = (user?: User) => {
 
   if (!user) return links;
 
-  if ( user.rol === roles.super) {
-    links = [...links, 
-      {name: "Admnistrar usuarios", href: adminRoutesMap.AUTH_ADMIN}
-    ]
-  }
   if ( user.rol === roles.super || user.rol === roles.profesor ) {
     links = [...links,
-      { name: "Análisis", href: privateRoutesMap.VIDEO_ANALYSIS }
+      { name: "Análisis", href: privateRoutesMap.VIDEO_ANALYSIS },
+      {name: "Admnistrar usuarios", href: privateRoutesMap.AUTH_ADMIN}
     ]
   }
   return links;
