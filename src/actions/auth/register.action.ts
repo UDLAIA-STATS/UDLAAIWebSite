@@ -14,11 +14,12 @@ export const registerUser = defineAction({
         console.log("Token:", cookies.get("token")?.value);
         const authUrl = import.meta.env.AUTH_URL;
         console.log("AUTH_URL:", authUrl);
+        const basicAuth = Buffer.from("admin:123456789").toString("base64");
         const response = await fetch(`${authUrl}/register/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          'Authorization': cookies.get("token")?.value ?? "",
+          "Authorization": `Basic ${basicAuth}`,
         },
         body: JSON.stringify({
           nombre_usuario: name,

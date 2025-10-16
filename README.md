@@ -2,6 +2,40 @@
 
 Sistema de gestión y análisis de estadísticas para equipos deportivos desarrollado con Astro, React, Solid.js y Tailwind CSS.
 
+## Índice
+## Índice
+
+- [📋 Requisitos del Sistema](#-requisitos-del-sistema)
+  - [Requisitos Obligatorios](#requisitos-obligatorios)
+  - [Verificación de Requisitos](#verificación-de-requisitos)
+- [🚀 Instalación y Configuración](#-instalación-y-configuración)
+- [🚀 Estructura del Proyecto](#-estructura-del-proyecto)
+- [🛠️ Stack Tecnológico](#️-stack-tecnológico)
+  - [Framework Principal](#framework-principal)
+  - [UI Frameworks](#ui-frameworks)
+  - [Estilos y CSS](#estilos-y-css)
+  - [Desarrollo](#desarrollo)
+  - [Testing y Calidad](#testing-y-calidad)
+  - [Despliegue y Hosting](#despliegue-y-hosting)
+  - [Herramientas Adicionales](#herramientas-adicionales)
+- [🧞 Comandos](#-comandos)
+  - [Comandos de Desarrollo](#comandos-de-desarrollo)
+  - [Comandos de Build y Despliegue](#comandos-de-build-y-despliegue)
+  - [Comandos de Testing](#comandos-de-testing)
+  - [Comandos Utilitarios](#comandos-utilitarios)
+- [🔐 Autenticación y Roles](#-autenticación-y-roles)
+- [🧪 Testing](#-testing)
+- [🌐 Despliegue](#-despliegue)
+- [🆘 Solución de Problemas](#-solución-de-problemas)
+  - [Errores con dependencias](#errores-con-dependencias)
+  - [Errores de Node.js y versiones](#errores-de-nodejs-y-versiones)
+  - [Errores de desarrollo](#errores-de-desarrollo)
+  - [Errores de testing](#errores-de-testing)
+  - [Problemas de memoria](#problemas-de-memoria)
+  - [Problemas específicos del proyecto](#problemas-específicos-del-proyecto)
+  - [Obtener ayuda adicional](#obtener-ayuda-adicional)
+- [📚 Recursos](#-recursos)
+
 ## 📋 Requisitos del Sistema
 
 Antes de ejecutar el proyecto, asegúrate de tener instalado:
@@ -35,6 +69,10 @@ cd proyecto-capstone-front
 
 ```sh
 yarn install
+```
+
+```sh
+yarn add astro
 ```
 
 ### 3. Configurar variables de entorno
@@ -361,10 +399,6 @@ Si los problemas persisten:
 - [Documentación de Tailwind CSS](https://tailwindcss.com/docs)
 - [Documentación de Solid.js](https://www.solidjs.com/docs/latest)
 - [Documentación de Vitest](https://vitest.dev/)
-
-## 👥 Contribución
-
-Este es un proyecto académico (Capstone). Para contribuir, sigue las convenciones de código establecidas y asegúrate de que todas las pruebas pasen antes de hacer commit.
 
 ---
 
