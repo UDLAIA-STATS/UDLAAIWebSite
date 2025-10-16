@@ -61,7 +61,7 @@ export const login = defineAction({
       });
 
 
-      return { data: user };
+      return user;
     } catch (err) {
       console.error("Fallo en la acción de login:", err);
       throw err;

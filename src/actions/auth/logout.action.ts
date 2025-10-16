@@ -7,7 +7,7 @@ export const logout = defineAction({
     try {
         cookies.delete("user", { path: "/" });
         cookies.delete("token", { path: "/" })
-      return { data: "Usuario deslogueado con éxito" };
+      return { message: "Usuario deslogueado con éxito" };
     } catch (err) {
       console.error("Fallo en la acción:", err);
       throw err;
