@@ -1,20 +1,19 @@
 import type { Link } from "@interfaces/link.interface";
 import { roles } from "@consts/roles"
-import {  privateRoutesMap, publicRoutesMap } from "@consts/routes"
+import {  privateRoutesMap, publicRoutesMap, adminRoutesMap } from "@consts/routes"
 import type { User } from "@interfaces/user.interface";
 
 export const getNavbarLinks = (user?: User) => {
   let links: Link[] = [
     { name: "Inicio", href: publicRoutesMap.HOME },
-    { name: "Estadísticas", href: publicRoutesMap.PLAYER_STATS },
-    { name: "Herramienta", href: privateRoutesMap.VIDEO_ANALYSIS }
+    { name: "Estadísticas", href: publicRoutesMap.PLAYER_STATS }
   ]
 
   if (!user) return links;
 
   if ( user.rol === roles.super) {
     links = [...links, 
-      {name: "Admnistrar usuarios", href: privateRoutesMap.AUTH_ADMIN}
+      {name: "Admnistrar usuarios", href: adminRoutesMap.AUTH_ADMIN}
     ]
   }
   if ( user.rol === roles.super || user.rol === roles.profesor ) {

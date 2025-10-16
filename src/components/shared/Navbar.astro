@@ -4,10 +4,13 @@ import { getNavbarLinks, navbarLinks } from "@consts/navbar-links";
 import LogoUdla from "@assets/logo_udla_corto.png";
 import type { User } from "@interfaces/user.interface";
 import VerticalChevron from "@assets/vertical_chevron.svg";
+export const prerender = false;
 
 const currentPath = Astro.url.pathname;
-const { user } = Astro.locals;
+const user  = Astro.cookies.get("user") ? JSON.parse(Astro.cookies.get("user")?.value as string) as User : null;
 const links = getNavbarLinks(user as User);
+console.log({user});
+console.log({links});
 ---
 
 <section class="w-full relative top-0 right-0 left-0">
@@ -17,7 +20,7 @@ const links = getNavbarLinks(user as User);
         <img src={LogoUdla.src} alt="Logo UDLA" class="h-8" />
       </a>
     </div>
-    <div class="flex flex-grow justify-center mr-10">
+    <div class="flex flex-grow justify-center mr-10 align-middle">
       <ul class="flex gap-5 list-none m-0 p-0">
         {
           links.map(({ href, name }) => (
@@ -45,16 +48,54 @@ const links = getNavbarLinks(user as User);
       </ul>
     </div>
     <div
-    class="flex flex-grow justify-end mr-5">
-    <div class="flex flex-row gap-2">
-      <span>{user ? `Hola, ${user.name}` : "Iniciar sesión"}</span>
-      { user ? (
-        <button id=""><img src={VerticalChevron.src} alt="Vertical Chevron" class="rotate-180"></a>
-      ) : false
-      }
+    class="flex justify-end mr-5 w-fit px-5">
+    <div class="flex flex-col text-white justify-center align-middle items-center cursor-pointer pb-1">
+      <button class="flex no-underline" id="showMenu">
+        <span class="flex pr-2">{user ? `Hola, ${user.nickname}` : "Bienvenido"}</span>
+        <div class:list={[
+          "flex items-center align-middle justify-center rotate-180",
+        ]}>
+          <img src={VerticalChevron.src} alt="Icono de flecha" class=`h-4 w-4 ${user ? "" : "hidden"}`  />
+        </div>
+      </button>
+      <div id="menu" class="hidden bg-white text-black absolute top-12 right-5 rounded-md shadow-lg z-0 w-40">
+        <ul class="flex flex-col gap-2 list-none m-0 p-0">
+              <button
+                id="logout"
+                class:list={[
+                  "text-base px-3 pb-1 cursor-pointer",
+                ]}>
+                Logout
+              </button>
+        </ul>
+      </div>
     </div>
-
-
-    </div>
-  </nav>
+    
+  </div>
+</nav>
 </section>
+
+<script>
+import { actions } from "astro:actions";
+import { publicRoutesMap } from "@consts/routes"
+
+  const btnShowMenu = document.getElementById("showMenu") as HTMLButtonElement;
+  const btnLogout = document.getElementById("logout") as HTMLButtonElement;
+
+  const menu = document.getElementById("menu");
+  let showMenu = false;
+
+  btnShowMenu.addEventListener("click", () => {
+    showMenu = !showMenu;
+    if (showMenu) {
+      menu?.classList.remove("hidden");
+    } else {
+      menu?.classList.add("hidden");
+    }
+  });
+
+  btnLogout.addEventListener("click", async () => {
+    await actions.logout(null);
+    window.location.replace(publicRoutesMap.HOME);
+  });
+  </script>

@@ -3,6 +3,7 @@ import "@styles/global.css";
 import arrowNextRight from "@assets/arrow_next_right.svg"
 import OutlinedButton from "@components/buttons/OutlinedButton.astro"
 
+const user  = Astro.cookies.get("user") ? JSON.parse(Astro.cookies.get("user")?.value as string) as User : null;
 ---
 
 <section class="flex flex-col justify-start content-center items-center gap-4 pt-10 h-svh">
@@ -13,7 +14,7 @@ import OutlinedButton from "@components/buttons/OutlinedButton.astro"
         <p>Sube tu video o mira tus estadísticas</p>
     </div>
     <div class="flex flex-row flex-wrap justify-evenly w-lg p-10 min-w-sm max-w-svw">
-        <OutlinedButton href="/auth/login" label="Iniciar Ahora" iconSrc={arrowNextRight.src} />
+        <OutlinedButton href="/auth/login" label="Iniciar Ahora" className={user ? "hidden" : ""} iconSrc={arrowNextRight.src} />
         <OutlinedButton href="/equipo/jugadores/estadisticas" label="Estadísticas" iconSrc={arrowNextRight.src} />
     </div>
 </section>

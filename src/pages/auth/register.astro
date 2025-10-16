@@ -79,12 +79,14 @@ const inputClass =
 
 <script>
   import { actions } from "astro:actions";
+  import Swal from "sweetalert2";
 
   const form = document.querySelector("form");
-  const btnSubmit = form!.querySelector("button[type='submit']");
+  const btnSubmit = form!.querySelector("button[type='submit']") as HTMLButtonElement;
 
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
+    btnSubmit.setAttribute('disabled', 'disabled');
 
     const formData = new FormData(form);
 
@@ -93,11 +95,23 @@ const inputClass =
 
     if (error) {
       console.error("Error:", error.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al registrar el usuario',
+        text: error.message,
+      })
+      btnSubmit.removeAttribute('disabled');
+      return;
     }
 
     if (data) {
       console.log("Success:", data);
-      alert("Registro de usuario exitoso. Por favor, inicia sesión.");
+      Swal.fire({
+        icon: 'success',
+        title: 'Registro de usuario exitoso',
+        text: 'Por favor, inicia sesión.'
+      })
     }
+    btnSubmit.removeAttribute('disabled');
   });
 </script>

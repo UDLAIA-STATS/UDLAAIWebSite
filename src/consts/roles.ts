@@ -1,4 +1,4 @@
 export const roles = {
-    super: "superusuario",
+    super: "superuser",
     profesor: "profesor"
 }

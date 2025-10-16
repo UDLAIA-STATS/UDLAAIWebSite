@@ -1,5 +1,6 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
+import type { User } from "@interfaces/user.interface";
 
 export const login = defineAction({
   accept: "form",
@@ -21,8 +22,8 @@ export const login = defineAction({
     }
 
       console.log("Intentando login:", { name, password, rememberMe });
-
-      const response = await fetch("http://127.0.0.1:8000/api/login/", {
+      const authUrl = import.meta.env.AUTH_URL;
+      const response = await fetch(`${authUrl}/login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -34,17 +35,36 @@ export const login = defineAction({
       });
       
       if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+        console.log("Error en la respuesta del servidor");
+        throw new Error('Contraseña o usuario incorrectos');
       }
       
       console.log("Respuesta del servidor:", response);
-      const json = await response.json();
+      const json = await response.json();;
+      
       console.log("Login exitoso:", json);
+      const user: User = {
+        email: json['usuario'].email_usuario,
+        nickname: json['usuario'].nombre_usuario,
+        rol: json['usuario'].rol,
+        loginTime: new Date(),
+      }
 
-      return json;
+      cookies.set("user", JSON.stringify(user), {
+        expires: new Date(Date.now() + 1000 * 3600), // 1 hour
+        path: "/",
+      });
+      cookies.set("token", json['token'], {
+        httpOnly: true,
+        expires: new Date(Date.now() + 1000 * 3600), // 1 hour
+        path: "/",
+      });
+
+
+      return { data: user };
     } catch (err) {
       console.error("Fallo en la acción de login:", err);
-      return err;
+      throw err;
     }
   },
 });

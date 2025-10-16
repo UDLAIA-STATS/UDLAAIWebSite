@@ -1,0 +1,29 @@
+import type { MiddlewareNext } from 'astro';
+import { defineMiddleware } from 'astro:middleware';
+import { privateRoutesMap, publicRoutesMap, adminRoutesMap } from '@consts/routes';
+import { roles } from "@consts/roles"
+
+
+export const onRequest = defineMiddleware(
+  async ({ url, locals, cookies, redirect }, next) => {
+
+    const user = cookies.get("user")?.value ?? "";
+    const token = cookies.get("token")?.value ?? "";
+
+    const rol = locals.user?.rol ?? "";
+
+    if (!user && url.pathname in privateRoutesMap || url.pathname in adminRoutesMap) {
+        return redirect('/');
+    }
+
+    if (user && url.pathname in adminRoutesMap && rol !== roles.super) {
+        return redirect('/');
+    }
+
+    if (user && (url.pathname in privateRoutesMap || url.pathname in adminRoutesMap) && rol !== roles.super && rol !== roles.profesor) {
+        return redirect('/');
+    }
+
+    return next();
+  }
+);

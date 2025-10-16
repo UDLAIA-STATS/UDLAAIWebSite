@@ -8,13 +8,17 @@ export const registerUser = defineAction({
     email: z.string().email(),
     password: z.string().min(8),
   }),
-  handler: async ({ email, password, name }) => {
+  handler: async ({ email, password, name }, { cookies }) => {
     try {
         console.log("Registrando usuario:", { name, email, password });
-      const response = await fetch("http://127.0.0.1:8000/api/register/", {
+        console.log("Token:", cookies.get("token")?.value);
+        const authUrl = import.meta.env.AUTH_URL;
+        console.log("AUTH_URL:", authUrl);
+        const response = await fetch(`${authUrl}/register/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          'Authorization': cookies.get("token")?.value ?? "",
         },
         body: JSON.stringify({
           nombre_usuario: name,
@@ -27,15 +31,16 @@ export const registerUser = defineAction({
         console.log("Error en la respuesta del servidor");
         const errorData = await response.json().catch(() => ({}));
         console.error("Error al registrar usuario:", errorData);
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+        throw new Error(errorData.detail || `Error ${response.status}: ${response.statusText}`);
       }
       console.log("Usuario registrado con éxito");
       const data = await response.json();
       console.log("Usuario creado:", data);
 
-      return data;
+      return { data: data };
     } catch (err) {
       console.error("Fallo en la acción:", err);
+      throw err;
     }
   },
 });
