@@ -1,6 +1,6 @@
 import type { MiddlewareNext } from 'astro';
 import { defineMiddleware } from 'astro:middleware';
-import { privateRoutesMap, publicRoutesMap, adminRoutesMap } from '@consts/routes';
+import { privateRoutesMap, publicRoutesMap } from '@consts/routes';
 import { roles } from "@consts/roles"
 
 
@@ -12,15 +12,15 @@ export const onRequest = defineMiddleware(
 
     const rol = locals.user?.rol ?? "";
 
-    if (!user && url.pathname in privateRoutesMap || url.pathname in adminRoutesMap) {
+    if (!user && url.pathname in privateRoutesMap) {
         return redirect('/');
     }
 
-    if (user && url.pathname in adminRoutesMap && rol !== roles.super) {
+    if (user && url.pathname in privateRoutesMap && rol !== roles.super) {
         return redirect('/');
     }
 
-    if (user && (url.pathname in privateRoutesMap || url.pathname in adminRoutesMap) && rol !== roles.super && rol !== roles.profesor) {
+    if (user && (url.pathname in privateRoutesMap) && rol !== roles.super && rol !== roles.profesor) {
         return redirect('/');
     }
 

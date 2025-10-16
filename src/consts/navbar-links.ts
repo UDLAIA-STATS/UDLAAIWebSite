@@ -14,7 +14,7 @@ export const getNavbarLinks = (user?: User) => {
   if ( user.rol === roles.super || user.rol === roles.profesor ) {
     links = [...links,
       { name: "Análisis", href: privateRoutesMap.VIDEO_ANALYSIS },
-      {name: "Admnistrar usuarios", href: privateRoutesMap.AUTH_ADMIN}
+      {name: "Administrar usuarios", href: privateRoutesMap.AUTH_ADMIN}
     ]
   }
   return links;
