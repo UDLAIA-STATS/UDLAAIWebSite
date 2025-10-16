@@ -59,7 +59,7 @@ jobs:
         if: always()
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage/lcov.info
+          files: ./coverage/index.html
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false

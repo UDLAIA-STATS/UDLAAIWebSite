@@ -7,7 +7,9 @@ export default getViteConfig({
     globals: true,
     // setupFiles: ["./vitest.setup.ts"],
     coverage: {
+      enabled: true,
       provider: "v8",
+      reportsDirectory: "./coverage",
       reporter: ["text", "html"],
       exclude: [
         "node_modules/**",
