@@ -1,0 +1,90 @@
+---
+import "@styles/global.css";
+import Layout from "@layouts/Layout.astro";
+import { privateRoutesMap } from "@consts/routes";
+import horizontalArrow from "@assets/black_horizontal_arrow.svg";
+import EditIcon from "@assets/edit_icon_black.svg";
+import DeleteIcon from "@assets/delete_icon_black.svg";
+
+const { AUTH_REGISTER, EDIT_USER } = privateRoutesMap;
+const name = Astro.cookies.get("name")?.value;
+---
+
+<Layout>
+  <section class="mx-10 my-5 h-svh">
+    <div class="text-2xl font-bold" id="title">
+      <h1>Panel de Administrador</h1>
+    </div>
+    <div class="text-lg py-4" id="subtitle">
+      <span>
+        Bienvenido, {name}.
+      </span>
+    </div>
+    <div class="py-3 flex flex-col gap-3 w-full">
+        <div class="flex flex-row justify-between w-full">
+          <h1 class="font-bold text-2xl">Usuarios</h1>
+          <div class="flex flex-row gap-10 w-3/2 justify-end">
+            <a  
+              href={AUTH_REGISTER}
+              class="no-underline text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md flex cursor-pointer items-center gap-2"
+            >
+              Agregar Usuario
+            </a>
+            <input
+              type="search"
+              name="search"
+              placeholder="Buscar usuario..."
+              id="search-box"
+              class="rounded-md p-2 w-1/4 focus:outline-none focus:ring-1 focus:ring-[#000] text-black border border-solid border-[#000]"
+            />
+          </div>
+        </div>
+        <div class="relative overflow-x-auto w-svw mt-5 flex justify-center">
+          <table
+            class="table-auto border-collapse w-7xl text-sm text-left rtl:text-right"
+          >
+            <thead class="text-xs uppercase">
+              <tr>
+                <th scope="col" class="px-6 py-3">Nombre de usuario</th>
+                <th scope="col" class="px-6 py-3">Email</th>
+                <th scope="col" class="px-6 py-3">Rol</th>
+                <th scope="col" class="px-6 py-3">Editar</th>
+                <th scope="col" class="px-6 py-3">Eliminar</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b">
+                <td scope="row" class="px-6 py-4">Juan Perez</td>
+                <td scope="row" class="px-6 py-4">H8h1o@example.com</td>
+                <td scope="row" class="px-6 py-4">Admin</td>
+                <td scope="row" class="px-6 py-4">
+                  <a class="cursor-pointer no-underline" href={`${EDIT_USER}/david`}>
+                    <img
+                      class="size-8"
+                      src={EditIcon.src}
+                      alt="Editar Usuario"
+                    />
+                  </a>
+                </td>
+                <td scope="row" class="px-6 py-4">
+                  <button class="cursor-pointer" type="submit" id="delete">
+                    <img
+                      class="size-8"
+                      src={DeleteIcon.src}
+                      alt="Eliminar Usuario"
+                    />
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+
+  const deleteBtn = document.getElementById("delete") as HTMLButtonElement;
+
+</script>

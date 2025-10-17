@@ -1,7 +1,7 @@
 ---
 import "@styles/global.css";
 import Layout from "@layouts/Layout.astro";
-import arrowNextRight from "@assets/arrow_next_right.svg";
+import arrowNext from "@assets/arrow_next.svg";
 
 export const prerender = false;
 
@@ -25,7 +25,7 @@ const inputClass =
         <h1>Inicio de Sesión</h1>
       </div>
       <div id="register-form" class="flex flex-col gap-5">
-        <form action="" autocomplete="on" method="post">
+        <form action="submit" autocomplete="on" method="post">
           <div class="flex flex-col gap-2 mb-4 px-5">
             <label class="text-base font-medium" for="name"
               >Usuario</label
@@ -64,22 +64,16 @@ const inputClass =
               />
               <label for="rememberMe" class="text-sm">Recuérdame</label>
             </div>
-            <button
-              class="text-sm text-white underline cursor-pointer"
-              id="forgot-password"
-            >
-              ¿Olvidaste tu contraseña?</button
-            >
           </div>
           <div class="flex justify-center mt-5 pt-2">
             <button 
-            class="disabled:bg-gray-300 text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md cursor-pointer flex" 
+            class="disabled:bg-gray-300 text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md cursor-pointer flex gap-2" 
             type="submit" 
             id="btn-login"
               >Iniciar Sesión
               <img
-                src={arrowNextRight.src}
-                class="size-7 align-middle pl-2"
+                src={arrowNext.src}
+                class="size-7 align-middle pl-2 rotate-180"
                 alt=""
               />
             </button>
@@ -96,9 +90,6 @@ const inputClass =
 
   const form = document.querySelector("form");
   const btnSubmit = form!.querySelector("button[type='submit']") as HTMLButtonElement;
-  const btnForgotPassword = document.getElementById(
-    "forgot-password"
-  ) as HTMLButtonElement;
 
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -110,7 +101,6 @@ const inputClass =
     const { data, error } = await actions.login(formData);
 
     if (error) {
-      console.error("Error:", error);
       Swal.fire({
         icon: 'error',
         title: 'Error al iniciar sesión',
@@ -120,15 +110,8 @@ const inputClass =
       return;
     }
 
-    if (data) {
-      console.log("Success:", data);
-      alert("Inicio de sesión exitoso");
-    }
     btnSubmit.removeAttribute('disabled');
     window.location.replace("/"); 
   });
 
-  btnForgotPassword?.addEventListener("click", () => {
-    alert("Funcionalidad no implementada aún.");
-  });
 </script>

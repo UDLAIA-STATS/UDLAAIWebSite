@@ -1,8 +1,9 @@
 export const privateRoutesMap = {
     REGISTER_PLAYER: "/equipo/jugadores/registrar-jugador",
     VIDEO_ANALYSIS: "/equipo/jugadores/analisis-video",
-    AUTH_REGISTER: "/auth/register",
-    AUTH_ADMIN: "/auth/admin",
+    AUTH_REGISTER: "/admin/register",
+    AUTH_ADMIN: "/admin",
+    EDIT_USER: "/admin",
 }
 
 

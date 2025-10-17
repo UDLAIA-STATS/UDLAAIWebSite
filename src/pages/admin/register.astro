@@ -1,7 +1,7 @@
 ---
 import "@styles/global.css";
 import Layout from "@layouts/Layout.astro";
-import arrowNextRight from "@assets/arrow_next_right.svg";
+import arrowNext from "@assets/arrow_next.svg";
 
 export const prerender = false;
 
@@ -24,7 +24,7 @@ const inputClass =
         <h1>Registro de Usuario</h1>
       </div>
       <div id="register-form" class="flex flex-col gap-5">
-        <form action="" autocomplete="on" method="post">
+        <form autocomplete="on" method="post">
           <div class="flex flex-col gap-2 mb-4 px-5">
             <label class="text-base font-medium" for="name"
               >Nombre</label
@@ -32,6 +32,7 @@ const inputClass =
             <input
               type="text"
               maxlength="100"
+              minlength="3"
               id="name"
               name="name"
               class={inputClass}
@@ -47,7 +48,7 @@ const inputClass =
               maxlength="70"
               id="email"
               name="email"
-              pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+              pattern="/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/"
               class={inputClass}
               required
             />
@@ -59,6 +60,7 @@ const inputClass =
             <input
               type="password"
               maxlength="30"
+              minlength="8"
               id="password"
               name="password"
               class={inputClass}
@@ -69,8 +71,8 @@ const inputClass =
             <button class={buttonClass} type="submit" id="btn-login"
               >Crear Sesión
               <img
-                src={arrowNextRight.src}
-                class="size-7 align-middle pl-2"
+                src={arrowNext.src}
+                class="size-7 align-middle pl-2 rotate-180"
                 alt=""
               />
             </button>
@@ -99,11 +101,20 @@ const inputClass =
 
     if (error) {
       console.error("Error:", error.message);
+      if (error.message.toString().includes("validation")) {
+        Swal.fire({
+        icon: 'error',
+        title: 'Error al registrar el usuario',
+        text: "Uno de los campos no es válido. Por favor, verifica e intenta nuevamente.",
+      });
+        btnSubmit.removeAttribute('disabled');
+        return;
+      }
       Swal.fire({
         icon: 'error',
         title: 'Error al registrar el usuario',
         text: error.message,
-      })
+      });
       btnSubmit.removeAttribute('disabled');
       return;
     }
@@ -117,5 +128,6 @@ const inputClass =
       })
     }
     btnSubmit.removeAttribute('disabled');
+    form.reset();
   });
 </script>

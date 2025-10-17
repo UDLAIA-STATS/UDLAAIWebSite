@@ -5,13 +5,8 @@ import SmallStatsCard from "@components/cards/SmallStatsCard.astro";
 import NotFoundImage from "@assets/not_found.svg";
 import { ToggleButton } from "@components/buttons/ToggleButton";
 import OutlinedButton from "@components/buttons/OutlinedButton.astro";
-import arrowNextRight from "@assets/arrow_next_right.svg";
-import arrowNextLeft from "@assets/arrow_next_left.svg";
+import arrowNext from "@assets/arrow_next.svg";
 
-const inactiveButtonClass =
-  "text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md flex cursor-pointer";
-const activeButtonClass =
-  "text-white bg-[#C10230] px-4 py-2 rounded-md flex cursor-pointer";
 let currentFilter: string = "jugador";
  
 ---
@@ -55,8 +50,8 @@ let currentFilter: string = "jugador";
       }
     </div>
     <div id="navigation" class="flex flex-row justify-center gap-5 my-10">
-        <OutlinedButton label="Anterior" iconSrc={arrowNextLeft.src} iconPosition="left" />
-        <OutlinedButton label="Siguiente" iconSrc={arrowNextRight.src} />
+        <OutlinedButton label="Anterior" iconSrc={arrowNext.src} iconPosition="left" />
+        <OutlinedButton label="Siguiente" iconSrc={arrowNext.src} iconRotation={180} />
         
     </div>
   </section>
