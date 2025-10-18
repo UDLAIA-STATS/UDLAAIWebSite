@@ -2,6 +2,7 @@
 import "@styles/global.css";
 import Layout from "@layouts/Layout.astro";
 import arrowNext from "@assets/arrow_next.svg";
+import CardContainer from "@components/cards/CardContainer.astro";
 
 export const prerender = false;
 
@@ -94,8 +95,29 @@ const inputClass =
     e.preventDefault();
     btnSubmit.setAttribute('disabled', 'disabled');
 
-    const formData = new FormData(form);
+    const { value: userCredential } = await Swal.fire({
+      title: "Ingrese su contraseña",
+      input: "password",
+      inputAttributes: {
+        autocapitalize: "off",
+      },
+      showCancelButton: true,
+      confirmButtonText: "Aceptar",
+      cancelButtonText: "Cancelar",
+      showLoaderOnConfirm: true,
+      preConfirm: async (userCredential) => {
+        if (!userCredential) {
+          Swal.showValidationMessage("La contraseña es requerida");
+          btnSubmit.removeAttribute('disabled');
+          return;
+        }
 
+        return userCredential;
+      }
+    })
+    
+    const formData = new FormData(form);
+    formData.append("userCredential", userCredential);
 
     const { data, error } = await actions.registerUser(formData);
 

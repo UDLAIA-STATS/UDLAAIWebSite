@@ -6,7 +6,7 @@ interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
 
-type User = {
+type LoggedUser = {
     nickname: string,
     email: string,
     rol: string,
@@ -16,6 +16,6 @@ type User = {
 declare namespace App {
   interface Locals {
     token: string | null;
-    user: User | null;
+    user: LoggedUser | null;
   }
 }

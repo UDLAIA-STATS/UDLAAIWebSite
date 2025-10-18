@@ -1,9 +1,9 @@
 import type { Link } from "@interfaces/link.interface";
 import { roles } from "@consts/roles"
 import {  privateRoutesMap, publicRoutesMap } from "@consts/routes"
-import type { User } from "@interfaces/user.interface";
+import type { LoggedUser } from "@interfaces/user.interface";
 
-export const getNavbarLinks = (user?: User) => {
+export const getNavbarLinks = (user?: LoggedUser) => {
   let links: Link[] = [
     { name: "Inicio", href: publicRoutesMap.HOME },
     { name: "Estadísticas", href: publicRoutesMap.PLAYER_STATS }

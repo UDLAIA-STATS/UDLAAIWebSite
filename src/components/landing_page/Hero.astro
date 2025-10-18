@@ -4,7 +4,7 @@ import arrowNext from "@assets/arrow_next.svg";
 import OutlinedButton from "@components/buttons/OutlinedButton.astro";
 
 const user = Astro.cookies.get("user")
-  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as User)
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
 ---
 
@@ -19,7 +19,7 @@ const user = Astro.cookies.get("user")
   <div
     class="flex pt-5 lg:text-3xl font-semibold text-center justify-center lg:w-3xl sm:text-xl"
   >
-    <p>Sube tu video o mira tus estadísticas</p>
+    <p>Accede a tus estadísticas  y datos históricos</p>
   </div>
   <div
     class="flex flex-row flex-wrap justify-evenly w-lg p-10 min-w-sm max-w-svw"

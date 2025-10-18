@@ -3,5 +3,5 @@ export interface TableActions {
     alt: string;
     type: "button" | "link";
     href?: string;
-    action?: () => void;
+    action?: (username: string) => void;
  }

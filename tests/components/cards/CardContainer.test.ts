@@ -4,7 +4,7 @@ import { renderAstroComponent } from "../../helpers.ts";
 
 test("CardContainer renders correctly with slot content", async () => {
   const result = await renderAstroComponent(CardContainer, {
-    props: { sizes: "w-64 h-32" },
+    props: { className: "w-64 h-32" },
     slots: { default: "<p>Contenido de prueba</p>" },
   });
 

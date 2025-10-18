@@ -1,6 +1,6 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import type { User } from "@interfaces/user.interface";
+import type { LoggedUser } from "@interfaces/user.interface";
 
 export const login = defineAction({
   accept: "form",
@@ -43,7 +43,7 @@ export const login = defineAction({
       const json = await response.json();;
       
       console.log("Login exitoso:", json);
-      const user: User = {
+      const user: LoggedUser = {
         email: json['usuario'].email_usuario,
         nickname: json['usuario'].nombre_usuario,
         rol: json['usuario'].rol,

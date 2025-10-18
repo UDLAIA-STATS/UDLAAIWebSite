@@ -1,14 +1,14 @@
 ---
 import { getNavbarLinks } from "@consts/navbar-links";
 import LogoUdla from "@assets/logo_udla_corto.png";
-import type { User } from "@interfaces/user.interface";
+import type { LoggedUser } from "@interfaces/user.interface";
 import Logout from "@assets/logout.svg";
 
 const currentPath = Astro.url.pathname;
 const user = Astro.cookies.get("user")
-  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as User)
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
-const links = getNavbarLinks(user as User);
+const links = getNavbarLinks(user as LoggedUser);
 console.log({ user });
 console.log({ links });
 ---

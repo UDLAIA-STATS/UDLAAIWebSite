@@ -7,14 +7,14 @@ export const registerUser = defineAction({
     name: z.string().min(2).max(100),
     email: z.string().email(),
     password: z.string().min(8),
+    userCredential: z.string().min(8).max(100),
   }),
-  handler: async ({ email, password, name }, { cookies }) => {
+  handler: async ({ email, password, name, userCredential }, { cookies }) => {
     try {
         console.log("Registrando usuario:", { name, email, password });
-        console.log("Token:", cookies.get("token")?.value);
+        const loggedInUser = cookies.get("name");
         const authUrl = import.meta.env.AUTH_URL;
-        console.log("AUTH_URL:", authUrl);
-        const basicAuth = Buffer.from("administrador:123456789").toString("base64");
+        const basicAuth = Buffer.from(`${loggedInUser?.value}:${userCredential}`).toString("base64");
         const response = await fetch(`${authUrl}/register/`, {
         method: "POST",
         headers: {
@@ -29,14 +29,10 @@ export const registerUser = defineAction({
       });
       console.log("Respuesta del servidor:", response);
       if (!response.ok) {
-        console.log("Error en la respuesta del servidor");
         const errorData = await response.json().catch(() => ({}));
-        console.error("Error al registrar usuario:", errorData);
         throw new Error(errorData.detail || `Error ${response.status}: ${response.statusText}`);
       }
-      console.log("Usuario registrado con éxito");
       const data = await response.json();
-      console.log("Usuario creado:", data);
 
       return { data: data };
     } catch (err) {

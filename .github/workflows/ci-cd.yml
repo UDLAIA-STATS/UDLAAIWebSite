@@ -15,7 +15,7 @@ jobs:
   test:
     name: Test & Quality Checks
     runs-on: ubuntu-latest
-    
+    environment: development
     steps:
       - name: 🔍 Checkout code
         uses: actions/checkout@v5
