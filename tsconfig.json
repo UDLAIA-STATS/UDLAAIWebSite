@@ -35,6 +35,9 @@
       ],
       "@actions/*": [
         "./src/actions/*"
+      ],
+      "@views/*": [
+        "./src/views/*"
       ]
     },
     "jsx": "preserve",

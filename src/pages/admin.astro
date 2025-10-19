@@ -1,139 +1,24 @@
 ---
 import "@styles/global.css";
-import Layout from "@layouts/Layout.astro";
-import { privateRoutesMap } from "@consts/routes";
-import horizontalArrow from "@assets/black_horizontal_arrow.svg";
-import { Table } from "@components/tables/Table";
-import EditIcon from "@assets/edit_icon_black.svg";
-import DeleteIcon from "@assets/delete_icon_black.svg";
-import type { TableActions } from "@interfaces/table-actions.interface";
-import type { User } from "@interfaces/user.interface";
+import { AdminPanelLayout } from "@layouts/index";
+import PanelAdminView from "@views/admin/panel_admin_view.astro";
+import PanelProfessorView from "@views/profesor/panel_profesor_view.astro";
+import NotAuthorized from "@components/shared/NotAuthorized.astro";
+import { roles } from "@consts/roles";
 
-const { AUTH_REGISTER, EDIT_USER } = privateRoutesMap;
-const name = Astro.cookies.get("name")?.value;
+const user = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
+const { super: superRole } = roles;
 
-const headers = ["Nombre de usuario", "Email", "Rol", "Editar", "Eliminar"];
-
-
-const users: User[] = [
-  { nickname: "Juan Perez", email: "H8h1o@example.com", rol: "Admin" },
-  { nickname: "Maria López", email: "mlopez@example.com", rol: "Usuario" },
-];
-
-const rows = users.map((u) => [u.nickname, u.email, u.rol]);
-
-function handleDelete(username: string) {
-  console.log(`Usuario ${username} eliminado`);
-}
-
-const actions: TableActions[] = [];
-
-actions.push(
-  {
-    href: `${EDIT_USER}/`,
-    icon: EditIcon.src,
-    alt: "Editar usuario",
-    type: "link",
-  },
-  {
-    action: handleDelete,
-    icon: DeleteIcon.src,
-    alt: "Eliminar usuario",
-    type: "button",
-  }
-);
 ---
 
-<Layout>
-  <section class="mx-10 my-5 h-svh">
-    <div class="text-2xl font-bold" id="title">
-      <h1>Panel de Administrador</h1>
-    </div>
-    <div class="text-lg py-4" id="subtitle">
-      <span>
-        Bienvenido, {name}.
-      </span>
-    </div>
-    <div class="py-3 flex flex-col gap-3 w-full">
-      <div class="flex flex-row justify-between w-full">
-        <h1 class="font-bold text-2xl">Usuarios</h1>
-        <div class="flex flex-row gap-10 w-3/2 justify-end">
-          <a
-            href={AUTH_REGISTER}
-            class="no-underline text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md flex cursor-pointer items-center gap-2"
-          >
-            Agregar Usuario
-          </a>
-          <input
-            type="search"
-            name="search"
-            placeholder="Buscar usuario..."
-            id="search-box"
-            class="rounded-md p-2 w-1/4 focus:outline-none focus:ring-1 focus:ring-[#000] text-black border border-solid border-[#000]"
-          />
-        </div>
-      </div>
-      <div class="relative overflow-x-auto w-svw mt-5 flex justify-center">
-        <Table headers={headers}>
-          {
-            rows.map((row) => (
-              <tr class="border-b">
-                {row.map((cell) => <td class="px-6 py-4">{cell}</td>)}
-                {actions &&
-                  actions.length > 0 &&
-                  actions.map((action) =>
-                    action.type === "link" ? (
-                      <td class="px-6 py-4">
-                        <a
-                          class="cursor-pointer no-underline"
-                          href={action.href?.toString() + row[0]}
-                        >
-                          <img
-                            class="size-8"
-                            src={action.icon}
-                            alt={action.alt}
-                          />
-                        </a>
-                      </td>
-                    ) : (
-                      action.action && (
-                        <td class="px-6 py-4">
-                          <button
-                            type="button"
-                            id="delete-button"
-                            value={row[0]}
-                            data-delete-user
-                            data-username={row[0]}
-                            class="cursor-pointer"
-                          >
-                            <img
-                              class="size-8"
-                              src={action.icon}
-                              alt={action.alt}
-                            />
-                          </button>
-                        </td>
-                      )
-                    )
-                  )}
-              </tr>
-            ))
-          }
-        </Table>
-      </div>
-    </div>
-  </section>
-</Layout>
-
-<script>
-  document.addEventListener("click", (event) => {
-    const target = event.target as HTMLElement;
-    if (target.closest("[data-delete-user]")) {
-      const button = target.closest("[data-delete-user]") as HTMLButtonElement;
-      const username = button.getAttribute("data-username");
-      if (username) {
-        console.log(`Usuario ${username} eliminado`);
-      }
-    }
-  })
-</script>
+<AdminPanelLayout title="Panel de Administración">
+  {
+    !user ? (
+      <NotAuthorized />
+    ) : (
+      user?.rol === superRole ? <PanelAdminView /> : <PanelProfessorView />
+    )
+  }
+</AdminPanelLayout>

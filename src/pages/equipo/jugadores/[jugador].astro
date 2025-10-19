@@ -1,4 +1,5 @@
 ---
+import type { GetStaticPaths } from "astro";
 import "@styles/global.css";
 import Layout from "@layouts/Layout.astro";
 import arrowNext from "@assets/arrow_next.svg";
@@ -7,6 +8,15 @@ const buttonClass =
   "text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md flex items-center justify-center cursor-pointer transition";
 const inputClass =
   "bg-white text-black rounded-md p-2 w-md focus:outline-none focus:ring-2 focus:ring-[#C10230]";
+
+  export const getStaticPaths = (() => {
+    
+    return [
+      { params: { jugador: "Juan Perez" } },
+      { params: { jugador: "Maria López" } },
+      { params: { jugador: "jugador" } },
+    ];
+  }) satisfies GetStaticPaths;
 ---
 
 <Layout>
@@ -16,7 +26,7 @@ const inputClass =
     <div id="container" class="flex flex-col flex-wrap items-center justify-center gap-5 bg-[#C10230] self-center w-shw px-10 pt-4 pb-8 rounded-lg shadow-lg">
         <!-- Título -->
         <div class="font-bold text-3xl flex pb-3">
-            <h1>Agregar Jugador</h1>
+            <h1>Editar Jugador</h1>
         </div>
 
         <!-- Formulario -->

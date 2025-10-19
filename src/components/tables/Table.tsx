@@ -1,5 +1,5 @@
 import { privateRoutesMap } from "@consts/routes";
-import { type Component, type JSX } from "solid-js";
+import { For, type Component, type JSX } from "solid-js";
 
 const { AUTH_REGISTER, EDIT_USER } = privateRoutesMap;
 
@@ -18,11 +18,10 @@ export const Table: Component<Props> = ({
       <table class="table-auto border-collapse w-7xl text-sm text-left rtl:text-right">
         <thead class="text-xs uppercase">
           <tr>
-            {...headers.map((header) => (
-              <th scope="col" class="px-6 py-3">
-                {header}
-              </th>
-            ))}
+            <For each={headers} >    
+              {(header) => <th scope="col" class="px-6 py-3">{header}</th>} 
+            </For>
+            
           </tr>
         </thead>
         <tbody>

@@ -6,9 +6,9 @@ import NotFoundImage from "@assets/not_found.svg";
 import { ToggleButton } from "@components/buttons/ToggleButton";
 import OutlinedButton from "@components/buttons/OutlinedButton.astro";
 import arrowNext from "@assets/arrow_next.svg";
+import { publicRoutesMap } from "@consts/routes"
 
-let currentFilter: string = "jugador";
- 
+const { PLAYER_DETAIL } = publicRoutesMap;
 ---
 
 <Layout>
@@ -19,7 +19,7 @@ let currentFilter: string = "jugador";
       <h1 class="font-bold text-3xl flex pb-2 flex-col text-center">
         Estadísticas
       </h1>
-      <ToggleButton firstLabel="Jugador" secondLabel="Partidos" client:visible />
+      <ToggleButton firstLabel="Jugador" secondLabel="Partidos" id="selected" client:visible />
     </div>
     <div
       id="filters"
@@ -41,7 +41,7 @@ let currentFilter: string = "jugador";
       {
         [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((_, index) => (
           <SmallStatsCard
-            href="/"
+            href={PLAYER_DETAIL + "/asd"}
             imgSrc={NotFoundImage.src}
             title="Estadística"
             subtitle="Descripción"
