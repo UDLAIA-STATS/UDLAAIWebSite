@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        GITHUB_TOKEN = credentials('GITHUB_TOKEN') // Token de GitHub
+        GITHUB_TOKEN = credentials('GITHUB') // Token de GitHub
         SONARQUBE = credentials('SONARQUBE')       // Token de SonarCloud
     }
 
