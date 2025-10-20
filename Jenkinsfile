@@ -2,128 +2,115 @@ pipeline {
     agent any
 
     environment {
-        SONARQUBE = credentials('SONARKEY')
-        GITHUB_TOKEN = credentials('GITHUB')
-        REPO_URL = 'https://github.com/UDLAIA-STATS/UDLAAIWebSite.git'
-        BRANCH_NAME = 'develop'
-    }
-
-    options {
-        timestamps()
-        ansiColor('xterm')
+        GITHUB_TOKEN = credentials('GITHUB_TOKEN') // Token de GitHub
+        SONARQUBE = credentials('SONARQUBE')       // Token de SonarCloud
     }
 
     stages {
-
         stage('Clonar repositorio') {
             steps {
-                wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                    script {
-                        bat "echo 🔄 Clonando repositorio..."
-                        git branch: "${BRANCH_NAME}",
-                            credentialsId: 'GITHUB',
-                            url: "https://${GITHUB_TOKEN}@github.com/UDLAIA-STATS/UDLAAIWebSite.git"
-                    }
-                }
+                echo "📖 Clonando repositorio..."
+                checkout([$class: 'GitSCM',
+                          branches: [[name: 'develop']],
+                          userRemoteConfigs: [[
+                              url: 'https://github.com/UDLAIA-STATS/UDLAAIWebSite.git',
+                              credentialsId: 'GITHUB'
+                          ]]
+                ])
             }
         }
 
         stage('Instalar dependencias') {
             steps {
-                wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                    bat '''
-                        echo 📦 Instalando dependencias...
-                        npm install
-                    '''
-                }
+                echo "📦 Instalando dependencias..."
+                bat 'npm install'
             }
         }
 
         stage('Ejecutar pruebas unitarias') {
             steps {
-                wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                    bat '''
-                        echo 🧪 Ejecutando pruebas...
-                        npm test || echo "⚠️ Advertencia: pruebas con errores"
-                    '''
-                }
+                echo "🧪 Ejecutando pruebas..."
+                bat 'npm test || echo "⚠️ Advertencia: pruebas con errores"'
             }
         }
 
         stage('Análisis de calidad con SonarQube') {
             steps {
-                wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                    bat '''
-                        echo 🔍 Iniciando análisis con SonarQube...
-                        npx sonar-scanner ^
-                            -Dsonar.projectKey=UDLAAIWebSite ^
-                            -Dsonar.sources=src ^
-                            -Dsonar.host.url=https://sonarcloud.io ^
-                            -Dsonar.login=%SONARQUBE%
-                    '''
+                echo "🔍 Iniciando análisis con SonarQube..."
+                bat """
+                npx sonar-scanner ^
+                    -Dsonar.projectKey=UDLAAIWebSite ^
+                    -Dsonar.organization=TU_ORGANIZACION_SONARCLOUD ^
+                    -Dsonar.sources=src ^
+                    -Dsonar.host.url=https://sonarcloud.io ^
+                    -Dsonar.login=%SONARQUBE%
+                """
+            }
+        }
+
+        stage('Reportar estado a GitHub') {
+            steps {
+                script {
+                    def commitSHA = bat(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                    echo "📌 Commit SHA: ${commitSHA}"
+
+                    // Estado pending
+                    bat """
+                    curl -X POST -H "Accept: application/vnd.github+json" ^
+                         -H "Authorization: Bearer %GITHUB_TOKEN%" ^
+                         https://api.github.com/repos/UDLAIA-STATS/UDLAAIWebSite/statuses/${commitSHA} ^
+                         -d "{\\"state\\":\\"pending\\", \\"description\\":\\"Pipeline ejecutado\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
+                    """
                 }
             }
         }
 
         stage('Build Develop') {
-            when { branch 'develop' }
             steps {
-                wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                    bat '''
-                        echo 🏗️ Compilando proyecto para develop...
-                        npm run build
-                    '''
-                }
+                echo "🚀 Construyendo proyecto..."
+                bat 'npm run build'
             }
         }
 
         stage('Deploy Develop') {
-            when { branch 'develop' }
             steps {
-                wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                    bat '''
-                        echo 🚀 Desplegando a entorno local de producción simulado...
-                        xcopy /Y /E build "C:\\deploy\\UDLAAIWebSite"
-                        echo ✅ Despliegue completado.
-                    '''
-                }
+                echo "📤 Desplegando proyecto..."
+                // Agregar aquí pasos de despliegue según tu infraestructura
             }
         }
     }
 
     post {
-        always {
-            wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                bat '''
-                    echo 📰 Pipeline finalizado (always)
-                    curl -X POST -H "Accept: application/vnd.github+json" ^
-                         -H "Authorization: Bearer %GITHUB_TOKEN%" ^
-                         https://api.github.com/repos/UDLAIA-STATS/UDLAAIWebSite/statuses/%GIT_COMMIT% ^
-                         -d "{\\"state\\":\\"pending\\", \\"description\\":\\"Pipeline ejecutado\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
-                '''
-            }
-        }
         success {
-            wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                bat '''
-                    echo ✅ Pipeline exitoso.
-                    curl -X POST -H "Accept: application/vnd.github+json" ^
-                         -H "Authorization: Bearer %GITHUB_TOKEN%" ^
-                         https://api.github.com/repos/UDLAIA-STATS/UDLAAIWebSite/statuses/%GIT_COMMIT% ^
-                         -d "{\\"state\\":\\"success\\", \\"description\\":\\"Pipeline completado con éxito\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
-                '''
+            script {
+                def commitSHA = bat(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                echo "✅ Pipeline finalizado correctamente"
+
+                bat """
+                curl -X POST -H "Accept: application/vnd.github+json" ^
+                     -H "Authorization: Bearer %GITHUB_TOKEN%" ^
+                     https://api.github.com/repos/UDLAIA-STATS/UDLAAIWebSite/statuses/${commitSHA} ^
+                     -d "{\\"state\\":\\"success\\", \\"description\\":\\"Pipeline finalizado\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
+                """
             }
         }
+
         failure {
-            wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                bat '''
-                    echo ❌ Pipeline fallido.
-                    curl -X POST -H "Accept: application/vnd.github+json" ^
-                         -H "Authorization: Bearer %GITHUB_TOKEN%" ^
-                         https://api.github.com/repos/UDLAIA-STATS/UDLAAIWebSite/statuses/%GIT_COMMIT% ^
-                         -d "{\\"state\\":\\"failure\\", \\"description\\":\\"Error en el pipeline\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
-                '''
+            script {
+                def commitSHA = bat(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                echo "❌ Pipeline fallido"
+
+                bat """
+                curl -X POST -H "Accept: application/vnd.github+json" ^
+                     -H "Authorization: Bearer %GITHUB_TOKEN%" ^
+                     https://api.github.com/repos/UDLAIA-STATS/UDLAAIWebSite/statuses/${commitSHA} ^
+                     -d "{\\"state\\":\\"failure\\", \\"description\\":\\"Error en el pipeline\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
+                """
             }
+        }
+
+        always {
+            echo "🕒 Pipeline finalizado (always)"
         }
     }
 }
