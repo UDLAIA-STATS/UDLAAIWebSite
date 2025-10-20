@@ -6,12 +6,13 @@ pipeline {
         SONARKEY = credentials('SONARKEY')   // Token SonarCloud
         SONAR_ORG = 'udlaia-stats'
         SONAR_PROJECT_KEY = 'UDLAAIWebSite'
+        DEPLOY_BRANCH = 'gh-pages'
     }
 
     stages {
         stage('Clonar repositorio') {
             steps {
-                echo '🌀 Clonando el repositorio desde GitHub...'
+                echo '🌀 Clonando repositorio desde GitHub...'
                 git branch: 'develop',
                     url: 'https://github.com/UDLAIA-STATS/UDLAAIWebSite.git',
                     credentialsId: 'GITHUB'
@@ -53,47 +54,46 @@ pipeline {
             }
         }
 
-        stage('Deploy Develop') {
+        stage('Deploy a GitHub Pages') {
             steps {
-                echo '🚀 Desplegando build generado...'
-                // Puedes usar npm run preview o tu script de deploy
-                bat 'npm run preview'
+                echo '🚀 Deploy en GitHub Pages (branch gh-pages)...'
+                // Configurar git user
+                bat """
+                git config user.email "jenkins@ci.com"
+                git config user.name "Jenkins CI"
+                """
+
+                // Clonar gh-pages temporalmente
+                bat "git clone --branch ${DEPLOY_BRANCH} https://github.com/UDLAIA-STATS/UDLAAIWebSite.git dist-gh"
+
+                // Limpiar y copiar nuevo build
+                bat "rmdir /s /q dist-gh"
+                bat "xcopy dist dist-gh /E /I /Y"
+
+                // Subir cambios
+                dir('dist-gh') {
+                    bat """
+                    git init
+                    git add .
+                    git commit -m "Deploy desde Jenkins - ${env.BUILD_NUMBER}"
+                    git branch -M ${DEPLOY_BRANCH}
+                    git remote add origin https://github.com/UDLAIA-STATS/UDLAAIWebSite.git
+                    git push -f origin ${DEPLOY_BRANCH}
+                    """
+                }
             }
         }
     }
 
     post {
         always {
-            script {
-                def commitSHA = bat(script: 'git rev-parse HEAD', returnStdout: true).trim()
-                echo "📋 Pipeline finalizado. Commit: ${commitSHA}"
-            }
+            echo '🕒 Pipeline finalizado'
         }
-
         success {
-            script {
-                def commitSHA = bat(script: 'git rev-parse HEAD', returnStdout: true).trim()
-                echo "✅ Pipeline completado con éxito."
-                bat """
-                curl -X POST -H "Accept: application/vnd.github+json" ^
-                     -H "Authorization: Bearer ${GITHUB}" ^
-                     https://api.github.com/repos/UDLAIA-STATS/UDLAAIWebSite/statuses/${commitSHA} ^
-                     -d "{\\"state\\":\\"success\\", \\"description\\":\\"Build y deploy exitosos\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
-                """
-            }
+            echo '✅ Pipeline completado con éxito'
         }
-
         failure {
-            script {
-                def commitSHA = bat(script: 'git rev-parse HEAD', returnStdout: true).trim()
-                echo "❌ Pipeline fallido."
-                bat """
-                curl -X POST -H "Accept: application/vnd.github+json" ^
-                     -H "Authorization: Bearer ${GITHUB}" ^
-                     https://api.github.com/repos/UDLAIA-STATS/UDLAAIWebSite/statuses/${commitSHA} ^
-                     -d "{\\"state\\":\\"failure\\", \\"description\\":\\"Error en el pipeline\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
-                """
-            }
+            echo '❌ Pipeline fallido'
         }
     }
 }
