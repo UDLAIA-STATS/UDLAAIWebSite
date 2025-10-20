@@ -50,19 +50,17 @@ pipeline {
 
         stage('Reportar estado a GitHub') {
             steps {
-                node {
-                    script {
-                        def commitSHA = bat(script: 'git rev-parse HEAD', returnStdout: true).trim()
-                        echo "📌 Commit SHA: ${commitSHA}"
+                script {
+                    def commitSHA = bat(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                    echo "📌 Commit SHA: ${commitSHA}"
 
-                        // Estado pending
-                        bat """
-                        curl -X POST -H "Accept: application/vnd.github+json" ^
-                             -H "Authorization: Bearer %GITHUB%" ^
-                             https://api.github.com/repos/UDLAIA-STATS/UDLAAIWebSite/statuses/${commitSHA} ^
-                             -d "{\\"state\\":\\"pending\\", \\"description\\":\\"Pipeline ejecutado\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
-                        """
-                    }
+                    // Estado pending
+                    bat """
+                    curl -X POST -H "Accept: application/vnd.github+json" ^
+                         -H "Authorization: Bearer %GITHUB%" ^
+                         https://api.github.com/repos/UDLAIA-STATS/UDLAAIWebSite/statuses/${commitSHA} ^
+                         -d "{\\"state\\":\\"pending\\", \\"description\\":\\"Pipeline ejecutado\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
+                    """
                 }
             }
         }
@@ -84,34 +82,30 @@ pipeline {
 
     post {
         success {
-            node {
-                script {
-                    def commitSHA = bat(script: 'git rev-parse HEAD', returnStdout: true).trim()
-                    echo "✅ Pipeline finalizado correctamente"
+            script {
+                def commitSHA = bat(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                echo "✅ Pipeline finalizado correctamente"
 
-                    bat """
-                    curl -X POST -H "Accept: application/vnd.github+json" ^
-                         -H "Authorization: Bearer %GITHUB%" ^
-                         https://api.github.com/repos/UDLAIA-STATS/UDLAAIWebSite/statuses/${commitSHA} ^
-                         -d "{\\"state\\":\\"success\\", \\"description\\":\\"Pipeline finalizado\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
-                    """
-                }
+                bat """
+                curl -X POST -H "Accept: application/vnd.github+json" ^
+                     -H "Authorization: Bearer %GITHUB%" ^
+                     https://api.github.com/repos/UDLAIA-STATS/UDLAAIWebSite/statuses/${commitSHA} ^
+                     -d "{\\"state\\":\\"success\\", \\"description\\":\\"Pipeline finalizado\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
+                """
             }
         }
 
         failure {
-            node {
-                script {
-                    def commitSHA = bat(script: 'git rev-parse HEAD', returnStdout: true).trim()
-                    echo "❌ Pipeline fallido"
+            script {
+                def commitSHA = bat(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                echo "❌ Pipeline fallido"
 
-                    bat """
-                    curl -X POST -H "Accept: application/vnd.github+json" ^
-                         -H "Authorization: Bearer %GITHUB%" ^
-                         https://api.github.com/repos/UDLAIA-STATS/UDLAAIWebSite/statuses/${commitSHA} ^
-                         -d "{\\"state\\":\\"failure\\", \\"description\\":\\"Error en el pipeline\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
-                    """
-                }
+                bat """
+                curl -X POST -H "Accept: application/vnd.github+json" ^
+                     -H "Authorization: Bearer %GITHUB%" ^
+                     https://api.github.com/repos/UDLAIA-STATS/UDLAAIWebSite/statuses/${commitSHA} ^
+                     -d "{\\"state\\":\\"failure\\", \\"description\\":\\"Error en el pipeline\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
+                """
             }
         }
 
