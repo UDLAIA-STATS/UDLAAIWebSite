@@ -1,5 +1,6 @@
 interface ImportMetaEnv {
   readonly AUTH_URL: string;
+  readonly TEAMSERVICE_URL: string;
 }
 
 interface ImportMeta {

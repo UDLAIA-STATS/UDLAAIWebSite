@@ -1,6 +1,6 @@
 ---
 import "@styles/global.css";
-import { AdminPanelLayout } from "@layouts/index";
+import AdminPanelLayout from "@layouts/AdminPanelLayout.astro";
 import PanelAdminView from "@views/admin/panel_admin_view.astro";
 import PanelProfessorView from "@views/profesor/panel_profesor_view.astro";
 import NotAuthorized from "@components/shared/NotAuthorized.astro";
@@ -15,10 +15,6 @@ const { super: superRole } = roles;
 
 <AdminPanelLayout title="Panel de Administración">
   {
-    !user ? (
-      <NotAuthorized />
-    ) : (
-      user?.rol === superRole ? <PanelAdminView /> : <PanelProfessorView />
-    )
+    user?.rol === superRole ? <PanelAdminView /> : <PanelProfessorView />
   }
 </AdminPanelLayout>
