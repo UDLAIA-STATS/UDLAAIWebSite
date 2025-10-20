@@ -1,4 +1,3 @@
-import type { MiddlewareNext } from 'astro';
 import { defineMiddleware } from 'astro:middleware';
 import { privateRoutesMap, publicRoutesMap } from '@consts/routes';
 import { roles } from "@consts/roles"

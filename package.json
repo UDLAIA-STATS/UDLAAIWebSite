@@ -16,12 +16,11 @@
   "dependencies": {
     "@astrojs/check": "^0.9.4",
     "@astrojs/netlify": "^6.5.11",
-    "@astrojs/react": "^4.4.0",
     "@astrojs/solid-js": "^5.1.1",
     "@tailwindcss/vite": "^4.1.14",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
-    "astro": "^5.14.6",
+    "astro": "5.12.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "solid-js": "^1.9.9",
