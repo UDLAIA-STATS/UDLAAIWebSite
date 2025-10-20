@@ -32,6 +32,13 @@ pipeline {
             }
         }
 
+        stage('Build producción') {
+            steps {
+                echo '🏗️ Construyendo build de producción...'
+                bat 'npm run build'
+            }
+        }
+
         stage('Análisis de calidad con SonarCloud') {
             steps {
                 echo '🔍 Ejecutando análisis en SonarCloud...'
@@ -46,17 +53,11 @@ pipeline {
             }
         }
 
-        stage('Build Develop') {
-            steps {
-                echo '🏗️ Compilando aplicación (develop)...'
-                bat 'npm run build'
-            }
-        }
-
         stage('Deploy Develop') {
             steps {
-                echo '🚀 Desplegando entorno de desarrollo local...'
-                bat 'npm run start'
+                echo '🚀 Desplegando build generado...'
+                // Puedes usar npm run preview o tu script de deploy
+                bat 'npm run preview'
             }
         }
     }
