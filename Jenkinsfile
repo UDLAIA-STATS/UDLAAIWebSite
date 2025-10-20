@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        GITHUB_TOKEN = credentials('GITHUB') // Token de GitHub
-        SONARQUBE = credentials('SONARQUBE')       // Token de SonarCloud
+        GITHUB = credentials('GITHUB')      // Token de GitHub
+        SONARKEY = credentials('SONARKEY')  // Token de SonarCloud
     }
 
     stages {
@@ -40,27 +40,29 @@ pipeline {
                 bat """
                 npx sonar-scanner ^
                     -Dsonar.projectKey=UDLAAIWebSite ^
-                    -Dsonar.organization=TU_ORGANIZACION_SONARCLOUD ^
+                    -Dsonar.organization=UDLAIA-STATS ^
                     -Dsonar.sources=src ^
                     -Dsonar.host.url=https://sonarcloud.io ^
-                    -Dsonar.login=%SONARQUBE%
+                    -Dsonar.login=%SONARKEY%
                 """
             }
         }
 
         stage('Reportar estado a GitHub') {
             steps {
-                script {
-                    def commitSHA = bat(script: 'git rev-parse HEAD', returnStdout: true).trim()
-                    echo "📌 Commit SHA: ${commitSHA}"
+                node {
+                    script {
+                        def commitSHA = bat(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                        echo "📌 Commit SHA: ${commitSHA}"
 
-                    // Estado pending
-                    bat """
-                    curl -X POST -H "Accept: application/vnd.github+json" ^
-                         -H "Authorization: Bearer %GITHUB_TOKEN%" ^
-                         https://api.github.com/repos/UDLAIA-STATS/UDLAAIWebSite/statuses/${commitSHA} ^
-                         -d "{\\"state\\":\\"pending\\", \\"description\\":\\"Pipeline ejecutado\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
-                    """
+                        // Estado pending
+                        bat """
+                        curl -X POST -H "Accept: application/vnd.github+json" ^
+                             -H "Authorization: Bearer %GITHUB%" ^
+                             https://api.github.com/repos/UDLAIA-STATS/UDLAAIWebSite/statuses/${commitSHA} ^
+                             -d "{\\"state\\":\\"pending\\", \\"description\\":\\"Pipeline ejecutado\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
+                        """
+                    }
                 }
             }
         }
@@ -82,30 +84,34 @@ pipeline {
 
     post {
         success {
-            script {
-                def commitSHA = bat(script: 'git rev-parse HEAD', returnStdout: true).trim()
-                echo "✅ Pipeline finalizado correctamente"
+            node {
+                script {
+                    def commitSHA = bat(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                    echo "✅ Pipeline finalizado correctamente"
 
-                bat """
-                curl -X POST -H "Accept: application/vnd.github+json" ^
-                     -H "Authorization: Bearer %GITHUB_TOKEN%" ^
-                     https://api.github.com/repos/UDLAIA-STATS/UDLAAIWebSite/statuses/${commitSHA} ^
-                     -d "{\\"state\\":\\"success\\", \\"description\\":\\"Pipeline finalizado\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
-                """
+                    bat """
+                    curl -X POST -H "Accept: application/vnd.github+json" ^
+                         -H "Authorization: Bearer %GITHUB%" ^
+                         https://api.github.com/repos/UDLAIA-STATS/UDLAAIWebSite/statuses/${commitSHA} ^
+                         -d "{\\"state\\":\\"success\\", \\"description\\":\\"Pipeline finalizado\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
+                    """
+                }
             }
         }
 
         failure {
-            script {
-                def commitSHA = bat(script: 'git rev-parse HEAD', returnStdout: true).trim()
-                echo "❌ Pipeline fallido"
+            node {
+                script {
+                    def commitSHA = bat(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                    echo "❌ Pipeline fallido"
 
-                bat """
-                curl -X POST -H "Accept: application/vnd.github+json" ^
-                     -H "Authorization: Bearer %GITHUB_TOKEN%" ^
-                     https://api.github.com/repos/UDLAIA-STATS/UDLAAIWebSite/statuses/${commitSHA} ^
-                     -d "{\\"state\\":\\"failure\\", \\"description\\":\\"Error en el pipeline\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
-                """
+                    bat """
+                    curl -X POST -H "Accept: application/vnd.github+json" ^
+                         -H "Authorization: Bearer %GITHUB%" ^
+                         https://api.github.com/repos/UDLAIA-STATS/UDLAAIWebSite/statuses/${commitSHA} ^
+                         -d "{\\"state\\":\\"failure\\", \\"description\\":\\"Error en el pipeline\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
+                    """
+                }
             }
         }
 
