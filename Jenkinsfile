@@ -6,7 +6,7 @@ pipeline {
         SONARKEY = credentials('SONARKEY')   // Token SonarCloud
         SONAR_ORG = 'udlaia-stats'
         SONAR_PROJECT_KEY = 'UDLAAIWebSite'
-        DEPLOY_BRANCH = 'gh-pages'
+        DEPLOY_BRANCH = 'gh-pagess'
     }
 
     stages {
@@ -56,14 +56,14 @@ pipeline {
 
         stage('Deploy a GitHub Pages') {
             steps {
-                echo '🚀 Deploy en GitHub Pages (branch gh-pages)...'
+                echo '🚀 Deploy en GitHub Pages (branch gh-pagess)...'
                 // Configurar git user
                 bat """
                 git config user.email "jenkins@ci.com"
                 git config user.name "Jenkins CI"
                 """
 
-                // Clonar gh-pages temporalmente
+                // Clonar gh-pagess temporalmente
                 bat "git clone --branch ${DEPLOY_BRANCH} https://github.com/UDLAIA-STATS/UDLAAIWebSite.git dist-gh"
 
                 // Limpiar y copiar nuevo build
