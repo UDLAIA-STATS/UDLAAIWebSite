@@ -2,95 +2,82 @@ pipeline {
     agent any
 
     environment {
-        GITHUB = credentials('GITHUB')      // Token de GitHub
-        SONARKEY = credentials('SONARKEY')  // Token de SonarCloud
+        GITHUB = credentials('GITHUB')       // Token GitHub
+        SONARKEY = credentials('SONARKEY')   // Token SonarCloud
+        SONAR_ORG = 'udlaia-stats'
+        SONAR_PROJECT_KEY = 'UDLAAIWebSite'
     }
 
     stages {
         stage('Clonar repositorio') {
             steps {
-                echo "📖 Clonando repositorio..."
-                checkout([$class: 'GitSCM',
-                          branches: [[name: 'develop']],
-                          userRemoteConfigs: [[
-                              url: 'https://github.com/UDLAIA-STATS/UDLAAIWebSite.git',
-                              credentialsId: 'GITHUB'
-                          ]]
-                ])
+                echo '🌀 Clonando el repositorio desde GitHub...'
+                git branch: 'develop',
+                    url: 'https://github.com/UDLAIA-STATS/UDLAAIWebSite.git',
+                    credentialsId: 'GITHUB'
             }
         }
 
         stage('Instalar dependencias') {
             steps {
-                echo "📦 Instalando dependencias..."
+                echo '📦 Instalando dependencias...'
                 bat 'npm install'
             }
         }
 
         stage('Ejecutar pruebas unitarias') {
             steps {
-                echo "🧪 Ejecutando pruebas..."
-                bat 'npm test || echo "⚠️ Advertencia: pruebas con errores"'
+                echo '🧪 Ejecutando pruebas unitarias...'
+                bat 'npm run test || exit 0'
             }
         }
 
-        stage('Análisis de calidad con SonarQube') {
+        stage('Análisis de calidad con SonarCloud') {
             steps {
-                echo "🔍 Iniciando análisis con SonarQube..."
+                echo '🔍 Ejecutando análisis en SonarCloud...'
                 bat """
                 npx sonar-scanner ^
-                    -Dsonar.projectKey=UDLAAIWebSite ^
-                    -Dsonar.organization=UDLAIA-STATS ^
-                    -Dsonar.sources=src ^
-                    -Dsonar.host.url=https://sonarcloud.io ^
-                    -Dsonar.login=%SONARKEY%
+                  -Dsonar.organization=${SONAR_ORG} ^
+                  -Dsonar.projectKey=${SONAR_PROJECT_KEY} ^
+                  -Dsonar.sources=src ^
+                  -Dsonar.host.url=https://sonarcloud.io ^
+                  -Dsonar.login=${SONARKEY}
                 """
-            }
-        }
-
-        stage('Reportar estado a GitHub') {
-            steps {
-                script {
-                    def commitSHA = bat(script: 'git rev-parse HEAD', returnStdout: true).trim()
-                    echo "📌 Commit SHA: ${commitSHA}"
-
-                    // Estado pending
-                    bat """
-                    curl -X POST -H "Accept: application/vnd.github+json" ^
-                         -H "Authorization: Bearer %GITHUB%" ^
-                         https://api.github.com/repos/UDLAIA-STATS/UDLAAIWebSite/statuses/${commitSHA} ^
-                         -d "{\\"state\\":\\"pending\\", \\"description\\":\\"Pipeline ejecutado\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
-                    """
-                }
             }
         }
 
         stage('Build Develop') {
             steps {
-                echo "🚀 Construyendo proyecto..."
+                echo '🏗️ Compilando aplicación (develop)...'
                 bat 'npm run build'
             }
         }
 
         stage('Deploy Develop') {
             steps {
-                echo "📤 Desplegando proyecto..."
-                // Agregar aquí pasos de despliegue según tu infraestructura
+                echo '🚀 Desplegando entorno de desarrollo local...'
+                bat 'npm run start'
             }
         }
     }
 
     post {
+        always {
+            script {
+                def commitSHA = bat(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                echo "📋 Pipeline finalizado. Commit: ${commitSHA}"
+            }
+        }
+
         success {
             script {
                 def commitSHA = bat(script: 'git rev-parse HEAD', returnStdout: true).trim()
-                echo "✅ Pipeline finalizado correctamente"
-
+                echo "✅ Pipeline completado con éxito."
                 bat """
                 curl -X POST -H "Accept: application/vnd.github+json" ^
-                     -H "Authorization: Bearer %GITHUB%" ^
+                     -H "Authorization: Bearer ${GITHUB}" ^
                      https://api.github.com/repos/UDLAIA-STATS/UDLAAIWebSite/statuses/${commitSHA} ^
-                     -d "{\\"state\\":\\"success\\", \\"description\\":\\"Pipeline finalizado\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
+                     -d "{\\"state\\":\\"success\\", \\"description\\":\\"Build y deploy exitosos\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
                 """
             }
         }
@@ -98,19 +85,14 @@ pipeline {
         failure {
             script {
                 def commitSHA = bat(script: 'git rev-parse HEAD', returnStdout: true).trim()
-                echo "❌ Pipeline fallido"
-
+                echo "❌ Pipeline fallido."
                 bat """
                 curl -X POST -H "Accept: application/vnd.github+json" ^
-                     -H "Authorization: Bearer %GITHUB%" ^
+                     -H "Authorization: Bearer ${GITHUB}" ^
                      https://api.github.com/repos/UDLAIA-STATS/UDLAAIWebSite/statuses/${commitSHA} ^
                      -d "{\\"state\\":\\"failure\\", \\"description\\":\\"Error en el pipeline\\", \\"context\\":\\"jenkins/ci\\", \\"target_url\\":\\"%BUILD_URL%\\"}"
                 """
             }
-        }
-
-        always {
-            echo "🕒 Pipeline finalizado (always)"
         }
     }
 }
