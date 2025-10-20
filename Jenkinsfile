@@ -64,14 +64,14 @@ pipeline {
                 """
 
                 // Clonar gh-pagess temporalmente
-                bat "git clone --branch ${DEPLOY_BRANCH} https://github.com/UDLAIA-STATS/UDLAAIWebSite.git dist-gh"
+                bat "git clone --branch ${DEPLOY_BRANCH} https://github.com/UDLAIA-STATS/UDLAAIWebSite.git dist-ghv"
 
                 // Limpiar y copiar nuevo build
-                bat "rmdir /s /q dist-gh"
-                bat "xcopy dist dist-gh /E /I /Y"
+                bat "rmdir /s /q dist-ghv"
+                bat "xcopy dist dist-ghv /E /I /Y"
 
                 // Subir cambios
-                dir('dist-gh') {
+                dir('dist-ghv') {
                     bat """
                     git init
                     git add .
