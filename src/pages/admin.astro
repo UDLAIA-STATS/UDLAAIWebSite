@@ -15,6 +15,12 @@ const { super: superRole } = roles;
 
 <AdminPanelLayout title="Panel de Administración">
   {
-    user?.rol === superRole ? <PanelAdminView /> : <PanelProfessorView />
+    !user ? (
+      <NotAuthorized/>
+    ) : user?.rol === superRole ? (
+      <PanelAdminView />
+    ) : (
+      <PanelProfessorView />
+    )
   }
 </AdminPanelLayout>
