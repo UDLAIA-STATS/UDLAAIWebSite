@@ -1,5 +1,1 @@
 @import "tailwindcss";
-
-input {
-    @apply bg-white text-black rounded-md p-2 w-md focus:outline-none focus:ring-2 focus:ring-[#C10230];
-}

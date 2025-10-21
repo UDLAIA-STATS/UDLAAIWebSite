@@ -1,0 +1,141 @@
+version: 2.1
+
+defaults: &defaults
+  docker:
+    - image: cimg/node:22.8 
+  working_directory: ~/repo
+  environment:
+    NODE_ENV: development
+    YARN_CACHE_FOLDER: .yarn/cache
+
+# -------------------------
+# JOBS
+# -------------------------
+jobs:
+  test:
+    <<: *defaults
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - v1-yarn-cache-{{ arch }}-{{ checksum "yarn.lock" }}
+            - v1-yarn-cache-
+
+      - run:
+          name: 📥 Install dependencies
+          command: |
+            yarn install --frozen-lockfile --prefer-offline
+
+      - save_cache:
+          paths:
+            - .yarn/cache
+          key: v1-yarn-cache-{{ arch }}-{{ checksum "yarn.lock" }}
+
+      - run:
+          name: 🔍 Lint and Type Check
+          command: |
+            yarn check
+
+      - run:
+          name: 🧪 Run Tests with Coverage
+          command: |
+            yarn coverage
+
+      - run:
+          name: 📊 Upload Coverage to Codecov
+          command: |
+            bash <(curl -s https://codecov.io/bash) -t ${CODECOV_TOKEN} || echo "Codecov upload failed"
+
+      - store_artifacts:
+          path: coverage
+          destination: coverage
+
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - v1-yarn-cache-{{ arch }}-{{ checksum "yarn.lock" }}
+            - v1-yarn-cache-
+
+      - run:
+          name: 📥 Install dependencies
+          command: |
+            yarn install --frozen-lockfile --prefer-offline
+
+      - run:
+          name: 🏗️ Build Application
+          command: |
+            yarn build
+
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist
+
+      - store_artifacts:
+          path: dist
+          destination: dist
+
+  deploy-dev:
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/repo
+
+      - run:
+          name: 🚀 Deploy to Development
+          command: |
+            echo "Deploying to development environment..."
+            # Aquí puedes añadir comandos reales (ejemplo: netlify-cli, firebase deploy, scp, etc.)
+
+  notify-failure:
+    <<: *defaults
+    steps:
+      - run:
+          name: 📧 Send Failure Notification
+          command: |
+            echo "❌ Pipeline failed for branch ${CIRCLE_BRANCH}. Please check logs and fix issues."
+
+# -------------------------
+# WORKFLOWS
+# -------------------------
+workflows:
+  version: 2
+  ci_cd_pipeline:
+    jobs:
+      - test
+
+      - build:
+          requires:
+            - test
+
+      - deploy-dev:
+          requires:
+            - build
+          filters:
+            branches:
+              only: develop
+
+      # Despliegue a producción (comentado por ahora)
+      # - deploy-prod:
+      #     requires:
+      #       - build
+      #     filters:
+      #       branches:
+      #         only: main
+
+      - notify-failure:
+          requires:
+            - test
+            - build
+          filters:
+            branches:
+              only:
+                - develop
+                - main
+          when: on_fail
