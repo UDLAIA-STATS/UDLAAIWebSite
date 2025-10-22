@@ -2,6 +2,8 @@
 import type { GetStaticPaths } from "astro";
 import Layout from "@layouts/Layout.astro";
 import arrowNext from "@assets/arrow_next.svg";
+import NotAuthorized from "@components/shared/NotAuthorized.astro";
+import { roles } from "@consts/roles";
 
 const buttonClass =
   "text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md flex items-center justify-center cursor-pointer transition";
@@ -16,11 +18,27 @@ const inputClass =
       { params: { jugador: "jugador" } },
     ];
   }) satisfies GetStaticPaths;
+
+
+
+const user = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
+const { super: superRole } = roles;
 ---
 
 <Layout>
+  <section class:list={[
+    "h-svh md:w-svw lg:w-shw w-shw flex flex-wrap justify-self-start flex-col mx-10 my-5",
+    user && ( user.rol === superRole || user.rol === roles.profesor ) ? "hidden" : ""
+  ]}>
+    <NotAuthorized />
+  </section>
   <section
-    class="h-fit md:w-svw lg:w-shw w-shw min-h-[100vh] text-white flex flex-wrap justify-self-center-safe flex-col mt-16">
+    class:list={[
+      "h-fit md:w-svw lg:w-shw w-shw min-svh text-white flex flex-wrap justify-self-center-safe flex-col mt-16",
+      user && (user.rol === superRole || user.rol === roles.profesor) ? "" : "hidden",
+    ]}>
     <!-- Contenedor principal -->
     <div id="container" class="flex flex-col flex-wrap items-center justify-center gap-5 bg-[#C10230] self-center w-shw px-10 pt-4 pb-8 rounded-lg shadow-lg">
         <!-- Título -->

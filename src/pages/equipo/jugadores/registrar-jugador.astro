@@ -16,12 +16,22 @@ const user = Astro.cookies.get("user")
 const { super: superRole } = roles;
 ---
 
-{
-  !user ? (
-    <NotAuthorized />
-  ) : (<Layout>
+<Layout>
   <section
-    class="h-fit md:w-svw lg:w-shw w-shw min-h-[100vh] text-white flex flex-wrap justify-self-center-safe flex-col mt-16"
+    class:list={[
+      "h-svh md:w-svw lg:w-shw w-shw flex flex-wrap justify-self-start flex-col mx-10 my-5",
+      user && (user.rol === superRole || user.rol === roles.profesor)
+        ? "hidden"
+        : ""
+    ]}
+  >
+    <NotAuthorized />
+  </section>
+  <section
+    class:list={[
+      "h-fit md:w-svw lg:w-shw w-shw min-svh text-white flex flex-wrap justify-self-center-safe flex-col mt-16",
+      user && (user.rol === superRole || user.rol === roles.profesor) ? "" : "hidden"
+    ]}
   >
     <!-- Contenedor principal -->
     <div
@@ -122,9 +132,9 @@ const { super: superRole } = roles;
       </div>
     </div>
   </section>
-</Layout>)
+</Layout>
 
-}
+
 <script>
   import { actions } from "astro:actions";
 

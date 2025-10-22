@@ -7,15 +7,25 @@ import type { Partido } from "@interfaces/partido.interface";
 export const getNavbarLinks = (user?: LoggedUser) => {
   let links: Link[] = [
     { name: "Inicio", href: publicRoutesMap.HOME },
-    { name: "Estadísticas", href: publicRoutesMap.PLAYER_STATS }
+    { name: "Visualizar Estadísticas", href: publicRoutesMap.PLAYER_STATS }
   ]
 
   if (!user) return links;
 
-  if ( user.rol === roles.super || user.rol === roles.profesor ) {
+  if ( user.rol === roles.profesor ) {
     links = [...links,
-      { name: "Análisis", href: privateRoutesMap.VIDEO_ANALYSIS },
-      { name: "Administrar", href: privateRoutesMap.AUTH_ADMIN }
+    { name: "Análisis", href: privateRoutesMap.VIDEO_ANALYSIS },
+    { name: "Administrar Estudiantes", href: privateRoutesMap.AUTH_ADMIN },
+    { name: "Administrar Partidos y Torneos", href: privateRoutesMap.ADMIN_PARTIDOS }
+  ]
+  }
+
+  if ( user.rol === roles.super ) {
+    links = [...links,
+    { name: "Analizar Video", href: privateRoutesMap.VIDEO_ANALYSIS },
+    { name: "Administrar Estudiantes", href: privateRoutesMap.AUTH_ADMIN },
+    { name: "Administrar Temporadas", href: privateRoutesMap.ADMIN_PARTIDOS },
+    { name: "Administrar Usuarios", href: privateRoutesMap.AUTH_ADMIN }
     ]
   }
   return links;

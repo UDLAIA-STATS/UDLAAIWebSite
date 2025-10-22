@@ -4,6 +4,7 @@ export const privateRoutesMap = {
     VIDEO_ANALYSIS: "/equipo/jugadores/analisis-video",
     AUTH_REGISTER: "/admin/register",
     AUTH_ADMIN: "/admin",
+    ADMIN_PARTIDOS: "/admin-partidos",
     EDIT_USER: "/admin",
 }
 

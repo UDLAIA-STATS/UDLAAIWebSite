@@ -147,7 +147,7 @@ El servidor estará disponible en: `http://localhost:4321`
 ## 🛠️ Stack Tecnológico
 
 ### Framework Principal
-- **Astro**: v5.14.5 - Framework web moderno para sitios rápidos
+- **Astro**: v5.12.3 - Framework web moderno para sitios rápidos.
 
 ### UI Frameworks
 - **React**: v19.2.0 - Para componentes interactivos
