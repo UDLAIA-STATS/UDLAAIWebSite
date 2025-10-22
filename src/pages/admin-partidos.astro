@@ -3,14 +3,20 @@ import AdminPanelLayout from "@layouts/AdminPanelLayout.astro";
 import NotAuthorized from "@components/shared/NotAuthorized.astro";
 import PartidosProfesorView from "@views/profesor/partidos_profesor_view";
 import { roles } from "@consts/roles";
+import type { User } from "@interfaces/user.interface";
 
-const user = Astro.cookies.get("user")
-  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
-  : null;
+const user: User = {
+  nickname: "Juan Perez",
+  rol: "profesor",
+  email: "juan.perez@example.com"
+};
+// Astro.cookies.get("user")
+//   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+//   : null;
 const { super: superRole } = roles;
 ---
 
-<AdminPanelLayout title="Administración de Partidos y Torneos">
+<AdminPanelLayout title="Gestión de Torneos y Partidos">
   <section
     class:list={[
       "mx-10 my-5 h-svh",
@@ -21,7 +27,7 @@ const { super: superRole } = roles;
   >
     {
       user ? (
-        <PartidosProfesorView user={user} />
+        <PartidosProfesorView user={user} client:load />
       ) : (
         <section class="h-svh md:w-svw lg:w-shw w-shw flex flex-wrap justify-self-start flex-col mx-10 my-5">
           <NotAuthorized />
