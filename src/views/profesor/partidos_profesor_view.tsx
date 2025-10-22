@@ -1,0 +1,121 @@
+import { createSignal, type Component } from "solid-js";
+import { privateRoutesMap } from "@consts/routes";
+import { Table } from "@components/tables/Table";
+import type { TableActions } from "@interfaces/table-actions.interface";
+import type { User } from "@interfaces/user.interface";
+import EditIcon from "@assets/edit_icon_black.svg";
+import DeleteIcon from "@assets/delete_icon_black.svg";
+
+interface Props {
+    user: User;
+}
+
+const PartidosProfesorView: Component<Props> = ({ user }: Props) => {
+    const { REGISTER_PLAYER, EDIT_PLAYER } = privateRoutesMap;
+    const headers = ["Nombre de usuario", "Email", "Rol", "Editar", "Eliminar"];
+
+    const users: User[] = [
+        { nickname: "Juan Perez", email: "H8h1o@example.com", rol: "Admin" },
+        { nickname: "Maria López", email: "mlopez@example.com", rol: "Usuario" },
+    ];
+
+    const rows = users.map((u) => [u.nickname, u.email, u.rol]);
+
+    function handleDelete(username: string) {
+        console.log(`Usuario ${username} eliminado`);
+    }
+
+    const actions: TableActions[] = [];
+
+    actions.push(
+        {
+            href: `${EDIT_PLAYER}/`,
+            icon: EditIcon.src,
+            alt: "Editar jugador",
+            type: "link",
+        },
+        {
+            action: handleDelete,
+            icon: DeleteIcon.src,
+            alt: "Eliminar jugador",
+            type: "button",
+        },
+    );
+
+    return (
+        <>
+            <div class="flex flex-row justify-between w-full">
+                <h1 class="font-bold text-2xl w-xl">Partidos y Torneos</h1>
+                <div class="flex flex-row gap-10 w-3/2 justify-end">
+                    <a
+                        href={REGISTER_PLAYER}
+                        class="no-underline text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md flex cursor-pointer items-center gap-2"
+                    >
+                        Agregar Caso
+                    </a>
+                    <input
+                        type="search"
+                        name="search"
+                        placeholder="Buscar jugador..."
+                        id="search-box"
+                        class="rounded-md p-2 w-1/4 focus:outline-none focus:ring-1 focus:ring-[#000] text-black border border-solid border-[#000]"
+                    />
+                </div>
+            </div>
+            <div class="relative overflow-x-auto w-svw mt-5 flex justify-center">
+                <Table headers={headers}>
+                    {
+                        rows.map((row) => (
+                            <tr class="border-b">
+                                {row.map((cell) => (
+                                    <td class="px-6 py-4">{cell}</td>
+                                ))}
+                                {actions &&
+                                    actions.length > 0 &&
+                                    actions.map((action) =>
+                                        action.type === "link" ? (
+                                            <td class="px-6 py-4">
+                                                <a
+                                                    class="cursor-pointer no-underline"
+                                                    href={action.href?.toString() + row[0]}
+                                                >
+                                                    <img
+                                                        class="size-8"
+                                                        src={action.icon}
+                                                        alt={action.alt}
+                                                    />
+                                                </a>
+                                            </td>
+                                        ) : (
+                                            action.action && (
+                                                <td class="px-6 py-4">
+                                                    <button
+                                                        type="button"
+                                                        id="delete-button"
+                                                        value={row[0]}
+                                                        data-delete-user
+                                                        data-username={row[0]}
+                                                        class="cursor-pointer"
+                                                    >
+                                                        <img
+                                                            class="size-8"
+                                                            src={action.icon}
+                                                            alt={action.alt}
+                                                        />
+                                                    </button>
+                                                </td>
+                                            )
+                                        ),
+                                    )}
+                            </tr>
+                        ))
+                    }
+                </Table>
+            </div>
+        </>
+    );
+
+}
+
+
+export default PartidosProfesorView;

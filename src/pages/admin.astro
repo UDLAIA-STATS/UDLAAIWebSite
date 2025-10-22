@@ -2,7 +2,7 @@
 import "@styles/global.css";
 import AdminPanelLayout from "@layouts/AdminPanelLayout.astro";
 import PanelAdminView from "@views/admin/panel_admin_view.astro";
-import PanelProfessorView from "@views/profesor/panel_profesor_view.astro";
+import PlayersProfessorView from "@views/profesor/jugadores_profesor_view.astro";
 import NotAuthorized from "@components/shared/NotAuthorized.astro";
 import { roles } from "@consts/roles";
 
@@ -20,7 +20,7 @@ const { super: superRole } = roles;
     ) : user?.rol === superRole ? (
       <PanelAdminView />
     ) : (
-      <PanelProfessorView />
+      <PlayersProfessorView />
     )
   }
 </AdminPanelLayout>

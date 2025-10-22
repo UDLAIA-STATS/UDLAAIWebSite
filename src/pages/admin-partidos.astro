@@ -1,0 +1,32 @@
+---
+import AdminPanelLayout from "@layouts/AdminPanelLayout.astro";
+import NotAuthorized from "@components/shared/NotAuthorized.astro";
+import PartidosProfesorView from "@views/profesor/partidos_profesor_view";
+import { roles } from "@consts/roles";
+
+const user = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
+const { super: superRole } = roles;
+---
+
+<AdminPanelLayout title="Administración de Partidos y Torneos">
+  <section
+    class:list={[
+      "mx-10 my-5 h-svh",
+      user && (user.rol === superRole || user.rol === roles.profesor)
+        ? ""
+        : "hidden",
+    ]}
+  >
+    {
+      user ? (
+        <PartidosProfesorView user={user} />
+      ) : (
+        <section class="h-svh md:w-svw lg:w-shw w-shw flex flex-wrap justify-self-start flex-col mx-10 my-5">
+          <NotAuthorized />
+        </section>
+      )
+    }
+  </section>
+</AdminPanelLayout>
