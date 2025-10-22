@@ -5,5 +5,8 @@ interface Props {
 }
 
 const InputForm:Component<Props> = ({}: Props) => {
-    
+    return (
+        <>
+        </>
+    )
 }
