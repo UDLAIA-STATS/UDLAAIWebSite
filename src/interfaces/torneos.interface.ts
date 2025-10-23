@@ -27,6 +27,10 @@ export interface Temporada {
     idtorneo: Torneo;
 }
 
+export interface TorneoPartido {
+    idtorneo: Torneo;
+    idpartido: Partido;
+}
 
 
 

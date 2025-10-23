@@ -1,11 +1,11 @@
-import { login, logout, registerUser } from "./auth";
-import { registerPlayer } from "./players";
-import { uploadVideo } from "./analysis";
+import * as auth from "./auth";
+import * as players from "./players";
+import * as analysis from "./analysis";
+import * as team from "./team";
 
 export const server = {
-    login,
-    registerUser,
-    registerPlayer,
-    logout,
-    uploadVideo
-}
+  ...auth,
+  ...players,
+  ...analysis,
+  ...team,
+};
