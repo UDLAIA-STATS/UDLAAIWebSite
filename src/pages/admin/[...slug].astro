@@ -12,11 +12,13 @@ import type { User } from "@interfaces/user.interface";
 
 const { username } = Astro.params;
 
+console.log("Parámetro username:", username);
+
 if (!username) {
   Astro.redirect(publicRoutesMap[404]);
 }
 
-const { data, error } = await Astro.callAction(actions.getUserById, { username: username ?? "", userCredential: "123456789"});
+const { data, error } = await Astro.callAction(actions.getUserByUsername, { username: username ?? "", userCredential: "123456789"});
 if (!data) Astro.redirect(publicRoutesMap[404]);
 const user: User = data!.data;
 
@@ -107,7 +109,7 @@ const { super: superRole } = roles;
             id="password"
             name="password"
             class={inputClass}
-            value={email}
+            value={"*********"}
             required
           />
         </div>
