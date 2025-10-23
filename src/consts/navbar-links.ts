@@ -24,8 +24,7 @@ export const getNavbarLinks = (user?: LoggedUser) => {
     links = [...links,
     { name: "Analizar Video", href: privateRoutesMap.VIDEO_ANALYSIS },
     { name: "Administrar Estudiantes", href: privateRoutesMap.AUTH_ADMIN },
-    { name: "Administrar Temporadas", href: privateRoutesMap.ADMIN_PARTIDOS },
-    { name: "Administrar Usuarios", href: privateRoutesMap.AUTH_ADMIN }
+    { name: "Administrar Partidos y Torneos", href: privateRoutesMap.ADMIN_PARTIDOS },
     ]
   }
   return links;

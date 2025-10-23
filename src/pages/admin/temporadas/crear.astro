@@ -1,7 +1,136 @@
 ---
-import Layout from "@layouts/Layout.astro"
+import "@styles/global.css";
+import FormLayout from "@layouts/FormLayout.astro";
+import arrowNext from "@assets/arrow_next.svg";
+import NotAuthorized from "@components/shared/NotAuthorized.astro";
+import { actions } from "astro:actions";
+import { roles } from "@consts/roles";
+import type {Equipo, Temporada, Torneo } from "@interfaces/torneos.interface";
+import Swal from "sweetalert2";
+
+interface Props {
+  temporada?: Temporada | null;
+}
+
+const buttonClass =
+  "text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md flex items-center justify-center cursor-pointer transition";
+const inputClass =
+  "bg-white text-black rounded-md p-2 w-md focus:outline-none focus:ring-2 focus:ring-[#C10230]";
+
+const user = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
+
+const { temporada } = Astro.props;
+
+const { data, error } = await actions.getTorneos();
+
+if (error) {
+  console.error("Error fetching torneos:", error);
+  Swal.fire("Error", "Error al cargar los torneos", "error");
+}
+
+
+if (!data) {
+    console.error("No data received for torneos");
+    Swal.fire("Warning", "No se recibieron datos de los torneos.", "warning");
+}
+
+const torneos: Torneo[] = data?.data ?? [];
+
 ---
 
-<Layout>
+<FormLayout
+  formTitle={temporada ? "Editar Temporada" : "Agregar Temporada"}
+  pageTitle={temporada ? "Editar Temporada" : "Agregar Temporada"}
+  user={user}
+>
+  <form id="form-temporada" class="flex flex-col w-full max-w-md">
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="nombretemporada" class="text-base font-medium"
+        >Nombre de la Temporada</label
+      >
+      <input 
+        id="nombretemporada"
+        name="nombretemporada"
+        value={temporada?.nombretemporada ?? ""}
+        type="text"
+        class={inputClass}
+        required
+      />
+    </div>
+
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="tipotemporada" class="text-base font-medium"
+        >Tipo de Temporada</label
+      >
+      <select name="tipotemporada" class={inputClass} id="tipotemporada">
+        <option value="oficial" selected={temporada?.tipotemporada === true}>Oficial</option>
+        <option value="amistoso" selected={temporada?.tipotemporada === false}>Amistoso</option>
+      </select>
+    </div>
     
-</Layout>
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="idtorneo" class="text-base font-medium"
+        >Torneo</label
+      >
+      <select name="idtorneo" class={inputClass} id="idtorneo">
+        <option value="" disabled selected>Selecciona un torneo</option>
+        {torneos.map((torneo: Torneo) => (
+          <option
+            value={torneo.idtorneo}
+            id={`torneo-${torneo.idtorneo}`}
+            selected={torneo.idtorneo === temporada?.idtorneo.idtorneo}
+          >
+            {torneo.nombretorneo}
+          </option>
+        ))}
+      </select>
+      </select>
+    </div>
+
+    <div class="flex gap-2 justify-center pt-5">
+      <button class={buttonClass} type="submit">
+        {temporada ? "Editar Temporada" : "Agregar Temporada"}
+        <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
+      </button>
+    </div>
+  </form>
+</FormLayout>
+
+<script>
+  import Swal from "sweetalert2";
+  import { actions } from "astro:actions";
+
+  const form = document.querySelector("#form-temporada") as HTMLFormElement;
+  const temporadaId = "{temporada?.idtemporada ?? ''}" as string;
+
+  document.addEventListener("astro:page-load", () => {
+    form?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+
+      if (temporadaId && temporadaId !== "") {
+        formData.append("idtemporada", temporadaId);
+      }
+
+      try {
+        const { data, error } =
+          temporadaId && temporadaId !== ""
+            ? await actions.updateTemporada(formData)
+            : await actions.createTemporada(formData);
+
+        if (error) throw error;
+        Swal.fire(
+          "Éxito",
+          temporadaId ? "Temporada actualizada" : "Temporada creada",
+          "success"
+        );
+        form.reset();
+      } catch (err) {
+        console.error(err as Error);
+        Swal.fire("Error", "Error al crear el partido", "error");
+      }
+    });
+  });
+</script>

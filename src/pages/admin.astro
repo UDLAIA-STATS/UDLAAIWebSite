@@ -6,6 +6,8 @@ import PlayersProfessorView from "@views/profesor/jugadores_profesor_view.astro"
 import NotAuthorized from "@components/shared/NotAuthorized.astro";
 import { roles } from "@consts/roles";
 
+export const prerender = false;
+
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
@@ -18,9 +20,9 @@ const { super: superRole } = roles;
     !user ? (
       <NotAuthorized/>
     ) : user?.rol === superRole ? (
-      <PanelAdminView />
+      <PanelAdminView client:load />
     ) : (
-      <PlayersProfessorView />
+      <PlayersProfessorView client:load />
     )
   }
 </AdminPanelLayout>

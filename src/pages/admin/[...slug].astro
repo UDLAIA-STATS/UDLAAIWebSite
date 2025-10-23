@@ -5,23 +5,38 @@ import Layout from "@layouts/Layout.astro";
 import arrowNext from "@assets/arrow_next.svg";
 import NotAuthorized from "@components/shared/NotAuthorized.astro";
 import { roles } from "@consts/roles";
+import { actions } from "astro:actions"; 
+import Swal from "sweetalert2";
+import { publicRoutesMap } from "@consts/routes";
+import type { User } from "@interfaces/user.interface";
 
-export const prerender = false;
+const { username } = Astro.params;
+
+if (!username) {
+  Astro.redirect(publicRoutesMap[404]);
+}
+
+const { data, error } = await Astro.callAction(actions.getUserById, { username: username ?? "", userCredential: "123456789"});
+if (!data) Astro.redirect(publicRoutesMap[404]);
+const user: User = data!.data;
+
+
+if (error) {
+  console.error("Error fetching user:", error);
+  Astro.redirect(publicRoutesMap[404]);
+}
+
+if (!user) {
+  Astro.redirect(publicRoutesMap[404]);
+};
 
 const inputClass =
   "bg-white text-black rounded-md p-2 w-md focus:outline-none focus:ring-2 focus:ring-[#C10230]";
 
-export const getStaticPaths = (() => {
-  return [
-    { params: { name: "david" } },
-    { params: { name: "asdasd" } },
-    { params: { name: "admin" } },
-  ];
-}) satisfies GetStaticPaths;
 
-const { name } = Astro.params;
+const { nombre_usuario, rol, email_usuario } = user;
 
-const user = Astro.cookies.get("user")
+const loggedUser = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
 const { super: superRole } = roles;
@@ -31,7 +46,7 @@ const { super: superRole } = roles;
   <section
     class:list={[
       "h-svh md:w-svw lg:w-shw w-shw flex flex-wrap justify-self-start flex-col mx-10 my-5",
-      user && (user.rol === superRole || user.rol === roles.profesor)
+      loggedUser && (loggedUser.rol === superRole || loggedUser.rol === roles.profesor)
         ? "hidden"
         : ""
     ]}
@@ -52,7 +67,7 @@ const { super: superRole } = roles;
       id="container"
       class="flex flex-col items-center justify-center gap-5 rounded-sm bg-[#C10230] self-center w-fit px-10 py-5 mt-5 pb-8"
     >
-      <form action="submit" method="post" autocomplete="on" class="text-white">
+      <form action="submit" method="post" autocomplete="on" id="form-usuario" class="text-white">
         <div class="flex flex-col gap-2 mb-4 px-5">
           <label class="text-base font-medium" for="name"> Nombre </label>
           <input
@@ -62,6 +77,7 @@ const { super: superRole } = roles;
             id="name"
             name="name"
             class={inputClass}
+            value={nombre_usuario}
             required
           />
         </div>
@@ -76,6 +92,7 @@ const { super: superRole } = roles;
             name="email"
             pattern="/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/"
             class={inputClass}
+            value={email_usuario}
             required
           />
         </div>
@@ -90,6 +107,7 @@ const { super: superRole } = roles;
             id="password"
             name="password"
             class={inputClass}
+            value={email}
             required
           />
         </div>
@@ -111,3 +129,37 @@ const { super: superRole } = roles;
     </div>
   </section>
 </Layout>
+
+<script>
+  import Swal from "sweetalert2";
+  import { actions } from "astro:actions";
+
+  const form = document.querySelector("#form-usuario") as HTMLFormElement;
+  const username = "{ username }" as string;
+  console.log("Username:", username);
+
+  const userCredential  = '123456789';
+
+  document.addEventListener("astro:page-load", () => {
+    form?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      formData.append("userCredential", userCredential);
+      formData.append("username", username);
+      try {
+        const { data, error } = await actions.updateUser(formData);
+
+        if (error) throw error;
+        Swal.fire(
+          "Éxito",
+          `Usuario ${username} actualizado`,
+          "success"
+        );
+        form.reset();
+      } catch (err) {
+        console.error(err as Error);
+        Swal.fire("Error", "Error al crear el torneo", "error");
+      }
+    });
+  });
+</script>

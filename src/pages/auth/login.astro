@@ -8,9 +8,9 @@ export const prerender = false;
 const inputClass =
   "bg-white text-black rounded-md p-2 w-md focus:outline-none focus:ring-2 focus:ring-[#C10230]";
 
- const name = Astro.cookies.get("name")?.value ?? "";
- console.log("Name from cookie:", name);
- const rememberMeChecked = !!name;
+const name = Astro.cookies.get("name")?.value ?? "";
+console.log("Name from cookie:", name);
+const rememberMeChecked = !!name;
 ---
 
 <Layout>
@@ -27,9 +27,7 @@ const inputClass =
       <div id="register-form" class="flex flex-col gap-5">
         <form action="submit" autocomplete="on" method="post">
           <div class="flex flex-col gap-2 mb-4 px-5">
-            <label class="text-base font-medium" for="name"
-              >Usuario</label
-            >
+            <label class="text-base font-medium" for="name">Usuario</label>
             <input
               type="text"
               maxlength="70"
@@ -66,10 +64,10 @@ const inputClass =
             </div>
           </div>
           <div class="flex justify-center mt-5 pt-2">
-            <button 
-            class="disabled:bg-gray-300 text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md cursor-pointer flex gap-2" 
-            type="submit" 
-            id="btn-login"
+            <button
+              class="disabled:bg-gray-300 text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md cursor-pointer flex gap-2"
+              type="submit"
+              id="btn-login"
               >Iniciar Sesión
               <img
                 src={arrowNext.src}
@@ -89,29 +87,31 @@ const inputClass =
   import Swal from "sweetalert2";
 
   const form = document.querySelector("form");
-  const btnSubmit = form!.querySelector("button[type='submit']") as HTMLButtonElement;
+  const btnSubmit = form!.querySelector(
+    "button[type='submit']"
+  ) as HTMLButtonElement;
 
-  form?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    btnSubmit.setAttribute('disabled', 'disabled');
+  document.addEventListener("astro:page-load", () => {
+    form?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      btnSubmit.setAttribute("disabled", "disabled");
 
-    const formData = new FormData(form);
+      const formData = new FormData(form);
 
+      const { data, error } = await actions.login(formData);
 
-    const { data, error } = await actions.login(formData);
+      if (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Error al iniciar sesión",
+          text: error.message,
+        });
+        btnSubmit.removeAttribute("disabled");
+        return;
+      }
 
-    if (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error al iniciar sesión',
-        text: error.message,
-      })
-      btnSubmit.removeAttribute('disabled');
-      return;
-    }
-
-    btnSubmit.removeAttribute('disabled');
-    window.location.replace("/"); 
+      btnSubmit.removeAttribute("disabled");
+      window.location.replace("/");
+    });
   });
-
 </script>

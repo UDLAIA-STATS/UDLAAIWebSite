@@ -1,7 +1,102 @@
 ---
-import Layout from "@layouts/Layout.astro"
+import "@styles/global.css";
+import FormLayout from "@layouts/FormLayout.astro";
+import arrowNext from "@assets/arrow_next.svg";
+import NotAuthorized from "@components/shared/NotAuthorized.astro";
+import { roles } from "@consts/roles";
+import type { Torneo } from "@interfaces/torneos.interface";
+
+interface Props {
+  torneo?: Torneo | null;
+}
+
+const buttonClass =
+  "text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md flex items-center justify-center cursor-pointer transition";
+const inputClass =
+  "bg-white text-black rounded-md p-2 w-md focus:outline-none focus:ring-2 focus:ring-[#C10230]";
+
+const user = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
+const { super: superRole } = roles;
+
+const torneo = Astro.props.torneo;
 ---
 
-<Layout>
-    
-</Layout>
+<FormLayout
+  formTitle={torneo ? "Editar Torneo" : "Agregar Torneo"}
+  pageTitle={torneo ? "Editar Torneo" : "Agregar Torneo"}
+  user={user}
+>
+  <form id="form-torneo" class="flex flex-col w-full max-w-md">
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="nombretorneo" class="text-base font-medium"
+        >Nombre del Torneo</label
+      >
+      <input
+        type="text"
+        id="nombretorneo"
+        name="nombretorneo"
+        value={torneo?.nombretorneo ?? ""}
+        class={inputClass}
+        required
+      />
+    </div>
+
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="descripciontorneo" class="text-base font-medium"
+        >Descripción</label
+      >
+      <textarea
+        id="descripciontorneo"
+        name="descripciontorneo"
+        class={inputClass}
+        rows="3">{torneo?.descripciontorneo ?? ""}</textarea
+      >
+    </div>
+
+    <div class="flex gap-2 justify-center pt-5">
+      <button class={buttonClass} type="submit">
+        {torneo ? "Actualizar Torneo" : "Guardar Torneo"}
+        <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
+      </button>
+    </div>
+  </form>
+</FormLayout>
+
+<script>
+  import Swal from "sweetalert2";
+  import { actions } from "astro:actions";
+
+  const form = document.querySelector("#form-torneo") as HTMLFormElement;
+  const torneoId = "{torneo?.idtorneo ?? ''}" as string;
+
+  document.addEventListener("astro:page-load", () => {
+    form?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+
+      if (torneoId && torneoId !== "") {
+        formData.append("idtorneo", torneoId);
+      }
+
+      try {
+        const { data, error } =
+          torneoId && torneoId !== ""
+            ? await actions.updateTorneo(formData)
+            : await actions.createTorneo(formData);
+
+        if (error) throw error;
+        Swal.fire(
+          "Éxito",
+          torneoId ? "Torneo actualizado" : "Torneo creado",
+          "success"
+        );
+        form.reset();
+      } catch (err) {
+        console.error(err as Error);
+        Swal.fire("Error", "Error al crear el torneo", "error");
+      }
+    });
+  });
+</script>

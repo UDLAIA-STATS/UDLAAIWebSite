@@ -9,7 +9,7 @@ export const login = defineAction({
     password: z.string().min(8),
     rememberMe: z.boolean().optional(),
   }),
-  handler: async ({ name, password, rememberMe }, { cookies }) => {
+  handler: async ({ name, password, rememberMe }, { cookies, locals }) => {
     try {
       // Manejo de cookies para "remember me"
       if (rememberMe) {
@@ -20,6 +20,7 @@ export const login = defineAction({
       } else {
         cookies.delete("name", { path: "/" });
     }
+;
 
       console.log("Intentando login:", { name, password, rememberMe });
       const authUrl = import.meta.env.AUTH_URL;
@@ -54,6 +55,7 @@ export const login = defineAction({
         expires: new Date(Date.now() + 1000 * 3600), // 1 hour
         path: "/",
       });
+      locals.user = user;
       cookies.set("token", json['token'], {
         httpOnly: true,
         expires: new Date(Date.now() + 1000 * 3600), // 1 hour

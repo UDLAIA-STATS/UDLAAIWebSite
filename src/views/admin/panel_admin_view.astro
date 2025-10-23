@@ -5,6 +5,8 @@ import type { TableActions } from "@interfaces/table-actions.interface";
 import type { User } from "@interfaces/user.interface";
 import EditIcon from "@assets/edit_icon_black.svg";
 import DeleteIcon from "@assets/delete_icon_black.svg";
+import { actions } from "astro:actions";
+import Swal from "sweetalert2";
 
 const { AUTH_REGISTER, EDIT_USER } = privateRoutesMap;
 
@@ -12,20 +14,29 @@ const name = Astro.cookies.get("name")?.value;
 
 const headers = ["Nombre de usuario", "Email", "Rol", "Editar", "Eliminar"];
 
-const users: User[] = [
-  { nickname: "Juan Perez", email: "H8h1o@example.com", rol: "Admin" },
-  { nickname: "Maria López", email: "mlopez@example.com", rol: "Usuario" },
-];
+const { data, error } = await Astro.callAction(actions.getUsers, "123456789");
 
-const rows = users.map((u) => [u.nickname, u.email, u.rol]);
+if (error) {
+  console.error("Error fetching users:", error);
+  Swal.fire({
+    icon: "error",
+    title: "Error al obtener los usuarios",
+    text: error.message,
+  });
+}
+
+const users: User[] = data?.data.filter((u) => u.nombre_usuario !== name) ?? [];
+
+
+const rows = users.map((u) => [u.nombre_usuario, u.email_usuario, u.rol]);
 
 function handleDelete(username: string) {
   console.log(`Usuario ${username} eliminado`);
 }
 
-const actions: TableActions[] = [];
+const tableActions: TableActions[] = [];
 
-actions.push(
+tableActions.push(
   {
     href: `${EDIT_USER}/`,
     icon: EditIcon.src,
@@ -39,83 +50,116 @@ actions.push(
     type: "button",
   }
 );
-
-
 ---
 
 <div class="flex flex-row justify-between w-full">
-    <h1 class="font-bold text-2xl">Usuarios</h1>
-    <div class="flex flex-row gap-10 w-3/2 justify-end">
-      <a
-        href={AUTH_REGISTER}
-        class="no-underline text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md flex cursor-pointer items-center gap-2"
-      >
-        Agregar Usuario
-      </a>
-      <input
-        type="search"
-        name="search"
-        placeholder="Buscar usuario..."
-        id="search-box"
-        class="rounded-md p-2 w-1/4 focus:outline-none focus:ring-1 focus:ring-black text-black border border-solid border-black"
-      />
-    </div>
+  <h1 class="font-bold text-2xl">Usuarios</h1>
+  <div class="flex flex-row gap-10 w-3/2 justify-end">
+    <a
+      href={AUTH_REGISTER}
+      class="no-underline text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md flex cursor-pointer items-center gap-2"
+    >
+      Agregar Usuario
+    </a>
+    <input
+      type="search"
+      name="search"
+      placeholder="Buscar usuario..."
+      id="search-box"
+      class="rounded-md p-2 w-1/4 focus:outline-none focus:ring-1 focus:ring-black text-black border border-solid border-black"
+    />
   </div>
-  <div class="relative overflow-x-auto w-svw mt-5 flex justify-center">
-    <Table headers={headers}>
-      {
-        rows.map((row) => (
-          <tr class="border-b">
-            {row.map((cell) => (
-              <td class="px-6 py-4">{cell}</td>
-            ))}
-            {actions &&
-              actions.length > 0 &&
-              actions.map((action) =>
-                action.type === "link" ? (
+</div>
+<div
+  class:list={[
+    "flex text-lg mt-3 w-svw justify-center text-black font-medium",
+    users.length === 0 ? "" : "hidden",
+  ]}
+>
+  <span>No se encontraron usuarios</span>
+</div>
+<div
+  class:list={[
+    "relative overflow-x-auto w-svw mt-5 flex justify-center",
+    users.length === 0 ? "hidden" : "",
+  ]}
+>
+  <Table headers={headers}>
+    {
+      rows.map((row) => (
+        <tr class="border-b">
+          {row.map((cell) => (
+            <td class="px-6 py-4">{cell}</td>
+          ))}
+          {tableActions &&
+            tableActions.length > 0 &&
+            tableActions.map((action) =>
+              action.type === "link" ? (
+                <td class="px-6 py-4">
+                  <a
+                    class="cursor-pointer no-underline"
+                    href={action.href?.toString() + row[0]}
+                  >
+                    <img class="size-8" src={action.icon} alt={action.alt} />
+                  </a>
+                </td>
+              ) : (
+                action.action && (
                   <td class="px-6 py-4">
-                    <a
-                      class="cursor-pointer no-underline"
-                      href={action.href?.toString() + row[0]}
+                    <button
+                      type="button"
+                      id="delete-button"
+                      value={row[0]}
+                      data-delete-user
+                      data-username={row[0]}
+                      class="cursor-pointer"
                     >
                       <img class="size-8" src={action.icon} alt={action.alt} />
-                    </a>
+                    </button>
                   </td>
-                ) : (
-                  action.action && (
-                    <td class="px-6 py-4">
-                      <button
-                        type="button"
-                        id="delete-button"
-                        value={row[0]}
-                        data-delete-user
-                        data-username={row[0]}
-                        class="cursor-pointer"
-                      >
-                        <img
-                          class="size-8"
-                          src={action.icon}
-                          alt={action.alt}
-                        />
-                      </button>
-                    </td>
-                  )
                 )
-              )}
-          </tr>
-        ))
-      }
-    </Table>
-  </div>
+              )
+            )}
+        </tr>
+      ))
+    }
+  </Table>
+</div>
 
-  <script>
-  document.addEventListener("click", (event) => {
+<script>
+  import { actions } from "astro:actions";
+  import Swal from "sweetalert2";
+  import { navigate } from 'astro:transitions/client';
+
+  document.addEventListener("astro:page-load", async () => {
+    const users = await actions.getUsers("123456789");
+  });
+  document.addEventListener("click", async (event) => {
     const target = event.target as HTMLElement;
     if (target.closest("[data-delete-user]")) {
       const button = target.closest("[data-delete-user]") as HTMLButtonElement;
       const username = button.getAttribute("data-username");
+
       if (username) {
         console.log(`Usuario ${username} eliminado`);
+        const formData = new FormData();
+        formData.append("nickname", username);
+        formData.append("userCredential", "123456789");
+        const { data, error } = await actions.deleteUser(formData);
+
+        if (error) {
+          Swal.fire({
+            icon: "error",
+            title: "Error al eliminar el usuario",
+            text: error.message,
+          });
+        } else {
+          Swal.fire("Éxito", `Usuario ${username} eliminado`, "success").then(
+            () => {
+              navigate('/admin');
+            }
+          );
+        }
       }
     }
   });

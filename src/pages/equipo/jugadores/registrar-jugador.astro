@@ -22,7 +22,7 @@ const { super: superRole } = roles;
       "h-svh md:w-svw lg:w-shw w-shw flex flex-wrap justify-self-start flex-col mx-10 my-5",
       user && (user.rol === superRole || user.rol === roles.profesor)
         ? "hidden"
-        : ""
+        : "",
     ]}
   >
     <NotAuthorized />
@@ -30,7 +30,9 @@ const { super: superRole } = roles;
   <section
     class:list={[
       "h-fit md:w-svw lg:w-shw w-shw min-svh text-white flex flex-wrap justify-self-center-safe flex-col mt-16",
-      user && (user.rol === superRole || user.rol === roles.profesor) ? "" : "hidden"
+      user && (user.rol === superRole || user.rol === roles.profesor)
+        ? ""
+        : "hidden",
     ]}
   >
     <!-- Contenedor principal -->
@@ -134,30 +136,31 @@ const { super: superRole } = roles;
   </section>
 </Layout>
 
-
 <script>
   import { actions } from "astro:actions";
 
   const form = document.querySelector("form");
   const btnSubmit = form!.querySelector("button[type='submit']");
 
-  form?.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  document.addEventListener("astro:page-load", () => {
+    form?.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-    const formData = new FormData(form);
+      const formData = new FormData(form);
 
-    const photo = formData.get("photo");
-    console.log(photo);
+      const photo = formData.get("photo");
+      console.log(photo);
 
-    const { data, error } = await actions.registerPlayer(formData);
+      const { data, error } = await actions.registerPlayer(formData);
 
-    if (error) {
-      console.error("Error:", error);
-      alert("Error: " + error.message);
-    } else {
-      console.log("Success:", data);
-      alert("Jugador registrado exitosamente");
-      form.reset();
-    }
+      if (error) {
+        console.error("Error:", error);
+        alert("Error: " + error.message);
+      } else {
+        console.log("Success:", data);
+        alert("Jugador registrado exitosamente");
+        form.reset();
+      }
+    });
   });
 </script>

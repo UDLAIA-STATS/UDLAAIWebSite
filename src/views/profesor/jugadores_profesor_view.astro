@@ -13,11 +13,11 @@ const name = Astro.cookies.get("name")?.value;
 const headers = ["Nombre de usuario", "Email", "Rol", "Editar", "Eliminar"];
 
 const users: User[] = [
-  { nickname: "Juan Perez", email: "H8h1o@example.com", rol: "Admin" },
-  { nickname: "Maria López", email: "mlopez@example.com", rol: "Usuario" },
+  { nombre_usuario: "Juan Perez", email_usuario: "H8h1o@example.com", rol: "Admin" },
+  { nombre_usuario: "Maria López", email_usuario: "mlopez@example.com", rol: "Usuario" },
 ];
 
-const rows = users.map((u) => [u.nickname, u.email, u.rol]);
+const rows = users.map((u) => [u.nombre_usuario, u.email_usuario, u.rol]);
 
 function handleDelete(username: string) {
   console.log(`Usuario ${username} eliminado`);
