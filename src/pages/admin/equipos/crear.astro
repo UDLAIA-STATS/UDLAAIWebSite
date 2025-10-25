@@ -1,0 +1,80 @@
+---
+import "@styles/global.css";
+import FormLayout from "@layouts/FormLayout.astro";
+import arrowNext from "@assets/arrow_next.svg";
+import { actions } from "astro:actions";
+import type { Equipo, Partido } from "@interfaces/torneos.interface";
+import Swal from "sweetalert2";
+import { privateRoutesMap, buttonClass, inputClass } from "@consts/index";
+
+const user = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
+
+---
+
+<FormLayout
+  formTitle="Agregar Partido"
+  pageTitle="Agregar Partido"
+  user={user}
+>
+  <form id="form-equipo" class="flex flex-col w-full max-w-md">
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="nombreequipo" class="text-base font-medium"
+        >Nombre</label
+      >
+        <input
+            id="nombreequipo"
+            name="nombreequipo"
+            type="text"
+            class={inputClass}
+            required
+        />
+    </div>
+
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="logoequipo" class="text-base font-medium"
+        >Logo</label
+      >
+      <input
+        id="logoequipo"
+        name="logoequipo"
+        type="file"
+        class={inputClass}
+        required
+      />
+    </div>
+
+    <div class="flex gap-2 justify-center pt-5">
+      <button class={buttonClass} type="submit">
+        Agregar Equipo
+        <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
+      </button>
+    </div>
+  </form>
+</FormLayout>
+
+<script>
+  import Swal from "sweetalert2";
+  import { actions } from "astro:actions";
+
+  const form = document.querySelector("#form-equipo") as HTMLFormElement;
+
+  document.addEventListener("astro:page-load", () => {
+    form?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+
+      try {
+        const { data, error } = await actions.createEquipo(formData);
+
+        if (error) throw error;
+        Swal.fire("Éxito", "Equipo creado", "success");
+        form.reset();
+      } catch (err) {
+        console.error(err as Error);
+        Swal.fire("Error", "Error al crear el equipo", "error");
+      }
+    });
+  });
+</script>

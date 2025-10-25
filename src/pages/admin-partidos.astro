@@ -19,7 +19,7 @@ const { super: superRole } = roles;
 <AdminPanelLayout title="Gestión de Torneos y Partidos">
   <section
     class:list={[
-      "mx-10 my-5 h-svh",
+      "self-center my-5 h-svh",
       user && (user.rol === superRole || user.rol === roles.profesor)
         ? ""
         : "hidden",

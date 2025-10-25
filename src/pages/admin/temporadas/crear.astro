@@ -5,25 +5,16 @@ import arrowNext from "@assets/arrow_next.svg";
 import NotAuthorized from "@components/shared/NotAuthorized.astro";
 import { actions } from "astro:actions";
 import { roles } from "@consts/roles";
-import type {Equipo, Temporada, Torneo } from "@interfaces/torneos.interface";
+import type { Torneo } from "@interfaces/torneos.interface";
 import Swal from "sweetalert2";
-
-interface Props {
-  temporada?: Temporada | null;
-}
-
-const buttonClass =
-  "text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md flex items-center justify-center cursor-pointer transition";
-const inputClass =
-  "bg-white text-black rounded-md p-2 w-md focus:outline-none focus:ring-2 focus:ring-[#C10230]";
+import { buttonClass, inputClass } from "@consts/index";
 
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
 
-const { temporada } = Astro.props;
 
-const { data, error } = await actions.getTorneos();
+const { data, error } = await Astro.callAction(actions.getTorneos, {});
 
 if (error) {
   console.error("Error fetching torneos:", error);
@@ -41,8 +32,8 @@ const torneos: Torneo[] = data?.data ?? [];
 ---
 
 <FormLayout
-  formTitle={temporada ? "Editar Temporada" : "Agregar Temporada"}
-  pageTitle={temporada ? "Editar Temporada" : "Agregar Temporada"}
+  formTitle={"Agregar Temporada"}
+  pageTitle={"Agregar Temporada"}
   user={user}
 >
   <form id="form-temporada" class="flex flex-col w-full max-w-md">
@@ -53,7 +44,6 @@ const torneos: Torneo[] = data?.data ?? [];
       <input 
         id="nombretemporada"
         name="nombretemporada"
-        value={temporada?.nombretemporada ?? ""}
         type="text"
         class={inputClass}
         required
@@ -65,8 +55,8 @@ const torneos: Torneo[] = data?.data ?? [];
         >Tipo de Temporada</label
       >
       <select name="tipotemporada" class={inputClass} id="tipotemporada">
-        <option value="oficial" selected={temporada?.tipotemporada === true}>Oficial</option>
-        <option value="amistoso" selected={temporada?.tipotemporada === false}>Amistoso</option>
+        <option value="oficial">Oficial</option>
+        <option value="amistoso">Amistoso</option>
       </select>
     </div>
     
@@ -80,7 +70,6 @@ const torneos: Torneo[] = data?.data ?? [];
           <option
             value={torneo.idtorneo}
             id={`torneo-${torneo.idtorneo}`}
-            selected={torneo.idtorneo === temporada?.idtorneo.idtorneo}
           >
             {torneo.nombretorneo}
           </option>
@@ -91,7 +80,7 @@ const torneos: Torneo[] = data?.data ?? [];
 
     <div class="flex gap-2 justify-center pt-5">
       <button class={buttonClass} type="submit">
-        {temporada ? "Editar Temporada" : "Agregar Temporada"}
+        {"Agregar Temporada"}
         <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
       </button>
     </div>
@@ -103,27 +92,19 @@ const torneos: Torneo[] = data?.data ?? [];
   import { actions } from "astro:actions";
 
   const form = document.querySelector("#form-temporada") as HTMLFormElement;
-  const temporadaId = "{temporada?.idtemporada ?? ''}" as string;
 
   document.addEventListener("astro:page-load", () => {
     form?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const formData = new FormData(form);
 
-      if (temporadaId && temporadaId !== "") {
-        formData.append("idtemporada", temporadaId);
-      }
-
       try {
-        const { data, error } =
-          temporadaId && temporadaId !== ""
-            ? await actions.updateTemporada(formData)
-            : await actions.createTemporada(formData);
+        const { data, error } = await actions.createTemporada(formData);
 
         if (error) throw error;
         Swal.fire(
           "Éxito",
-          temporadaId ? "Temporada actualizada" : "Temporada creada",
+          "Temporada creada",
           "success"
         );
         form.reset();

@@ -15,7 +15,7 @@ const rememberMeChecked = !!name;
 
 <Layout>
   <section
-    class="h-fit md:w-svw lg:w-max min-h-[100vh] text-white flex flex-wrap justify-self-center-safe flex-col mt-16"
+    class="md:w-svw lg:w-max h-svh text-white flex flex-wrap justify-self-center-safe flex-col mt-16"
   >
     <div
       id="container"
@@ -25,7 +25,7 @@ const rememberMeChecked = !!name;
         <h1>Inicio de Sesión</h1>
       </div>
       <div id="register-form" class="flex flex-col gap-5">
-        <form action="submit" autocomplete="on" method="post">
+        <form autocomplete="on" method="post">
           <div class="flex flex-col gap-2 mb-4 px-5">
             <label class="text-base font-medium" for="name">Usuario</label>
             <input
@@ -91,8 +91,7 @@ const rememberMeChecked = !!name;
     "button[type='submit']"
   ) as HTMLButtonElement;
 
-  document.addEventListener("astro:page-load", () => {
-    form?.addEventListener("submit", async (e) => {
+  form?.addEventListener("submit", async (e) => {
       e.preventDefault();
       btnSubmit.setAttribute("disabled", "disabled");
 
@@ -113,5 +112,4 @@ const rememberMeChecked = !!name;
       btnSubmit.removeAttribute("disabled");
       window.location.replace("/");
     });
-  });
 </script>

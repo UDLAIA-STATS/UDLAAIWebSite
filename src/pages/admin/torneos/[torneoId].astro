@@ -5,17 +5,49 @@ import arrowNext from "@assets/arrow_next.svg";
 import NotAuthorized from "@components/shared/NotAuthorized.astro";
 import { roles } from "@consts/roles";
 import type { Torneo } from "@interfaces/torneos.interface";
-import { buttonClass, inputClass } from "@consts/index";
+import { buttonClass, inputClass, privateRoutesMap } from "@consts/index";
+import { actions } from "astro:actions";
+import Swal from "sweetalert2";
 
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
 const { super: superRole } = roles;
 
-const torneo = Astro.props.torneo;
+const { torneoId } = Astro.params
+
+const { data, error } = await Astro.callAction(actions.getTorneoById, {
+  id: Number.parseInt(torneoId ?? "0"),
+});
+
+if (error) {
+  console.error("Error fetching torneo:", error);
+  Swal.fire("Error", "Error al cargar el torneo", "error").then((result) => {
+    if (result.isConfirmed) {
+      Astro.redirect(privateRoutesMap.ADMIN_PARTIDOS);
+    }
+  });
+}
+
+if (!data) {
+    console.error("No data received for torneo");
+    Swal.fire("Error", "No se pudo recuperar los datos del servidor.", "warning").then((result) => {
+      if (result.isConfirmed) {
+        Astro.redirect(privateRoutesMap.ADMIN_PARTIDOS);
+      }
+    });
+}
+
+const torneo: Torneo = data!.data;
+
 ---
 
-<FormLayout formTitle="Agregar Torneo" pageTitle="Agregar Torneo" user={user}>
+<FormLayout
+  formTitle="Editar Torneo"
+  pageTitle="Editar Torneo"
+  user={user}
+>
+<input type="text" hidden value={torneo?.idtorneo ?? ""} name="idtorneo" id="idtorneo" class="hidden"/>
   <form id="form-torneo" class="flex flex-col w-full max-w-md">
     <div class="flex gap-2 flex-col mb-4">
       <label for="nombretorneo" class="text-base font-medium"
@@ -25,6 +57,7 @@ const torneo = Astro.props.torneo;
         type="text"
         id="nombretorneo"
         name="nombretorneo"
+        value={torneo?.nombretorneo ?? ""}
         class={inputClass}
         required
       />
@@ -38,12 +71,13 @@ const torneo = Astro.props.torneo;
         id="descripciontorneo"
         name="descripciontorneo"
         class={inputClass}
-        rows="3"></textarea>
+        rows="3">{torneo?.descripciontorneo ?? ""}</textarea
+      >
     </div>
 
     <div class="flex gap-2 justify-center pt-5">
       <button class={buttonClass} type="submit">
-        Guardar Torneo
+        {torneo ? "Actualizar Torneo" : "Guardar Torneo"}
         <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
       </button>
     </div>
@@ -62,14 +96,18 @@ const torneo = Astro.props.torneo;
       const formData = new FormData(form);
 
       try {
-        const { data, error } = await actions.createTorneo(formData);
+        const { data, error } = await actions.updateTorneo(formData)
 
         if (error) throw error;
-        Swal.fire("Éxito", "Torneo creado", "success");
+        Swal.fire(
+          "Éxito",
+          "Torneo actualizado",
+          "success"
+        );
         form.reset();
       } catch (err) {
         console.error(err as Error);
-        Swal.fire("Error", "Error al crear el torneo", "error");
+        Swal.fire("Error", "Error al actualizar el torneo", "error");
       }
     });
   });

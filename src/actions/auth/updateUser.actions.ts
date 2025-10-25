@@ -5,19 +5,19 @@ export const updateUser = defineAction({
   accept: "form",
   input: z.object({
     originalName: z.string().min(2).max(100),
-    name: z.string().min(2).max(100),
-    email: z.string().email(),
-    password: z.string().min(8),
+    name: z.string().min(2).max(100).optional(),
+    email: z.string().email().optional(),
+    password: z.string().min(8).optional(),
     userCredential: z.string().min(8).max(100),
   }),
   handler: async ({ email, password, name, originalName, userCredential }, { cookies }) => {
     try {
-        console.log("Registrando usuario:", { name, email, password });
+        console.log("Actualizando usuario:", { name, email, password });
         const loggedInUser = cookies.get("name");
         const authUrl = import.meta.env.AUTH_URL;
         const basicAuth = Buffer.from(`${loggedInUser?.value}:${userCredential}`).toString("base64");
         const response = await fetch(`${authUrl}/users/${originalName}/update/`, {
-        method: "POST",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Basic ${basicAuth}`,

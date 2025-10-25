@@ -6,6 +6,15 @@ export const privateRoutesMap = {
     AUTH_ADMIN: "/admin",
     ADMIN_PARTIDOS: "/admin-partidos",
     EDIT_USER: "/admin",
+    CREAR_PARTIDOS: "/admin/partidos/crear",
+    EDITAR_PARTIDOS: "/admin/partidos/",
+    EDITAR_TORNEOS: "/admin/torneos/",
+    CREAR_TORNEOS: "/admin/torneos/crear",
+    EDITAR_TEMPORADAS: "/admin/temporadas/",
+    CREAR_TEMPORADAS: "/admin/temporadas/crear",
+    EDITAR_EQUIPOS: "/admin/equipos/",
+    CREAR_EQUIPOS: "/admin/equipos/crear",
+
 }
 
 

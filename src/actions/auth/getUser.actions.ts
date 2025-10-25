@@ -46,7 +46,6 @@ export const getUsers = defineAction({
   },
 });
 
-
 export const getUserByUsername = defineAction({
   accept: "json",
   input: z.object({
@@ -56,19 +55,19 @@ export const getUserByUsername = defineAction({
   handler: async ({ username, userCredential }, { locals, cookies }) => {
     console.log("getUserByUsername llamado con username:", username);
 
-    const baseUrl = import.meta.env.AUTH_URL; // asegúrate de tener AUTH_URL=http://localhost:8000/api
-    const loggedInUser = cookies.get("username")?.value; // <- asegúrate que el nombre del cookie sea correcto
+    const baseUrl = import.meta.env.AUTH_URL;
+    const loggedInUser = cookies.get("name")?.value; 
 
     if (!loggedInUser) {
       throw new Error("Usuario autenticado no encontrado en las cookies");
     }
 
-    const basicAuth = Buffer.from(
-      `${loggedInUser}:${userCredential}`
-    ).toString("base64");
+    const basicAuth = Buffer.from(`${loggedInUser}:${userCredential}`).toString(
+      "base64"
+    );
 
     try {
-      const response = await fetch(`${baseUrl}/usuarios/${username}/`, {
+      const response = await fetch(`${baseUrl}/users/${username}/`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -82,7 +81,7 @@ export const getUserByUsername = defineAction({
       }
 
       const data = await response.json();
-      return { data };
+      return { data: data };
     } catch (error) {
       console.error(
         `Error al obtener el usuario con nombre de usuario "${username}":`,

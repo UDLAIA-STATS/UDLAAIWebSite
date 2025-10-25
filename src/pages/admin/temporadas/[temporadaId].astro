@@ -1,0 +1,152 @@
+---
+import "@styles/global.css";
+import FormLayout from "@layouts/FormLayout.astro";
+import arrowNext from "@assets/arrow_next.svg";
+import NotAuthorized from "@components/shared/NotAuthorized.astro";
+import { actions } from "astro:actions";
+import { roles } from "@consts/roles";
+import type { Equipo, Temporada, Torneo } from "@interfaces/torneos.interface";
+import Swal from "sweetalert2";
+import { privateRoutesMap, buttonClass, inputClass } from "@consts/index";
+
+const { temporadaId } = Astro.params;
+
+const user = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
+
+const { data: torneosData, error: errorData } = await Astro.callAction(
+  actions.getTorneos,
+  {}
+);
+const { data: temporadaData, error: errorTemporada } = await Astro.callAction(
+  actions.getTemporadaById,
+  { id: Number.parseInt(temporadaId ?? "0") }
+);
+
+if (errorData) {
+  console.error("Error fetching torneos:", errorData);
+  Swal.fire("Error", "Error al cargar los torneos", "error").then((result) => {
+    if (result.isConfirmed) {
+      Astro.redirect(privateRoutesMap.AUTH_ADMIN);
+    }
+  });
+} else if (errorTemporada) {
+  console.error("Error fetching temporada:", errorTemporada);
+  Swal.fire("Error", "Error al cargar la temporada", "error").then((result) => {
+    if (result.isConfirmed) {
+      Astro.redirect(privateRoutesMap.AUTH_ADMIN);
+    }
+  });
+}
+
+if (!torneosData || !temporadaData) {
+  console.error("No data received for torneos");
+  Swal.fire(
+    "Error",
+    "No se pudo recuperar los datos del servidor.",
+    "error"
+  ).then(() => {
+    Astro.redirect(privateRoutesMap.AUTH_ADMIN);
+  });
+}
+
+const temporada: Temporada = temporadaData!.data;
+const torneos: Torneo[] = torneosData?.data ?? [];
+---
+
+<FormLayout
+  formTitle={"Editar Temporada"}
+  pageTitle={"Editar Temporada"}
+  user={user}
+>
+  <form id="form-temporada" class="flex flex-col w-full max-w-md">
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="nombretemporada" class="text-base font-medium"
+        >Nombre de la Temporada</label
+      >
+      <input
+        id="nombretemporada"
+        name="nombretemporada"
+        value={temporada?.nombretemporada ?? ""}
+        type="text"
+        class={inputClass}
+        required
+      />
+    </div>
+
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="tipotemporada" class="text-base font-medium"
+        >Tipo de Temporada</label
+      >
+      <select name="tipotemporada" class={inputClass} id="tipotemporada">
+        <option value="oficial" selected={temporada?.tipotemporada === true}
+          >Oficial</option
+        >
+        <option value="amistoso" selected={temporada?.tipotemporada === false}
+          >Amistoso</option
+        >
+      </select>
+    </div>
+
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="idtorneo" class="text-base font-medium">Torneo</label>
+      <select name="idtorneo" class={inputClass} id="idtorneo">
+        <option value="" disabled selected>Selecciona un torneo</option>
+        {
+          torneos.map((torneo: Torneo) => (
+            <option
+              value={torneo.idtorneo}
+              id={`torneo-${torneo.idtorneo}`}
+              selected={torneo.idtorneo === temporada?.idtorneo.idtorneo}
+            >
+              {torneo.nombretorneo}
+            </option>
+          ))
+        }
+      </select>
+    </div>
+  </form>
+
+  <div class="flex gap-2 justify-center pt-5">
+    <button class={buttonClass} type="submit">
+      {temporada ? "Editar Temporada" : "Agregar Temporada"}
+      <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
+    </button>
+  </div>
+</FormLayout>
+
+<script>
+  import Swal from "sweetalert2";
+  import { actions } from "astro:actions";
+import { navigate } from "astro:transitions/client";
+import { privateRoutesMap } from "@consts/routes";
+
+  const form = document.querySelector("#form-temporada") as HTMLFormElement;
+
+  document.addEventListener("astro:page-load", () => {
+    form?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+
+      try {
+        const { data, error } = await actions.updateTemporada(formData);
+
+        if (error) throw error;
+        Swal.fire(
+          "Éxito",
+          "Temporada actualizada",
+          "success"
+        ).then((result) => {
+          if (result.isConfirmed) {
+            navigate(privateRoutesMap.AUTH_ADMIN);
+          }
+        });
+        form.reset();
+      } catch (err) {
+        console.error(err as Error);
+        Swal.fire("Error", "Error al actualizar la temporada", "error");
+      }
+    });
+  });
+</script>

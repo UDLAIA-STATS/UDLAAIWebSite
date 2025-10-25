@@ -7,40 +7,51 @@ import type {Equipo, Partido } from "@interfaces/torneos.interface";
 import { buttonClass, inputClass } from "@consts/index"
 import Swal from "sweetalert2";
 
+const { partidoId } = Astro.params;
+
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
 
-const { data, error } = await Astro.callAction(actions.getEquipos, {});
+const { data: partidoData, error: errorPartido } = await Astro.callAction(actions.getPartidoById, {
+  id: Number.parseInt(partidoId ?? "0"),
+});
+const { data: equiposData, error: errorEquipos } = await Astro.callAction(actions.getEquipos, {});
 
-if (error) {
-  console.error("Error fetching equipos:", error);
+
+if (errorPartido) {
+  console.error("Error fetching partido:", errorPartido);
+  Swal.fire("Error", "Error al cargar el partido", "error");
+} else if (errorEquipos) {
+  console.error("Error fetching equipos:", errorEquipos);
   Swal.fire("Error", "Error al cargar los equipos", "error");
 }
 
 
-if (!data) {
+if (!equiposData || !partidoData) {
     console.error("No data received for equipos");
-    Swal.fire("Warning", "No se recibieron datos de los equipos.", "warning");
+    Swal.fire("Error", "No se pudo recuperar los datos del servidor.", "warning");
 }
 
-const equipos: Equipo[] = data?.data ?? [];
+const equipos: Equipo[] = equiposData?.data ?? [];
+const partido: Partido = partidoData!.data;
 
 ---
 
 <FormLayout
-  formTitle="Agregar Partido"
-  pageTitle="Agregar Partido"
+  formTitle="Editar Partido"
+  pageTitle="Editar Partido"
   user={user}
 >
   <form id="form-partido" class="flex flex-col w-full max-w-md">
+    <input type="text" hidden value={partido?.idpartido ?? ""} name="idpartido" id="idpartido" class="hidden"/>
     <div class="flex gap-2 flex-col mb-4">
       <label for="tipopartido" class="text-base font-medium"
         >Tipo de partido</label
       >
       <select name="tipopartido" class={inputClass} id="tipopartido">
-        <option value="oficial">Oficial</option>
-        <option value="amistoso">Amistoso</option>
+        <option value="oficial" selected={partido.tipopartido}>Oficial</option>
+        <option value="amistoso" selected={!partido.tipopartido}>Amistoso</option>
       </select>
     </div>
 
@@ -52,6 +63,7 @@ const equipos: Equipo[] = data?.data ?? [];
         id="marcadorequipolocal"
         name="marcadorequipolocal"
         type="number"
+        value={partido?.marcadorequipolocal ?? ""}
         min="0"
         max="100"
         required
@@ -69,6 +81,7 @@ const equipos: Equipo[] = data?.data ?? [];
         min="0"
         max="100"
         required
+        value={partido?.marcadorequipovisitante ?? ""}
         class={inputClass} />
     </div>
     
@@ -81,6 +94,7 @@ const equipos: Equipo[] = data?.data ?? [];
         name="fechapartido"
         type="date"
         required
+        value={partido?.fechapartido ?? ""}
         class={inputClass} />
     </div>
     
@@ -93,6 +107,7 @@ const equipos: Equipo[] = data?.data ?? [];
         name="fechapartido"
         type="date"
         required
+        value={partido?.fechapartido ?? ""}
         class={inputClass} />
     </div>
 
@@ -105,6 +120,7 @@ const equipos: Equipo[] = data?.data ?? [];
         {equipos.map((equipo: Equipo) => (
           <option
             value={equipo.nombreequipo}
+            selected={equipo.idequipo === partido?.idequipolocal.idequipo}
             id={`equipo-${equipo.idequipo}`}
           >
             {equipo.nombreequipo}
@@ -122,6 +138,7 @@ const equipos: Equipo[] = data?.data ?? [];
         {equipos.map((equipo: Equipo) => (
           <option
             value={equipo.nombreequipo}
+            selected={equipo.idequipo === partido?.idequipovisitante.idequipo}
             id={`equipo-${equipo.idequipo}`}
           >
             {equipo.nombreequipo}
@@ -133,7 +150,7 @@ const equipos: Equipo[] = data?.data ?? [];
 
     <div class="flex gap-2 justify-center pt-5">
       <button class={buttonClass} type="submit">
-        Agregar Partido
+        Actualizar Partido
         <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
       </button>
     </div>
@@ -152,12 +169,12 @@ const equipos: Equipo[] = data?.data ?? [];
       const formData = new FormData(form);
 
       try {
-        const { data, error } = await actions.createPartido(formData);
+        const { data, error } = await actions.updatePartido(formData);
 
         if (error) throw error;
         Swal.fire(
           "Éxito",
-          "Partido creado",
+          "Partido actualizado",
           "success"
         );
         form.reset();

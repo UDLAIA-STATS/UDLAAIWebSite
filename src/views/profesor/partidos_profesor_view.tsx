@@ -1,9 +1,20 @@
-import { createSignal, createEffect, type Component, For, Show } from "solid-js";
+import {
+  createSignal,
+  createEffect,
+  type Component,
+  For,
+  Show,
+} from "solid-js";
 import { privateRoutesMap } from "@consts/routes";
 import { Table } from "@components/tables/Table";
 import type { TableActions } from "@interfaces/table-actions.interface";
 import type { User } from "@interfaces/user.interface";
-import type { Partido, Torneo, Temporada } from "@interfaces/torneos.interface";
+import type {
+  Partido,
+  Torneo,
+  Temporada,
+  Equipo,
+} from "@interfaces/torneos.interface";
 import EditIcon from "@assets/edit_icon_black.svg";
 import DeleteIcon from "@assets/delete_icon_black.svg";
 
@@ -12,10 +23,21 @@ interface Props {
 }
 
 const PartidosProfesorView: Component<Props> = ({ user }: Props) => {
-  const { REGISTER_PLAYER, EDIT_PLAYER } = privateRoutesMap;
+  const {
+    EDITAR_EQUIPOS,
+    EDITAR_PARTIDOS,
+    EDITAR_TEMPORADAS,
+    EDITAR_TORNEOS,
+    CREAR_EQUIPOS,
+    CREAR_PARTIDOS,
+    CREAR_TEMPORADAS,
+    CREAR_TORNEOS,
+  } = privateRoutesMap;
 
   // --- Estado del filtro activo y carga ---
-  const [currentFilter, setFilter] = createSignal<"torneos" | "partidos" | "temporadas">("partidos");
+  const [currentFilter, setFilter] = createSignal<
+    "torneos" | "partidos" | "temporadas" | "equipos"
+  >("partidos");
   const [headers, setHeaders] = createSignal<string[]>([]);
   const [rows, setRows] = createSignal<any[][]>([]);
   const [loading, setLoading] = createSignal(false);
@@ -28,8 +50,18 @@ const PartidosProfesorView: Component<Props> = ({ user }: Props) => {
 
   // --- Datos simulados ---
   const torneos: Torneo[] = [
-    { idtorneo: 1, nombretorneo: "Copa Nacional", descripciontorneo: "Torneo oficial de clubes" },
+    {
+      idtorneo: 1,
+      nombretorneo: "Copa Nacional",
+      descripciontorneo: "Torneo oficial de clubes",
+    },
     { idtorneo: 2, nombretorneo: "Liga Amistosa" },
+  ];
+
+  const equipos: Equipo[] = [
+    { idequipo: 1, nombreequipo: "Águilas FC" },
+    { idequipo: 2, nombreequipo: "Tigres SC" },
+    { idequipo: 3, nombreequipo: "Leones United" },
   ];
 
   const partidos: Partido[] = [
@@ -54,7 +86,9 @@ const PartidosProfesorView: Component<Props> = ({ user }: Props) => {
   ];
 
   // --- Funciones dinámicas ---
-  const getHeaders = (filter: "torneos" | "partidos" | "temporadas") => {
+  const getHeaders = (
+    filter: "torneos" | "partidos" | "temporadas" | "equipos"
+  ) => {
     switch (filter) {
       case "torneos":
         return ["ID", "Nombre", "Descripción", "Editar", "Eliminar"];
@@ -71,13 +105,21 @@ const PartidosProfesorView: Component<Props> = ({ user }: Props) => {
         ];
       case "temporadas":
         return ["ID", "Nombre", "Tipo", "Torneo", "Editar", "Eliminar"];
+      case "equipos":
+        return ["ID", "Nombre", "Editar", "Eliminar"];
     }
   };
 
-  const getRows = (filter: "torneos" | "partidos" | "temporadas") => {
+  const getRows = (
+    filter: "torneos" | "partidos" | "temporadas" | "equipos"
+  ) => {
     switch (filter) {
       case "torneos":
-        return torneos.map((t) => [t.idtorneo, t.nombretorneo, t.descripciontorneo ?? "-"]);
+        return torneos.map((t) => [
+          t.idtorneo,
+          t.nombretorneo,
+          t.descripciontorneo ?? "-",
+        ]);
       case "partidos":
         return partidos.map((p) => [
           p.idpartido,
@@ -94,6 +136,8 @@ const PartidosProfesorView: Component<Props> = ({ user }: Props) => {
           t.tipotemporada ? "Oficial" : "Amistoso",
           t.idtorneo.nombretorneo,
         ]);
+      case "equipos":
+        return equipos.map((e) => [e.idequipo, e.nombreequipo]);
     }
   };
 
@@ -111,20 +155,59 @@ const PartidosProfesorView: Component<Props> = ({ user }: Props) => {
     console.log(`${currentFilter()} con id ${id} eliminado`);
   };
 
-  const actions: TableActions[] = [
-    {
-      href: `${EDIT_PLAYER}/`,
-      icon: EditIcon.src,
-      alt: "Editar",
-      type: "link",
-    },
-    {
-      action: handleDelete,
-      icon: DeleteIcon.src,
-      alt: "Eliminar",
-      type: "button",
-    },
-  ];
+  const deleteAction: TableActions = {
+            action: handleDelete,
+            icon: DeleteIcon.src,
+            alt: "Eliminar",
+            type: "button",
+          };
+
+  const getActions = (
+    filter: "torneos" | "partidos" | "temporadas" | "equipos"
+  ) => {
+    switch (filter) {
+      case "torneos":
+        return [
+          {
+            href: `${CREAR_TORNEOS}`,
+            icon: EditIcon.src,
+            alt: "Editar",
+            type: "link",
+          },
+          deleteAction,
+        ];
+      case "partidos":
+        return [
+          {
+            href: `${CREAR_PARTIDOS}`,
+            icon: EditIcon.src,
+            alt: "Editar",
+            type: "link",
+          },
+          deleteAction,
+        ];
+      case "temporadas":
+        return [
+          {
+            href: `${CREAR_TEMPORADAS}`,
+            icon: EditIcon.src,
+            alt: "Editar",
+            type: "link",
+          },
+          deleteAction,
+        ];
+      case "equipos":
+        return [
+          {
+            href: `${CREAR_EQUIPOS}`,
+            icon: EditIcon.src,
+            alt: "Editar",
+            type: "link",
+          },
+          deleteAction,
+        ];
+    }
+  };
 
   // --- Botón de agregar dinámico ---
   const getAddLabel = () => {
@@ -135,22 +218,28 @@ const PartidosProfesorView: Component<Props> = ({ user }: Props) => {
         return "Agregar Partido";
       case "temporadas":
         return "Agregar Temporada";
+      case "equipos":
+        return "Agregar Equipo";
     }
   };
 
   const getAddHref = () => {
     switch (currentFilter()) {
       case "torneos":
-        return "/torneos/nuevo";
+        return CREAR_TORNEOS;
       case "partidos":
-        return REGISTER_PLAYER;
+        return CREAR_PARTIDOS;
       case "temporadas":
-        return "/temporadas/nueva";
+        return CREAR_TEMPORADAS;
+      case "equipos":
+        return CREAR_EQUIPOS;
     }
   };
 
   // --- Cambio de sección ---
-  const handleSectionChange = (section: "torneos" | "partidos" | "temporadas") => {
+  const handleSectionChange = (
+    section: "torneos" | "partidos" | "temporadas" | "equipos"
+  ) => {
     setLoading(true);
     setTimeout(() => {
       setFilter(section);
@@ -159,10 +248,10 @@ const PartidosProfesorView: Component<Props> = ({ user }: Props) => {
   };
 
   return (
-    <section class="flex flex-col p-8 w-svw max-w-7xl">
+    <section class="flex flex-col w-svw max-w-7xl">
       {/* Subtítulo + Botón agregar */}
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-semibold capitalize">{currentFilter()}</h2>
+      <div class="flex flex-row justify-between items-center mb-4 w-full">
+        <h2 class="text-2xl font-semibold capitalize">{currentFilter()}</h2>
         <a
           href={getAddHref()}
           class="no-underline text-white bg-[#C10230] hover:bg-[#a10127] transition-all px-5 py-2 rounded-lg shadow-md"
@@ -175,42 +264,70 @@ const PartidosProfesorView: Component<Props> = ({ user }: Props) => {
       <div class="flex flex-wrap justify-between items-center gap-3 mb-5">
         <div class="flex flex-row gap-2">
           <button
-            class={currentFilter() === "torneos" ? activeButtonClass : inactiveButtonClass}
+            class={
+              currentFilter() === "torneos"
+                ? activeButtonClass
+                : inactiveButtonClass
+            }
             onClick={() => handleSectionChange("torneos")}
           >
             Torneos
           </button>
           <button
-            class={currentFilter() === "partidos" ? activeButtonClass : inactiveButtonClass}
+            class={
+              currentFilter() === "partidos"
+                ? activeButtonClass
+                : inactiveButtonClass
+            }
             onClick={() => handleSectionChange("partidos")}
           >
             Partidos
           </button>
           <button
-            class={currentFilter() === "temporadas" ? activeButtonClass : inactiveButtonClass}
+            class={
+              currentFilter() === "equipos"
+                ? activeButtonClass
+                : inactiveButtonClass
+            }
+            onClick={() => handleSectionChange("equipos")}
+          >
+            Equipos
+          </button>
+          <button
+            class={
+              currentFilter() === "temporadas"
+                ? activeButtonClass
+                : inactiveButtonClass
+            }
             onClick={() => handleSectionChange("temporadas")}
           >
             Temporadas
           </button>
         </div>
 
-        <div class="relative">
+        <div class="flex">
           <input
             type="search"
             placeholder={`Buscar ${currentFilter()}...`}
-            class="rounded-md p-2 w-64 pl-9 border border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C10230] transition-all"
+            class="rounded-md p-2 w-64 border border-gray-400 focus:outline-none focus:ring-1 focus:ring-black transition-all"
           />
-          <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
         </div>
       </div>
 
       {/* Contenido dinámico */}
-      <Show when={!loading()} fallback={<p class="text-gray-500 mt-10">Cargando {currentFilter()}...</p>}>
+      <Show
+        when={!loading()}
+        fallback={
+          <p class="text-gray-500 mt-10">Cargando {currentFilter()}...</p>
+        }
+      >
         <Show
           when={rows().length > 0}
-          fallback={<p class="text-gray-500 mt-10">No hay registros disponibles.</p>}
+          fallback={
+            <p class="text-gray-500 mt-10">No hay registros disponibles.</p>
+          }
         >
-          <div class="relative shadow-sm rounded-lg border border-gray-200 w-full h-fit">
+          <div class="flex rounded-md border border-gray-200 w-full h-fit self-center">
             <Table headers={headers()}>
               <For each={rows()}>
                 {(row) => (
@@ -219,27 +336,35 @@ const PartidosProfesorView: Component<Props> = ({ user }: Props) => {
                       {(cell) => <td class="px-6 py-4">{cell}</td>}
                     </For>
 
-                    <For each={actions}>
+                    <For each={getActions(currentFilter())}>
                       {(action) =>
                         action.type === "link" ? (
-                          <td class="px-6 py-4 text-center">
+                          <td class="px-6 py-4 text-start">
                             <a
                               class="cursor-pointer"
                               href={action.href ?? "" + row[0]}
                               title={action.alt}
                             >
-                              <img class="size-6" src={action.icon} alt={action.alt} />
+                              <img
+                                class="size-6"
+                                src={action.icon}
+                                alt={action.alt}
+                              />
                             </a>
                           </td>
                         ) : (
-                          <td class="px-6 py-4 text-center">
+                          <td class="px-6 py-4 text-start">
                             <button
                               type="button"
                               onClick={() => handleDelete(Number(row[0]))}
                               class="cursor-pointer"
                               title={action.alt}
                             >
-                              <img class="size-6" src={action.icon} alt={action.alt} />
+                              <img
+                                class="size-6"
+                                src={action.icon}
+                                alt={action.alt}
+                              />
                             </button>
                           </td>
                         )
