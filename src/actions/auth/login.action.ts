@@ -14,7 +14,7 @@ export const login = defineAction({
       // Manejo de cookies para "remember me"
       if (rememberMe) {
       cookies.set("name", name, {
-          expires: new Date(Date.now() + 1000 * 3600 * 24 * 30), // 30 days
+          expires: new Date(Date.now() + 1000 * 3600), // 1 hour
           path: "/",
         });
       } else {

@@ -18,20 +18,15 @@ const { super: superRole } = roles;
 
 <AdminPanelLayout title="Gestión de Torneos y Partidos">
   <section
-    class:list={[
-      "self-center my-5 h-svh",
-      user && (user.rol === superRole || user.rol === roles.profesor)
-        ? ""
-        : "hidden",
-    ]}
+    class="self-center my-5 h-svh"
   >
     {
       user ? (
         <PartidosProfesorView user={user} client:load />
       ) : (
-        <section class="h-svh md:w-svw lg:w-shw w-shw flex flex-wrap justify-self-start flex-col mx-10 my-5">
+        <div class="md:w-svw lg:w-shw w-shw flex flex-wrap justify-self-start flex-col">
           <NotAuthorized />
-        </section>
+        </div>
       )
     }
   </section>
