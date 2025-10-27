@@ -25,14 +25,13 @@ const user = Astro.cookies.get("user")
       />
     </div>
 
-    <div class="flex gap-2 flex-col mb-4">
+    <div class="flex gap-2 flex-col mb-4" hidden>
       <label for="logoequipo" class="text-base font-medium">Logo</label>
       <input
         id="logoequipo"
         name="logoequipo"
         type="file"
         class={inputClass}
-        required
       />
     </div>
 
@@ -48,6 +47,8 @@ const user = Astro.cookies.get("user")
 <script>
   import Swal from "sweetalert2";
   import { actions } from "astro:actions";
+import { privateRoutesMap } from "@consts/routes";
+import { navigate } from "astro:transitions/client";
 
   const form = document.querySelector("#form-equipo") as HTMLFormElement;
 
@@ -55,12 +56,23 @@ const user = Astro.cookies.get("user")
     e.preventDefault();
     const formData = new FormData(form);
 
+    const logo: File = formData.get("logoequipo") as File;
+    if (logo && logo.size > 0) {
+      formData.set("logoequipo", logo);
+    } else {
+      formData.delete("logoequipo");
+    }
+
     try {
       const { data, error } = await actions.createEquipo(formData);
 
       if (error) throw error;
-      Swal.fire("Éxito", "Equipo creado", "success");
       form.reset();
+      Swal.fire("Éxito", "Equipo creado", "success").then((result) => {
+        if (result.isConfirmed) {
+          navigate(privateRoutesMap.ADMIN_PARTIDOS);
+        }
+      });
     } catch (err) {
       console.error(err as Error);
       Swal.fire("Error", "Error al crear el equipo", "error");

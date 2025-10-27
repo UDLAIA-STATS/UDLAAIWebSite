@@ -138,3 +138,29 @@ export const updateEquipo = defineAction({
     }
   },
 });
+
+export const deleteEquipo = defineAction({
+  input: z.object({
+    idequipo: z.number().int().positive("El ID debe ser un número positivo"),
+  }),
+  handler: async ({ idequipo }) => {
+    const baseUrl = import.meta.env.TEAMSERVICE_URL;
+    try {
+
+      const response = await fetch(`${baseUrl}/equipos/${idequipo}/delete/`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return { data: data as Equipo };
+    } catch (error) {
+      console.error(`Error al eliminar el equipo con ID ${idequipo}:`, error);
+      throw new Error("No se pudo eliminar el equipo, posiblemente está asociado a partidos.");
+    }
+  },
+});

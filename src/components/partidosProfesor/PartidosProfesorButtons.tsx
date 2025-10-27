@@ -15,10 +15,11 @@ interface Props {
 export const PartidosButtons: Component<Props> = ({ options }: Props) => {
   const [filter, setFilter] = createSignal<matchOptions>(matchOptions.torneos);
 
-  onMount(async () => {
-    const savedFilter = await MatchOptionClient.getFilter();
-    setFilter(savedFilter);
-  });
+  // onMount(async () => {
+  //   const savedFilter = await MatchOptionClient.getFilter();
+  //   await MatchOptionClient.setFilter(savedFilter);
+  //   setFilter(savedFilter);
+  // });
 
   const handleClick = async (match: matchOptions) => {
     await MatchOptionClient.setFilter(match);

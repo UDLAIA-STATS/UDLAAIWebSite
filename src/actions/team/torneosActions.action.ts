@@ -31,7 +31,6 @@ export const getTorneos = defineAction({
 
 // Obtener torneo por ID
 export const getTorneoById = defineAction({
-  accept: "json",
   input: z.object({ id: z.number().int().positive() }),
   handler: async ({ id }) => {
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
@@ -89,6 +88,26 @@ export const updateTorneo = defineAction({
     } catch (err) {
       console.error(`Error al actualizar torneo ${idtorneo}:`, err);
       throw new Error("No se pudo actualizar el torneo");
+    }
+  },
+});
+
+export const deleteTorneo = defineAction({
+  input: z.number().int().positive(),
+  handler: async ( input ) => {
+    const baseUrl = import.meta.env.TEAMSERVICE_URL;
+    try {
+      const res = await fetch(`${baseUrl}/torneos/${input}/delete/`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `Error ${res.status}: ${res.statusText}`);
+      };
+      return { data: (await res.json()) as Torneo };
+    } catch (err) {
+      console.error(`Error al eliminar torneo ${input}:`, err);
+      throw new Error("No se puede eliminar el torneo, posiblemente tiene temporadas o partidos asociados.");
     }
   },
 });

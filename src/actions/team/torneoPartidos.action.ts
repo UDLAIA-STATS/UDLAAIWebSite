@@ -28,9 +28,29 @@ export const getTorneoPartidos = defineAction({
   },
 });
 
+export const getTorneoPartidosById = defineAction({
+  input: z.object({ idPartido: z.number().int().positive() }),
+  handler: async ({ idPartido }) => {
+    const baseUrl = import.meta.env.TEAMSERVICE_URL;
+    try {
+      const response = await fetch(`${baseUrl}/torneo-partidos/${idPartido}/`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+      const data = await response.json();
+      return { data: data as TorneoPartido };
+    } catch (error) {
+      console.error("Error al obtener torneo-partidos:", error);
+      throw new Error("No se pudo obtener la lista de torneo-partidos");
+    }
+  },
+});
+
 // Crear una relación torneo-partido
 export const createTorneoPartido = defineAction({
-  accept: "form",
   input: torneoPartidoSchema,
   handler: async ({ idtorneo, idpartido }) => {
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
@@ -53,4 +73,31 @@ export const createTorneoPartido = defineAction({
       throw new Error("No se pudo crear la relación torneo-partido");
     }
   },
+});
+
+export const updateTorneoPartido = defineAction({
+  input: z.object({
+    idtorneo: z.number().int().positive("El ID del torneo debe ser positivo"),
+    idpartido: z.number().int().positive("El ID del partido debe ser positivo"),
+  }),
+  handler: async ({ idtorneo, idpartido }) => {
+    const baseUrl = import.meta.env.TEAMSERVICE_URL;
+    try {
+      const response = await fetch(`${baseUrl}/torneo-partidos/${idpartido}/update/`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idtorneo: idtorneo, idpartido: idpartido }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `Error ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return { data };
+    } catch (error) {
+      throw new Error("No se pudo actualizar la relación torneo-partido " + error);
+    }
+  },  
 });

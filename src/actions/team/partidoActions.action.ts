@@ -63,7 +63,8 @@ export const createPartido = defineAction({
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
-      return { data: (await res.json()) as Partido };
+      const data = await res.json();
+      return { data: data.partido as Partido };
     } catch (err) {
       console.error("Error al crear partido:", err);
       throw new Error("No se pudo crear el partido");
@@ -84,10 +85,32 @@ export const updatePartido = defineAction({
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
-      return { data: (await res.json()) as Partido };
+      const data = await res.json();
+      console.log("Partido update response data:", data);
+      return { data: data.partido as Partido };
     } catch (err) {
       console.error(`Error al actualizar partido ${payload.idpartido}:`, err);
       throw new Error("No se pudo actualizar el partido");
+    }
+  },
+});
+
+export const deletePartido = defineAction({
+  input: z.number().int().positive(),
+  handler: async ( input ) => {
+    const baseUrl = import.meta.env.TEAMSERVICE_URL;
+    try {
+      const response = await fetch(`${baseUrl}/partidos/${input}/delete/`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+      }
+      return { data: (await response.json()) as Partido };
+    } catch (error) {
+      console.error("Error al eliminar partido:", error);
+      throw new Error("No se pudo eliminar el partido, posiblemente está asociado a uno o más torneos");
     }
   },
 });

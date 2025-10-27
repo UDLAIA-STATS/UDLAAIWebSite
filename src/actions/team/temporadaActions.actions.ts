@@ -102,3 +102,25 @@ export const updateTemporada = defineAction({
     }
   },
 });
+
+export const deleteTemporada = defineAction({
+  input: z.object({
+    idtemporada: z.number().int().positive(),
+  }),
+  handler: async ({ idtemporada }) => {
+    const baseUrl = import.meta.env.TEAMSERVICE_URL;
+    try {
+      const res = await fetch(`${baseUrl}/temporadas/${idtemporada}/delete/`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `Error ${res.status}: ${res.statusText}`);
+      }
+      return { data: (await res.json()) as Temporada };
+    } catch (err) {
+      console.error(`Error al eliminar temporada ${idtemporada}:`, err);
+      throw new Error("No se pudo eliminar la temporada, posiblemente tiene torneos asociados.");
+    }
+  },
+});

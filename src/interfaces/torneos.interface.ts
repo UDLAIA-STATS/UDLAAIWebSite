@@ -31,8 +31,8 @@ export interface Temporada {
 }
 
 export interface TorneoPartido {
-    idtorneo: Torneo;
-    idpartido: Partido;
+    idtorneo: number;
+    idpartido: number;
 }
 
 

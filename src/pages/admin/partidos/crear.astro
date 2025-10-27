@@ -3,7 +3,7 @@ import "@styles/global.css";
 import FormLayout from "@layouts/FormLayout.astro";
 import arrowNext from "@assets/arrow_next.svg";
 import { actions } from "astro:actions";
-import type { Equipo, Partido } from "@interfaces/torneos.interface";
+import type { Equipo, Partido, Torneo } from "@interfaces/torneos.interface";
 import { buttonClass, inputClass } from "@consts/index";
 import Swal from "sweetalert2";
 
@@ -12,10 +12,19 @@ const user = Astro.cookies.get("user")
   : null;
 
 const { data, error } = await Astro.callAction(actions.getEquipos, {});
+const { data: torneoData, error: torneoError } = await Astro.callAction(
+  actions.getTorneos,
+  {}
+);
 
 if (error) {
   console.error("Error fetching equipos:", error);
   Swal.fire("Error", "Error al cargar los equipos", "error");
+}
+
+if (torneoError) {
+  console.error("Error fetching torneos:", torneoError);
+  Swal.fire("Error", "Error al cargar los torneos", "error");
 }
 
 if (!data) {
@@ -23,11 +32,22 @@ if (!data) {
   Swal.fire("Warning", "No se recibieron datos de los equipos.", "warning");
 }
 
+if (!torneoData) {
+  console.error("No data received for torneos");
+  Swal.fire("Warning", "No se recibieron datos de los torneos.", "warning");
+}
+
 const equipos: Equipo[] = data?.data ?? [];
+const torneos: Torneo[] = torneoData?.data ?? [];
 ---
 
 <FormLayout formTitle="Agregar Partido" pageTitle="Agregar Partido" user={user}>
-  <form action="" method="post" id="form-partido" class="flex flex-col w-full max-w-md">
+  <form
+    action=""
+    method="post"
+    id="form-partido"
+    class="flex flex-col w-full max-w-md"
+  >
     <div class="flex gap-2 flex-col mb-4">
       <label for="tipopartido" class="text-base font-medium"
         >Tipo de partido</label
@@ -35,6 +55,20 @@ const equipos: Equipo[] = data?.data ?? [];
       <select name="tipopartido" class={inputClass} id="tipopartido">
         <option value="oficial">Oficial</option>
         <option value="amistoso">Amistoso</option>
+      </select>
+    </div>
+
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="idtorneo" class="text-base font-medium">Torneo</label>
+      <select name="idtorneo" class={inputClass} id="idtorneo" required>
+        <option value="" disabled selected>Selecciona un torneo</option>
+        {
+          torneos.map((torneo: Torneo) => (
+            <option value={torneo.idtorneo} id={`torneo-${torneo.idtorneo}`}>
+              {torneo.nombretorneo}
+            </option>
+          ))
+        }
       </select>
     </div>
 
@@ -141,20 +175,34 @@ const equipos: Equipo[] = data?.data ?? [];
 <script>
   import Swal from "sweetalert2";
   import { actions } from "astro:actions";
-import { navigate } from "astro:transitions/client";
-import { privateRoutesMap } from "@consts/index";
+  import { navigate } from "astro:transitions/client";
+  import { privateRoutesMap } from "@consts/index";
+import type { Torneo } from "@interfaces/index";
+import type { Partido } from "@interfaces/partido.interface";
 
   const form = document.querySelector("#form-partido") as HTMLFormElement;
 
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const formData = new FormData(form);
+    const date = formData.get("fechapartido") as string;
+    formData.set("fechapartido", new Date(date).toISOString());
     const nombreLocal = formData.get("idequipolocal");
     const nombreVisitante = formData.get("idequipovisitante");
-    const { data: equipoLocal, error: equipoError } = await actions.getEquipoByName({ nombre: nombreLocal as string });
-    const { data: equipoVisitante, error: visitanteError } = await actions.getEquipoByName({ nombre: nombreVisitante as string });
+    if (nombreLocal === nombreVisitante) {
+      Swal.fire(
+        "Error",
+        "El equipo local y el equipo visitante no pueden ser el mismo.",
+        "error"
+      );
+      return;
+    }
+    const { data: equipoLocal, error: equipoError } =
+      await actions.getEquipoByName({ nombre: nombreLocal as string });
+    const { data: equipoVisitante, error: visitanteError } =
+      await actions.getEquipoByName({ nombre: nombreVisitante as string });
 
-        if (equipoError || visitanteError) {
+    if (equipoError || visitanteError) {
       console.error("Error fetching equipos:", equipoError || visitanteError);
       Swal.fire("Error", "Error al obtener los equipos seleccionados", "error");
       return;
@@ -167,8 +215,32 @@ import { privateRoutesMap } from "@consts/index";
 
     try {
       const { data, error } = await actions.createPartido(formData);
+      console.log("Partido creation response:", data);
+      const { data: torneoData, error: torneError } = await actions.getTorneos();
 
-      if (error) throw error;
+      if (!data) {
+        console.error("No data received for partido creation");
+        return;
+      }
+
+
+      if (torneError || error) {
+        console.error("Error fetching torneos:", torneError);
+        return;
+      }
+
+      const partido = data.data;
+
+      const torneo: Torneo = torneoData?.data.find(
+        (torneo: Torneo) => torneo.idtorneo === Number(formData.get("idtorneo"))
+      ) as Torneo;
+
+
+      const { data: torneoPartido, error: torneoPartidoError } = await actions.createTorneoPartido({
+        idpartido: data?.data.idpartido,
+        idtorneo: torneo.idtorneo,
+      })
+
       Swal.fire("Éxito", "Partido creado", "success").then((result) => {
         if (result.isConfirmed) {
           navigate(privateRoutesMap.ADMIN_PARTIDOS);
@@ -176,7 +248,7 @@ import { privateRoutesMap } from "@consts/index";
       });
       form.reset();
     } catch (err) {
-      console.error(err as Error);
+      console.error(err);
       Swal.fire("Error", "Error al crear el partido", "error");
     }
   });
