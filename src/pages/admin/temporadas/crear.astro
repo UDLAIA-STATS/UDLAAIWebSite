@@ -13,7 +13,6 @@ const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
 
-
 const { data, error } = await Astro.callAction(actions.getTorneos, {});
 
 if (error) {
@@ -21,14 +20,12 @@ if (error) {
   Swal.fire("Error", "Error al cargar los torneos", "error");
 }
 
-
 if (!data) {
-    console.error("No data received for torneos");
-    Swal.fire("Warning", "No se recibieron datos de los torneos.", "warning");
+  console.error("No data received for torneos");
+  Swal.fire("Warning", "No se recibieron datos de los torneos.", "warning");
 }
 
 const torneos: Torneo[] = data?.data ?? [];
-
 ---
 
 <FormLayout
@@ -36,12 +33,12 @@ const torneos: Torneo[] = data?.data ?? [];
   pageTitle={"Agregar Temporada"}
   user={user}
 >
-  <form id="form-temporada" class="flex flex-col w-full max-w-md">
+  <form action="" method="post" id="form-temporada" class="flex flex-col w-full max-w-md">
     <div class="flex gap-2 flex-col mb-4">
       <label for="nombretemporada" class="text-base font-medium"
         >Nombre de la Temporada</label
       >
-      <input 
+      <input
         id="nombretemporada"
         name="nombretemporada"
         type="text"
@@ -59,28 +56,24 @@ const torneos: Torneo[] = data?.data ?? [];
         <option value="amistoso">Amistoso</option>
       </select>
     </div>
-    
+
     <div class="flex gap-2 flex-col mb-4">
-      <label for="idtorneo" class="text-base font-medium"
-        >Torneo</label
-      >
-      <select name="idtorneo" class={inputClass} id="idtorneo">
+      <label for="idtorneo" class="text-base font-medium">Torneo</label>
+      <select name="idtorneo" class={inputClass} id="idtorneo" required>
         <option value="" disabled selected>Selecciona un torneo</option>
-        {torneos.map((torneo: Torneo) => (
-          <option
-            value={torneo.idtorneo}
-            id={`torneo-${torneo.idtorneo}`}
-          >
-            {torneo.nombretorneo}
-          </option>
-        ))}
-      </select>
+        {
+          torneos.map((torneo: Torneo) => (
+            <option value={torneo.idtorneo} id={`torneo-${torneo.idtorneo}`}>
+              {torneo.nombretorneo}
+            </option>
+          ))
+        }
       </select>
     </div>
-
+    
     <div class="flex gap-2 justify-center pt-5">
       <button class={buttonClass} type="submit">
-        {"Agregar Temporada"}
+        Agregar Temporada
         <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
       </button>
     </div>
@@ -90,28 +83,27 @@ const torneos: Torneo[] = data?.data ?? [];
 <script>
   import Swal from "sweetalert2";
   import { actions } from "astro:actions";
+import { navigate } from "astro:transitions/client";
+import { privateRoutesMap } from "@consts/routes";
 
   const form = document.querySelector("#form-temporada") as HTMLFormElement;
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
 
-  document.addEventListener("astro:page-load", () => {
-    form?.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const formData = new FormData(form);
+    try {
+      const { data, error } = await actions.createTemporada(formData);
 
-      try {
-        const { data, error } = await actions.createTemporada(formData);
-
-        if (error) throw error;
-        Swal.fire(
-          "Éxito",
-          "Temporada creada",
-          "success"
-        );
-        form.reset();
-      } catch (err) {
-        console.error(err as Error);
-        Swal.fire("Error", "Error al crear el partido", "error");
-      }
-    });
+      if (error) throw error;
+      Swal.fire("Éxito", "Temporada creada", "success").then((result) => {
+        if (result.isConfirmed) {
+          navigate(privateRoutesMap.ADMIN_PARTIDOS);
+        }
+      });
+      form.reset();
+    } catch (err) {
+      console.error(err as Error);
+      Swal.fire("Error", "Error al crear el partido", "error");
+    }
   });
 </script>

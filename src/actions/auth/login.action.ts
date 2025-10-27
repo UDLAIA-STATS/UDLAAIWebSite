@@ -12,6 +12,7 @@ export const login = defineAction({
   handler: async ({ name, password, rememberMe }, { cookies, locals }) => {
     try {
       // Manejo de cookies para "remember me"
+      console.log("Recordar usuario:", rememberMe);
       if (rememberMe) {
       cookies.set("name", name, {
           expires: new Date(Date.now() + 1000 * 3600), // 1 hour

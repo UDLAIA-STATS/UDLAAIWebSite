@@ -1,33 +1,57 @@
 ---
 import AdminPanelLayout from "@layouts/AdminPanelLayout.astro";
 import NotAuthorized from "@components/shared/NotAuthorized.astro";
-import PartidosProfesorView from "@views/profesor/partidos_profesor_view";
-import { roles } from "@consts/roles";
-import type { User } from "@interfaces/user.interface";
+import { PartidosButtons } from "@components/partidosProfesor/PartidosProfesorButtons";
+import PartidosTable from "@components/partidosProfesor/PartidosProfesorTable.astro";
+import * as handlePartidos from "@utils/handle-partidos-table";
+import { MatchOptionClient } from "@utils/index";
+import type { server } from "@actions/index";
 
-const user: User = {
-  nombre_usuario: "Juan Perez",
-  rol: "profesor",
-  email_usuario: "juan.perez@example.com"
-};
-// Astro.cookies.get("user")
-//   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
-//   : null;
-const { super: superRole } = roles;
+const user: LoggedUser | null = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
+
+const filter: handlePartidos.matchOptions = await MatchOptionClient.getFilter();
+
 ---
 
 <AdminPanelLayout title="Gestión de Torneos y Partidos">
-  <section
-    class="self-center my-5 h-svh"
+  <div
+  id="GestionTorneosPartidos"
+    class="self-center my-5 h-svh w-fit max-w-7xl"
   >
     {
       user ? (
-        <PartidosProfesorView user={user} client:load />
+        <>
+          <PartidosButtons
+            options={Object.values(handlePartidos.matchOptions)}
+            client:load
+          />
+          <div>
+          <PartidosTable
+            filter={filter}
+          />
+          </div>
+        </>
       ) : (
         <div class="md:w-svw lg:w-shw w-shw flex flex-wrap justify-self-start flex-col">
           <NotAuthorized />
         </div>
       )
     }
+  </div>
   </section>
 </AdminPanelLayout>
+
+<script>
+import { MatchOptionClient } from "@utils/match-option-cookies";
+
+  // Limpia las cookies al salir o cerrar la pestaña
+  window.addEventListener("beforeunload", async () => {
+    try {
+      await MatchOptionClient.clearFilter();
+    } catch (err) {
+      console.warn("No se pudieron limpiar las cookies:", err);
+    }
+  });
+</script>

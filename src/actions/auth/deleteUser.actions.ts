@@ -9,15 +9,17 @@ export const deleteUser = defineAction({
   }),
   handler: async ({ nickname, userCredential }, { cookies }) => {
     const authUrl = import.meta.env.AUTH_URL;
-    const loggedInUser = cookies.get("name");
+    const loggedInUser = cookies.get("user")
+  ? (JSON.parse(cookies.get("user")?.value as string) as LoggedUser)
+  : null;;
 
     if (!authUrl) {
       console.error("AUTH_URL no está definida en import.meta.env");
       throw new Error("Configuración inválida del servidor de autenticación.");
     }
 
-    if (!loggedInUser?.value) {
-      console.error("No se encontró la cookie 'name'.");
+    if (!loggedInUser) {
+      console.error("No se encontró la cookie 'user'.");
       throw new Error("Usuario no autenticado.");
     }
 
@@ -30,7 +32,7 @@ export const deleteUser = defineAction({
       console.log("Eliminando usuario:", { nickname });
 
       const basicAuth = Buffer.from(
-        `${loggedInUser.value}:${userCredential}`
+        `${loggedInUser.nickname}:${userCredential}`
       ).toString("base64");
 
       const url = `${authUrl}/users/${encodeURIComponent(nickname)}/delete/`;

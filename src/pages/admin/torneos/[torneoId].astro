@@ -14,7 +14,7 @@ const user = Astro.cookies.get("user")
   : null;
 const { super: superRole } = roles;
 
-const { torneoId } = Astro.params
+const { torneoId } = Astro.params;
 
 const { data, error } = await Astro.callAction(actions.getTorneoById, {
   id: Number.parseInt(torneoId ?? "0"),
@@ -30,25 +30,40 @@ if (error) {
 }
 
 if (!data) {
-    console.error("No data received for torneo");
-    Swal.fire("Error", "No se pudo recuperar los datos del servidor.", "warning").then((result) => {
-      if (result.isConfirmed) {
-        Astro.redirect(privateRoutesMap.ADMIN_PARTIDOS);
-      }
-    });
+  console.error("No data received for torneo");
+  Swal.fire(
+    "Error",
+    "No se pudo recuperar los datos del servidor.",
+    "warning"
+  ).then((result) => {
+    if (result.isConfirmed) {
+      Astro.redirect(privateRoutesMap.ADMIN_PARTIDOS);
+    }
+  });
 }
 
 const torneo: Torneo = data!.data;
-
 ---
 
-<FormLayout
-  formTitle="Editar Torneo"
-  pageTitle="Editar Torneo"
-  user={user}
->
-<input type="text" hidden value={torneo?.idtorneo ?? ""} name="idtorneo" id="idtorneo" class="hidden"/>
+<FormLayout formTitle="Editar Torneo" pageTitle="Editar Torneo" user={user}>
+  <input
+    type="text"
+    hidden
+    value={torneo?.idtorneo ?? ""}
+    name="idtorneo"
+    id="idtorneo"
+    class="hidden"
+  />
   <form id="form-torneo" class="flex flex-col w-full max-w-md">
+    <input
+        type="number"
+        id="idtorneo"
+        hidden
+        name="idtorneo"
+        value={torneo?.idtorneo ?? ""}
+        class={inputClass}
+        required
+      />
     <div class="flex gap-2 flex-col mb-4">
       <label for="nombretorneo" class="text-base font-medium"
         >Nombre del Torneo</label
@@ -87,28 +102,28 @@ const torneo: Torneo = data!.data;
 <script>
   import Swal from "sweetalert2";
   import { actions } from "astro:actions";
+import { privateRoutesMap } from "@consts/routes";
+import { navigate } from "astro:transitions/client";
 
   const form = document.querySelector("#form-torneo") as HTMLFormElement;
 
-  document.addEventListener("astro:page-load", () => {
-    form?.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const formData = new FormData(form);
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
 
-      try {
-        const { data, error } = await actions.updateTorneo(formData)
+    try {
+      const { data, error } = await actions.updateTorneo(formData);
 
-        if (error) throw error;
-        Swal.fire(
-          "Éxito",
-          "Torneo actualizado",
-          "success"
-        );
-        form.reset();
-      } catch (err) {
-        console.error(err as Error);
-        Swal.fire("Error", "Error al actualizar el torneo", "error");
-      }
-    });
+      if (error) throw error;
+      Swal.fire("Éxito", "Torneo actualizado", "success").then((result) => {
+        if (result.isConfirmed) {
+          navigate(privateRoutesMap.ADMIN_PARTIDOS);
+        }
+      });
+      form.reset();
+    } catch (err) {
+      console.error(err as Error);
+      Swal.fire("Error", "Error al actualizar el torneo", "error");
+    }
   });
 </script>

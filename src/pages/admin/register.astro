@@ -110,68 +110,65 @@ const { super: superRole } = roles;
   const btnSubmit = form!.querySelector(
     "button[type='submit']"
   ) as HTMLButtonElement;
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    btnSubmit.setAttribute("disabled", "disabled");
 
-  document.addEventListener("astro:page-load", () => {
-    form?.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      btnSubmit.setAttribute("disabled", "disabled");
-
-      const { value: userCredential } = await Swal.fire({
-        title: "Ingrese su contraseña",
-        input: "password",
-        inputAttributes: {
-          autocapitalize: "off",
-        },
-        showCancelButton: true,
-        confirmButtonText: "Aceptar",
-        cancelButtonText: "Cancelar",
-        showLoaderOnConfirm: true,
-        preConfirm: async (userCredential) => {
-          if (!userCredential) {
-            Swal.showValidationMessage("La contraseña es requerida");
-            btnSubmit.removeAttribute("disabled");
-            return;
-          }
-
-          return userCredential;
-        },
-      });
-
-      const formData = new FormData(form);
-      formData.append("userCredential", userCredential);
-
-      const { data, error } = await actions.registerUser(formData);
-
-      if (error) {
-        console.error("Error:", error.message);
-        if (error.message.toString().includes("validation")) {
-          Swal.fire({
-            icon: "error",
-            title: "Error al registrar el usuario",
-            text: "Uno de los campos no es válido. Por favor, verifica e intenta nuevamente.",
-          });
+    const { value: userCredential } = await Swal.fire({
+      title: "Ingrese su contraseña",
+      input: "password",
+      inputAttributes: {
+        autocapitalize: "off",
+      },
+      showCancelButton: true,
+      confirmButtonText: "Aceptar",
+      cancelButtonText: "Cancelar",
+      showLoaderOnConfirm: true,
+      preConfirm: async (userCredential) => {
+        if (!userCredential) {
+          Swal.showValidationMessage("La contraseña es requerida");
           btnSubmit.removeAttribute("disabled");
           return;
         }
+
+        return userCredential;
+      },
+    });
+
+    const formData = new FormData(form);
+    formData.append("userCredential", userCredential);
+
+    const { data, error } = await actions.registerUser(formData);
+
+    if (error) {
+      console.error("Error:", error.message);
+      if (error.message.toString().includes("validation")) {
         Swal.fire({
           icon: "error",
           title: "Error al registrar el usuario",
-          text: error.message,
+          text: "Uno de los campos no es válido. Por favor, verifica e intenta nuevamente.",
         });
         btnSubmit.removeAttribute("disabled");
         return;
       }
-
-      if (data) {
-        console.log("Success:", data);
-        Swal.fire({
-          icon: "success",
-          title: "Registro de usuario exitoso",
-          text: "Por favor, inicia sesión.",
-        });
-      }
+      Swal.fire({
+        icon: "error",
+        title: "Error al registrar el usuario",
+        text: error.message,
+      });
       btnSubmit.removeAttribute("disabled");
-      form.reset();
-    });
+      return;
+    }
+
+    if (data) {
+      console.log("Success:", data);
+      Swal.fire({
+        icon: "success",
+        title: "Registro de usuario exitoso",
+        text: "Por favor, inicia sesión.",
+      });
+    }
+    btnSubmit.removeAttribute("disabled");
+    form.reset();
   });
 </script>

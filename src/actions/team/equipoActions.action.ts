@@ -1,20 +1,20 @@
 // src/actions/equipos.ts
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import { fileToBase64 } from "@utils/fileToBase64";
+import { fileToBase64, imageToBase64 } from "@utils/fileToBase64";
 import type { Equipo } from "@interfaces/torneos.interface";
 
 
 // === Esquemas de validación ===
 const equipoSchema = z.object({
   nombreequipo: z.string().min(2, "El nombre es muy corto").max(100, "El nombre es muy largo"),
-  logoequipo: z.instanceof(File).optional(),
+  logoequipo: z.string().optional(),
 });
 
 const equipoUpdateSchema = z.object({
   idequipo: z.number().int().positive("El ID debe ser un número positivo"),
   nombreequipo: z.string().min(2).max(100).optional(),
-  logoequipo: z.instanceof(File).optional(),
+  logoequipo: z.string().optional(),
 });
 
 // === Actions ===
@@ -56,6 +56,26 @@ export const getEquipoById = defineAction({
   },
 });
 
+export const getEquipoByName = defineAction({
+  accept: "json",
+  input: z.object({
+    nombre: z.string().min(2).max(100),
+  }),
+  handler: async ({ nombre }) => {
+    const baseUrl = import.meta.env.TEAMSERVICE_URL;
+    try {
+      const response = await fetch(`${baseUrl}/equipos/search/${nombre}/`);
+      if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+      const data = await response.json();
+      return { data: data as Equipo };
+    } catch (error) {
+      console.error(`Error al obtener el equipo con nombre ${nombre}:`, error);
+      throw new Error("No se pudo obtener el equipo solicitado");
+    }
+  },
+});
+
+
 // Crear nuevo equipo
 export const createEquipo = defineAction({
   accept: "form",
@@ -63,18 +83,14 @@ export const createEquipo = defineAction({
   handler: async ({ nombreequipo, logoequipo }) => {
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
-      let logoBase64: string | undefined;
-      if (logoequipo) {
-        logoBase64 = await fileToBase64(logoequipo);
-        console.log("Logo convertido a Base64" + logoBase64?.substring(0, 100) + "...");
-      }
+
 
       const response = await fetch(`${baseUrl}/equipos/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nombreequipo,
-          logoequipo: logoBase64,
+          logoequipo: logoequipo,
         }),
       });
 
@@ -99,17 +115,13 @@ export const updateEquipo = defineAction({
   handler: async ({ idequipo, nombreequipo, logoequipo }) => {
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
-      let logoBase64: string | undefined;
-      if (logoequipo) {
-        logoBase64 = await fileToBase64(logoequipo);
-      }
 
       const response = await fetch(`${baseUrl}/equipos/${idequipo}/update/`, {
-        method: "PUT",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nombreequipo,
-          logoequipo: logoBase64,
+          logoequipo: logoequipo,
         }),
       });
 

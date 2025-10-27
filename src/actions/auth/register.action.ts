@@ -11,15 +11,19 @@ export const registerUser = defineAction({
   }),
   handler: async ({ email, password, name, userCredential }, { cookies }) => {
     try {
-        console.log("Registrando usuario:", { name, email, password });
-        const loggedInUser = cookies.get("name");
-        const authUrl = import.meta.env.AUTH_URL;
-        const basicAuth = Buffer.from(`${loggedInUser?.value}:${userCredential}`).toString("base64");
-        const response = await fetch(`${authUrl}/register/`, {
+      console.log("Registrando usuario:", { name, email, password });
+      const loggedInUser = cookies.get("user")
+        ? (JSON.parse(cookies.get("user")?.value as string) as LoggedUser)
+        : null;
+      const authUrl = import.meta.env.AUTH_URL;
+      const basicAuth = Buffer.from(
+        `${loggedInUser?.nickname}:${userCredential}`
+      ).toString("base64");
+      const response = await fetch(`${authUrl}/register/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Basic ${basicAuth}`,
+          Authorization: `Basic ${basicAuth}`,
         },
         body: JSON.stringify({
           nombre_usuario: name,
@@ -30,7 +34,9 @@ export const registerUser = defineAction({
       console.log("Respuesta del servidor:", response);
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || `Error ${response.status}: ${response.statusText}`);
+        throw new Error(
+          errorData.detail || `Error ${response.status}: ${response.statusText}`
+        );
       }
       const data = await response.json();
 

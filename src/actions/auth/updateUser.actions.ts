@@ -10,17 +10,24 @@ export const updateUser = defineAction({
     password: z.string().min(8).optional(),
     userCredential: z.string().min(8).max(100),
   }),
-  handler: async ({ email, password, name, originalName, userCredential }, { cookies }) => {
+  handler: async (
+    { email, password, name, originalName, userCredential },
+    { cookies }
+  ) => {
     try {
-        console.log("Actualizando usuario:", { name, email, password });
-        const loggedInUser = cookies.get("name");
-        const authUrl = import.meta.env.AUTH_URL;
-        const basicAuth = Buffer.from(`${loggedInUser?.value}:${userCredential}`).toString("base64");
-        const response = await fetch(`${authUrl}/users/${originalName}/update/`, {
+      console.log("Actualizando usuario:", { name, email, password });
+      const loggedInUser = cookies.get("user")
+        ? (JSON.parse(cookies.get("user")?.value as string) as LoggedUser)
+        : null;
+      const authUrl = import.meta.env.AUTH_URL;
+      const basicAuth = Buffer.from(
+        `${loggedInUser?.nickname}:${userCredential}`
+      ).toString("base64");
+      const response = await fetch(`${authUrl}/users/${originalName}/update/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Basic ${basicAuth}`,
+          Authorization: `Basic ${basicAuth}`,
         },
         body: JSON.stringify({
           nombre_usuario: name,
@@ -31,7 +38,9 @@ export const updateUser = defineAction({
       console.log("Respuesta del servidor:", response);
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || `Error ${response.status}: ${response.statusText}`);
+        throw new Error(
+          errorData.detail || `Error ${response.status}: ${response.statusText}`
+        );
       }
       const data = await response.json();
 

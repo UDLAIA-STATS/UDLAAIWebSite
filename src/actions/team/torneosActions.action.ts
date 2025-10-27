@@ -56,7 +56,9 @@ export const createTorneo = defineAction({
       const res = await fetch(`${baseUrl}/torneos/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombretorneo, descripciontorneo }),
+        body: JSON.stringify({ 
+          nombretorneo: nombretorneo, 
+          descripciontorneo: descripciontorneo }),
       });
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
       return { data: (await res.json()) as Torneo };
@@ -75,9 +77,12 @@ export const updateTorneo = defineAction({
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
       const res = await fetch(`${baseUrl}/torneos/${idtorneo}/update/`, {
-        method: "PUT",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombretorneo, descripciontorneo }),
+        body: JSON.stringify({ 
+          nombretorneo: nombretorneo, 
+          descripciontorneo: descripciontorneo
+        }),
       });
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
       return { data: (await res.json()) as Torneo };

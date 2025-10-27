@@ -10,8 +10,10 @@ export interface Partido {
     marcadorequipovisitante?: number;
     fechapartido: string; // ISO date string
     tipopartido: boolean; // True = oficial, False = amistoso
-    idequipolocal: Equipo;
-    idequipovisitante: Equipo;
+    idequipolocal: number;
+    idequipovisitante: number;
+    equipo_local: string;
+    equipo_visitante: string;
 }
 
 export interface Torneo {
@@ -24,7 +26,8 @@ export interface Temporada {
     idtemporada: number;
     nombretemporada: string;
     tipotemporada: boolean; // True = Oficial / False = Amistoso
-    idtorneo: Torneo;
+    idtorneo: number;
+    torneo_nombre: string;
 }
 
 export interface TorneoPartido {

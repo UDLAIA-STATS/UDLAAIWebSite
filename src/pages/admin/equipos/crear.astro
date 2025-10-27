@@ -10,32 +10,23 @@ import { privateRoutesMap, buttonClass, inputClass } from "@consts/index";
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
-
 ---
 
-<FormLayout
-  formTitle="Agregar Partido"
-  pageTitle="Agregar Partido"
-  user={user}
->
-  <form id="form-equipo" class="flex flex-col w-full max-w-md">
+<FormLayout formTitle="Agregar Partido" pageTitle="Agregar Partido" user={user}>
+  <form action="" method="post" id="form-equipo" class="flex flex-col w-full max-w-md">
     <div class="flex gap-2 flex-col mb-4">
-      <label for="nombreequipo" class="text-base font-medium"
-        >Nombre</label
-      >
-        <input
-            id="nombreequipo"
-            name="nombreequipo"
-            type="text"
-            class={inputClass}
-            required
-        />
+      <label for="nombreequipo" class="text-base font-medium">Nombre</label>
+      <input
+        id="nombreequipo"
+        name="nombreequipo"
+        type="text"
+        class={inputClass}
+        required
+      />
     </div>
 
     <div class="flex gap-2 flex-col mb-4">
-      <label for="logoequipo" class="text-base font-medium"
-        >Logo</label
-      >
+      <label for="logoequipo" class="text-base font-medium">Logo</label>
       <input
         id="logoequipo"
         name="logoequipo"
@@ -60,21 +51,19 @@ const user = Astro.cookies.get("user")
 
   const form = document.querySelector("#form-equipo") as HTMLFormElement;
 
-  document.addEventListener("astro:page-load", () => {
-    form?.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const formData = new FormData(form);
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
 
-      try {
-        const { data, error } = await actions.createEquipo(formData);
+    try {
+      const { data, error } = await actions.createEquipo(formData);
 
-        if (error) throw error;
-        Swal.fire("Éxito", "Equipo creado", "success");
-        form.reset();
-      } catch (err) {
-        console.error(err as Error);
-        Swal.fire("Error", "Error al crear el equipo", "error");
-      }
-    });
+      if (error) throw error;
+      Swal.fire("Éxito", "Equipo creado", "success");
+      form.reset();
+    } catch (err) {
+      console.error(err as Error);
+      Swal.fire("Error", "Error al crear el equipo", "error");
+    }
   });
 </script>

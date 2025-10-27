@@ -38,7 +38,7 @@ export const createTorneoPartido = defineAction({
       const response = await fetch(`${baseUrl}/torneo-partidos/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idtorneo, idpartido }),
+        body: JSON.stringify({ idtorneo: idtorneo, idpartido: idpartido }),
       });
 
       if (!response.ok) {

@@ -52,29 +52,26 @@ console.log({ links });
     <div class="flex flex-row mr-10 gap-5 justify-center align-middle">
       <div class="flex flex-col justify-end w-fit">
         <div
-        class="flex flex-row text-white justify-center align-middle items-center pb-1"
+          class="flex flex-row text-white justify-center align-middle items-center pb-1"
         >
-        <span class="flex">{user ? `${user.nickname}` : "Bienvenido"}</span
-          >
+          <span class="flex">{user ? `${user.nickname}` : "Bienvenido"}</span>
+        </div>
+        <div
+          class="flex flex-row items-center text-white align-middle justify-center"
+        >
+          <span class="flex">[{user ? user.rol : "Invitado"}]</span>
+        </div>
       </div>
-      <div
-      class="flex flex-row items-center text-white align-middle justify-center"
-      >
-      <span class="flex">[{user ? user.rol : "Invitado"}]</span>
-    </div>
-  </div>
-  <div
-          class:list={["flex items-center align-middle justify-center"]}
-          >
-          <button class="flex no-underline cursor-pointer" id="logout">
-            <img
+      <div class:list={["flex items-center align-middle justify-center"]}>
+        <button class="flex no-underline cursor-pointer" id="logout">
+          <img
             src={Logout.src}
             alt="Cerrar Sesión"
             class=`h-6 w-6 ${user ? "" : "hidden"}`
-            />
-          </button>
-        </div>
-</div>
+          />
+        </button>
+      </div>
+    </div>
   </nav>
 </section>
 
@@ -83,8 +80,10 @@ console.log({ links });
   import { publicRoutesMap } from "@consts/routes";
   const btnLogout = document.getElementById("logout") as HTMLButtonElement;
 
-  btnLogout.addEventListener("click", async () => {
-    await actions.logout(null);
-    window.location.replace(publicRoutesMap.HOME);
+  document.addEventListener("astro:page-load", () => {
+    btnLogout.addEventListener("click", async () => {
+      await actions.logout(null);
+      window.location.replace(publicRoutesMap.HOME);
+    });
   });
 </script>

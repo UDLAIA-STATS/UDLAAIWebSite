@@ -3,8 +3,8 @@ import "@styles/global.css";
 import FormLayout from "@layouts/FormLayout.astro";
 import arrowNext from "@assets/arrow_next.svg";
 import { actions } from "astro:actions";
-import type {Equipo, Partido } from "@interfaces/torneos.interface";
-import { buttonClass, inputClass } from "@consts/index"
+import type { Equipo, Partido } from "@interfaces/torneos.interface";
+import { buttonClass, inputClass } from "@consts/index";
 import Swal from "sweetalert2";
 
 const { partidoId } = Astro.params;
@@ -13,11 +13,16 @@ const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
 
-const { data: partidoData, error: errorPartido } = await Astro.callAction(actions.getPartidoById, {
-  id: Number.parseInt(partidoId ?? "0"),
-});
-const { data: equiposData, error: errorEquipos } = await Astro.callAction(actions.getEquipos, {});
-
+const { data: partidoData, error: errorPartido } = await Astro.callAction(
+  actions.getPartidoById,
+  {
+    id: Number.parseInt(partidoId ?? "0"),
+  }
+);
+const { data: equiposData, error: errorEquipos } = await Astro.callAction(
+  actions.getEquipos,
+  {}
+);
 
 if (errorPartido) {
   console.error("Error fetching partido:", errorPartido);
@@ -27,31 +32,84 @@ if (errorPartido) {
   Swal.fire("Error", "Error al cargar los equipos", "error");
 }
 
-
 if (!equiposData || !partidoData) {
-    console.error("No data received for equipos");
-    Swal.fire("Error", "No se pudo recuperar los datos del servidor.", "warning");
+  console.error("No data received for equipos");
+  Swal.fire("Error", "No se pudo recuperar los datos del servidor.", "warning");
 }
 
 const equipos: Equipo[] = equiposData?.data ?? [];
 const partido: Partido = partidoData!.data;
-
 ---
 
-<FormLayout
-  formTitle="Editar Partido"
-  pageTitle="Editar Partido"
-  user={user}
->
+<FormLayout formTitle="Editar Partido" pageTitle="Editar Partido" user={user}>
   <form id="form-partido" class="flex flex-col w-full max-w-md">
-    <input type="text" hidden value={partido?.idpartido ?? ""} name="idpartido" id="idpartido" class="hidden"/>
+    <input
+      type="number"
+      hidden
+      value={partido?.idpartido ?? ""}
+      name="idpartido"
+      id="idpartido"
+      class="hidden"
+    />
     <div class="flex gap-2 flex-col mb-4">
       <label for="tipopartido" class="text-base font-medium"
         >Tipo de partido</label
       >
       <select name="tipopartido" class={inputClass} id="tipopartido">
         <option value="oficial" selected={partido.tipopartido}>Oficial</option>
-        <option value="amistoso" selected={!partido.tipopartido}>Amistoso</option>
+        <option value="amistoso" selected={!partido.tipopartido}
+          >Amistoso</option
+        >
+      </select>
+    </div>
+
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="idequipolocal" class="text-base font-medium"
+        >Equipo Local</label
+      >
+      <select
+        name="idequipolocal"
+        class={inputClass}
+        id="idequipolocal"
+        required
+      >
+        <option value="" disabled selected>Selecciona un equipo</option>
+        {
+          equipos.map((equipo: Equipo) => (
+            <option
+              value={equipo.nombreequipo}
+              selected={equipo.idequipo === partido?.idequipolocal}
+              id={`equipo-${equipo.idequipo}`}
+            >
+              {equipo.nombreequipo}
+            </option>
+          ))
+        }
+      </select>
+    </div>
+
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="idequipovisitante" class="text-base font-medium"
+        >Equipo Visitante</label
+      >
+      <select
+        name="idequipovisitante"
+        class={inputClass}
+        id="idequipovisitante"
+        required
+      >
+        <option value="" disabled selected>Selecciona un equipo</option>
+        {
+          equipos.map((equipo: Equipo) => (
+            <option
+              value={equipo.nombreequipo}
+              selected={equipo.idequipo === partido?.idequipovisitante}
+              id={`equipo-${equipo.idequipo}`}
+            >
+              {equipo.nombreequipo}
+            </option>
+          ))
+        }
       </select>
     </div>
 
@@ -67,9 +125,10 @@ const partido: Partido = partidoData!.data;
         min="0"
         max="100"
         required
-        class={inputClass} />
+        class={inputClass}
+      />
     </div>
-    
+
     <div class="flex gap-2 flex-col mb-4">
       <label for="marcadorequipovisitante" class="text-base font-medium"
         >Marcador Equipo Visitante</label
@@ -82,9 +141,10 @@ const partido: Partido = partidoData!.data;
         max="100"
         required
         value={partido?.marcadorequipovisitante ?? ""}
-        class={inputClass} />
+        class={inputClass}
+      />
     </div>
-    
+
     <div class="flex gap-2 flex-col mb-4">
       <label for="fechapartido" class="text-base font-medium"
         >Fecha del Partido</label
@@ -95,58 +155,9 @@ const partido: Partido = partidoData!.data;
         type="date"
         required
         value={partido?.fechapartido ?? ""}
-        class={inputClass} />
+        class={inputClass}
+      />
     </div>
-    
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="fechapartido" class="text-base font-medium"
-        >Fecha del Partido</label
-      >
-      <input
-        id="fechapartido"
-        name="fechapartido"
-        type="date"
-        required
-        value={partido?.fechapartido ?? ""}
-        class={inputClass} />
-    </div>
-
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="idequipolocal" class="text-base font-medium"
-        >Equipo Local</label
-      >
-      <select name="idequipolocal" class={inputClass} id="idequipolocal" required>
-        <option value="" disabled selected>Selecciona un equipo</option>
-        {equipos.map((equipo: Equipo) => (
-          <option
-            value={equipo.nombreequipo}
-            selected={equipo.idequipo === partido?.idequipolocal.idequipo}
-            id={`equipo-${equipo.idequipo}`}
-          >
-            {equipo.nombreequipo}
-          </option>
-        ))}
-      </select>
-    </div>
-
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="idequipovisitante" class="text-base font-medium"
-        >Equipo Visitante</label
-      >
-      <select name="idequipovisitante" class={inputClass} id="idequipovisitante" required>
-        <option value="" disabled selected>Selecciona un equipo</option>
-        {equipos.map((equipo: Equipo) => (
-          <option
-            value={equipo.nombreequipo}
-            selected={equipo.idequipo === partido?.idequipovisitante.idequipo}
-            id={`equipo-${equipo.idequipo}`}
-          >
-            {equipo.nombreequipo}
-          </option>
-        ))}
-      </select>
-    </div>
-    
 
     <div class="flex gap-2 justify-center pt-5">
       <button class={buttonClass} type="submit">
@@ -160,28 +171,43 @@ const partido: Partido = partidoData!.data;
 <script>
   import Swal from "sweetalert2";
   import { actions } from "astro:actions";
+  import { privateRoutesMap } from "@consts/routes";
+  import { navigate } from "astro:transitions/client";
 
   const form = document.querySelector("#form-partido") as HTMLFormElement;
 
-  document.addEventListener("astro:page-load", () => {
-    form?.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const formData = new FormData(form);
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    const nombreLocal = formData.get("idequipolocal");
+    const nombreVisitante = formData.get("idequipovisitante");
+    const { data: equipoLocal, error: equipoError } = await actions.getEquipoByName({ nombre: nombreLocal as string });
+    const { data: equipoVisitante, error: visitanteError } = await actions.getEquipoByName({ nombre: nombreVisitante as string });
 
-      try {
-        const { data, error } = await actions.updatePartido(formData);
+    if (equipoError || visitanteError) {
+      console.error("Error fetching equipos:", equipoError || visitanteError);
+      Swal.fire("Error", "Error al obtener los equipos seleccionados", "error");
+      return;
+    }
 
-        if (error) throw error;
-        Swal.fire(
-          "Éxito",
-          "Partido actualizado",
-          "success"
-        );
-        form.reset();
-      } catch (err) {
-        console.error(err as Error);
-        Swal.fire("Error", "Error al crear el partido", "error");
-      }
-    });
+    formData.set("idequipolocal", String(equipoLocal?.data.idequipo));
+    formData.set("idequipovisitante", String(equipoVisitante?.data.idequipo));
+
+    console.log("Form Data:", Array.from(formData.entries()));
+    try {
+      const { data, error } = await actions.updatePartido(formData);
+  
+
+      if (error) throw error;
+      Swal.fire("Éxito", "Partido actualizado", "success").then((result) => {
+        if (result.isConfirmed) {
+          navigate(privateRoutesMap.ADMIN_PARTIDOS);
+        }
+      });
+      form.reset();
+    } catch (err) {
+      console.error(err as Error);
+      Swal.fire("Error", "Error al editar el partido", "error");
+    }
   });
 </script>

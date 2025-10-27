@@ -23,7 +23,7 @@ export const getNavbarLinks = (user?: LoggedUser) => {
   if ( user.rol === roles.super ) {
     links = [...links,
     { name: "Analizar Video", href: privateRoutesMap.VIDEO_ANALYSIS },
-    { name: "Administrar Estudiantes", href: privateRoutesMap.AUTH_ADMIN },
+    { name: "Administrar Usuarios", href: privateRoutesMap.AUTH_ADMIN },
     { name: "Administrar Partidos y Torneos", href: privateRoutesMap.ADMIN_PARTIDOS },
     ]
   }

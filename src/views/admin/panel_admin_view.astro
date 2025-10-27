@@ -10,7 +10,9 @@ import Swal from "sweetalert2";
 
 const { AUTH_REGISTER, EDIT_USER } = privateRoutesMap;
 
-const name = Astro.cookies.get("name")?.value;
+const user = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
 
 const headers = ["Nombre de usuario", "Email", "Rol", "Editar", "Eliminar"];
 
@@ -25,8 +27,8 @@ if (error) {
   });
 }
 
-const users: User[] = data?.data.filter((u) => u.nombre_usuario !== name) ?? [];
-
+const users: User[] =
+  data?.data.filter((u) => u.nombre_usuario !== user?.nickname) ?? [];
 
 const rows = users.map((u) => [u.nombre_usuario, u.email_usuario, u.rol]);
 
@@ -87,7 +89,7 @@ tableActions.push(
   <Table headers={headers}>
     {
       rows.map((row) => (
-        <tr class="border-b">
+        <tr class="border-b" id={`user-row-${row[0]}`}>
           {row.map((cell) => (
             <td class="px-6 py-4">{cell}</td>
           ))}
@@ -129,38 +131,71 @@ tableActions.push(
 <script>
   import { actions } from "astro:actions";
   import Swal from "sweetalert2";
-  import { navigate } from 'astro:transitions/client';
+  import { navigate } from "astro:transitions/client";
 
   document.addEventListener("astro:page-load", async () => {
     const users = await actions.getUsers("123456789");
-  });
-  document.addEventListener("click", async (event) => {
-    const target = event.target as HTMLElement;
-    if (target.closest("[data-delete-user]")) {
-      const button = target.closest("[data-delete-user]") as HTMLButtonElement;
-      const username = button.getAttribute("data-username");
+    const searchBox = document.getElementById("search-box") as HTMLInputElement;
 
-      if (username) {
-        console.log(`Usuario ${username} eliminado`);
-        const formData = new FormData();
-        formData.append("nickname", username);
-        formData.append("userCredential", "123456789");
-        const { data, error } = await actions.deleteUser(formData);
+    document.addEventListener("click", async (event) => {
+      const target = event.target as HTMLElement;
+      if (target.closest("[data-delete-user]")) {
+        const button = target.closest(
+          "[data-delete-user]"
+        ) as HTMLButtonElement;
+        const username = button.getAttribute("data-username");
 
-        if (error) {
+        if (username) {
+          const formData = new FormData();
+          formData.append("nickname", username);
+          formData.append("userCredential", "123456789");
           Swal.fire({
-            icon: "error",
-            title: "Error al eliminar el usuario",
-            text: error.message,
-          });
-        } else {
-          Swal.fire("Éxito", `Usuario ${username} eliminado`, "success").then(
-            () => {
-              navigate('/admin');
+            title: `¿Estás seguro de eliminar al usuario ${username}?`,
+            text: "Esta acción no se puede deshacer.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Eliminar",
+            cancelButtonText: "Cancelar",
+          }).then(async (result) => {
+            if (result.isConfirmed) {
+              const { data, error } = await actions.deleteUser(formData);
+              if (error) {
+                Swal.fire({
+                  icon: "error",
+                  title: "Error al eliminar el usuario",
+                  text: error.message,
+                });
+              } else {
+                Swal.fire(
+                  "Éxito",
+                  `Usuario ${username} eliminado`,
+                  "success"
+                ).then(() => {
+                  navigate("/admin");
+                });
+              }
             }
-          );
+          });
         }
       }
-    }
+    });
+
+    searchBox.addEventListener("input", async () => {
+      const search = searchBox.value;
+      const rows = document.querySelectorAll("tr[id^='user-row-']");
+      rows.forEach((row) => {
+        const usernameCell = row.querySelector("td:first-child");
+        if (usernameCell) {
+          const username = usernameCell.textContent || "";
+          if (username.toLowerCase().includes(search.toLowerCase())) {
+            row.classList.remove("hidden");
+          } else {
+            row.classList.add("hidden");
+          }
+        }
+      });
+    });
   });
 </script>

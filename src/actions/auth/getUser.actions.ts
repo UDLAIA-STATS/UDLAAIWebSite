@@ -8,19 +8,22 @@ export const getUsers = defineAction({
   input: z.string().min(8).max(100),
   handler: async (userCredential, { cookies }) => {
     const baseUrl = import.meta.env.AUTH_URL;
-    const loggedInUser = cookies.get("name");
+    const loggedInUser = cookies.get("user")
+  ? (JSON.parse(cookies.get("user")?.value as string) as LoggedUser)
+  : null;
 
-    if (!loggedInUser?.value) {
-      console.error("No se encontró la cookie 'name'.");
+    if (!loggedInUser?.nickname) {
+      console.error("No se encontró la cookie 'user'.");
       throw new Error("Usuario no autenticado.");
     }
 
     try {
       const basicAuth = Buffer.from(
-        `${loggedInUser.value}:${userCredential}`
+        `${loggedInUser.nickname}:${userCredential}`
       ).toString("base64");
 
       const response = await fetch(`${baseUrl}/users/`, {
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Basic ${basicAuth}`,
@@ -56,13 +59,15 @@ export const getUserByUsername = defineAction({
     console.log("getUserByUsername llamado con username:", username);
 
     const baseUrl = import.meta.env.AUTH_URL;
-    const loggedInUser = cookies.get("name")?.value; 
+    const loggedInUser = cookies.get("user")
+  ? (JSON.parse(cookies.get("user")?.value as string) as LoggedUser)
+  : null; 
 
     if (!loggedInUser) {
       throw new Error("Usuario autenticado no encontrado en las cookies");
     }
 
-    const basicAuth = Buffer.from(`${loggedInUser}:${userCredential}`).toString(
+    const basicAuth = Buffer.from(`${loggedInUser.nickname}:${userCredential}`).toString(
       "base64"
     );
 

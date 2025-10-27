@@ -1,17 +1,21 @@
-import type { Torneo, Partido, Temporada, Equipo, TableActions } from "@interfaces/index";
-import {
-  highlightedButtonClass,
-  disabledButtonClass,
-} from "@consts/index";
-import { privateRoutesMap } from "@consts/routes"
+import type {
+  Torneo,
+  Partido,
+  Temporada,
+  Equipo,
+  TableActions,
+} from "@interfaces/index";
+import { highlightedButtonClass, disabledButtonClass } from "@consts/index";
+import { privateRoutesMap } from "@consts/routes";
+import EditIcon from "@assets/edit_icon_black.svg";
+import DeleteIcon from "@assets/delete_icon_black.svg";
+
 export enum matchOptions {
   torneos = "Torneos",
   partidos = "Partidos",
   temporadas = "Temporadas",
   equipos = "Equipos",
 }
-import EditIcon from "@assets/edit_icon_black.svg";
-import DeleteIcon from "@assets/delete_icon_black.svg";
 
 export const getHeaders = (filter: matchOptions) => {
   switch (filter) {
@@ -37,116 +41,125 @@ export const getHeaders = (filter: matchOptions) => {
 
 export const getRows = (
   filter: matchOptions,
-  torneos?: Torneo[],
-  partidos?: Partido[],
-  temporadas?: Temporada[],
-  equipos?: Equipo[]
-) => {
+  torneos?: Torneo[] | null,
+  partidos?: Partido[] | null,
+  temporadas?: Temporada[] | null,
+  equipos?: Equipo[] | null
+): (string | number)[][] => {
   switch (filter) {
     case matchOptions.torneos:
-      return torneos!.map((t) => [
-        t.idtorneo,
-        t.nombretorneo,
+      if (!Array.isArray(torneos)) return [];
+      return torneos.map((t) => [
+        t.idtorneo ?? "-",
+        t.nombretorneo ?? "-",
         t.descripciontorneo ?? "-",
       ]);
+
     case matchOptions.partidos:
-      return partidos!.map((p) => [
-        p.idpartido,
-        new Date(p.fechapartido).toLocaleDateString(),
-        p.idequipolocal.nombreequipo,
-        p.idequipovisitante.nombreequipo,
+      if (!Array.isArray(partidos)) return [];
+      return partidos.map((p) => [
+        p.idpartido ?? "-",
+        p.fechapartido ? new Date(p.fechapartido).toLocaleDateString() : "-",
+        p.equipo_local ?? "-",
+        p.equipo_visitante ?? "-",
         `${p.marcadorequipolocal ?? 0} - ${p.marcadorequipovisitante ?? 0}`,
         p.tipopartido ? "Oficial" : "Amistoso",
       ]);
+
     case matchOptions.temporadas:
-      return temporadas!.map((t) => [
-        t.idtemporada,
-        t.nombretemporada,
+      if (!Array.isArray(temporadas)) return [];
+      return temporadas.map((t) => [
+        t.idtemporada ?? "-",
+        t.nombretemporada ?? "-",
         t.tipotemporada ? "Oficial" : "Amistoso",
-        t.idtorneo.nombretorneo,
+        t.torneo_nombre ?? "-",
       ]);
+
     case matchOptions.equipos:
-      return equipos!.map((e) => [e.idequipo, e.nombreequipo]);
+      if (!Array.isArray(equipos)) return [];
+      return equipos.map((e) => [e.idequipo ?? "-", e.nombreequipo ?? "-"]);
+
+    default:
+      return [];
   }
 };
 
-
 export const getActions = (
-    filter: matchOptions,
-    handleDelete: (argument: any) => void
-  ) => {
-    const deleteAction: TableActions = {
+  filter: matchOptions,
+  handleDelete: (argument: any) => void
+) => {
+  const deleteAction: TableActions = {
     action: handleDelete,
     icon: DeleteIcon.src,
     alt: "Eliminar",
     type: "button",
   };
-    switch (filter) {
-      case matchOptions.torneos:
-        return [
-          {
-            href: `${privateRoutesMap.EDITAR_TORNEOS}`,
-            icon: EditIcon.src,
-            alt: "Editar",
-            type: "link",
-          },
-          deleteAction,
-        ];
-      case matchOptions.partidos:
-        return [
-          {
-            href: `${privateRoutesMap.EDITAR_PARTIDOS}`,
-            icon: EditIcon.src,
-            alt: "Editar",
-            type: "link",
-          },
-          deleteAction,
-        ];
-      case matchOptions.temporadas:
-        return [
-          {
-            href: `${privateRoutesMap.EDITAR_TEMPORADAS}`,
-            icon: EditIcon.src,
-            alt: "Editar",
-            type: "link",
-          },
-          deleteAction,
-        ];
-      case matchOptions.equipos:
-        return [
-          {
-            href: `${privateRoutesMap.EDITAR_EQUIPOS}`,
-            icon: EditIcon.src,
-            alt: "Editar",
-            type: "link",
-          },
-          deleteAction,
-        ];
-    }
-  };
+  switch (filter) {
+    case matchOptions.torneos:
+      return [
+        {
+          href: `${privateRoutesMap.EDITAR_TORNEOS}`,
+          icon: EditIcon.src,
+          alt: "Editar",
+          type: "link",
+        },
+        deleteAction,
+      ];
+    case matchOptions.partidos:
+      return [
+        {
+          href: `${privateRoutesMap.EDITAR_PARTIDOS}`,
+          icon: EditIcon.src,
+          alt: "Editar",
+          type: "link",
+        },
+        deleteAction,
+      ];
+    case matchOptions.temporadas:
+      return [
+        {
+          href: `${privateRoutesMap.EDITAR_TEMPORADAS}`,
+          icon: EditIcon.src,
+          alt: "Editar",
+          type: "link",
+        },
+        deleteAction,
+      ];
+    case matchOptions.equipos:
+      return [
+        {
+          href: `${privateRoutesMap.EDITAR_EQUIPOS}`,
+          icon: EditIcon.src,
+          alt: "Editar",
+          type: "link",
+        },
+        deleteAction,
+      ];
+  }
+};
 
 export const getAddLabel = (currentFilter: matchOptions) => {
-    switch (currentFilter) {
-      case matchOptions.torneos:
-        return "Agregar Torneo";
-      case matchOptions.partidos:
-        return "Agregar Partido";
-      case matchOptions.temporadas:
-        return "Agregar Temporada";
-      case matchOptions.equipos:
-        return "Agregar Equipo";
-    }
-  };
+  switch (currentFilter) {
+    case matchOptions.torneos:
+      return "Agregar Torneo";
+    case matchOptions.partidos:
+      return "Agregar Partido";
+    case matchOptions.temporadas:
+      return "Agregar Temporada";
+    case matchOptions.equipos:
+      return "Agregar Equipo";
+  }
+};
 
 export const getAddHref = (currentFilter: matchOptions) => {
-    switch (currentFilter) {
-      case matchOptions.torneos:
-        return privateRoutesMap.CREAR_TORNEOS;
-      case matchOptions.partidos:
-        return privateRoutesMap.CREAR_PARTIDOS;
-      case matchOptions.temporadas:
-        return privateRoutesMap.CREAR_TEMPORADAS;
-      case matchOptions.equipos:
-        return privateRoutesMap.CREAR_EQUIPOS;
-    }
-  };
+  switch (currentFilter) {
+    case matchOptions.torneos:
+      return privateRoutesMap.CREAR_TORNEOS;
+    case matchOptions.partidos:
+      return privateRoutesMap.CREAR_PARTIDOS;
+    case matchOptions.temporadas:
+      return privateRoutesMap.CREAR_TEMPORADAS;
+    case matchOptions.equipos:
+      return privateRoutesMap.CREAR_EQUIPOS;
+  }
+};

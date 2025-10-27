@@ -1,0 +1,144 @@
+---
+import { Table } from "@components/tables/Table";
+import * as handlePartidos from "@utils/handle-partidos-table";
+import type { Torneo, Partido, Temporada, Equipo } from "@interfaces/index";
+import { matchOptions } from "@utils/handle-partidos-table";
+import { actions } from "astro:actions";
+import Swal from "sweetalert2";
+import { MatchOptionClient } from "@utils/index";
+
+interface Props {
+  filter: matchOptions; 
+}
+
+const { filter }: Props = Astro.props;
+
+const { data: dataMatch, error: errorMatch } = await Astro.callAction(actions.getDataByFilter, { filter });
+
+if (errorMatch) {
+  console.error("Error fetching match data:", errorMatch);
+  Swal.fire({
+    icon: "error",
+    title: "Error al obtener los datos",
+    text: errorMatch.message,
+  });
+}
+
+if (!dataMatch) {
+  Swal.fire({
+    icon: "warning",
+    title: "No se encontraron datos",
+    text: "No se pudieron obtener los datos para el filtro seleccionado.",
+  });
+}
+
+// Mapeo para pasar los arrays a getRows sin condicionales repetitivos
+const dataMap: Record<string, any[]> = {
+  [matchOptions.torneos]: dataMatch?.torneos as Torneo[] ?? [],
+  [matchOptions.partidos]: dataMatch?.partidos as Partido[] ?? [],
+  [matchOptions.temporadas]: dataMatch?.temporadas as Temporada[] ?? [],
+  [matchOptions.equipos]: dataMatch?.equipos as Equipo[] ?? [],
+};
+
+// Helper para llamar getRows siempre con los 4 argumentos (pueden ser [])
+const buildRows = (option: matchOptions) =>
+  handlePartidos.getRows(
+    option,
+    dataMap[matchOptions.torneos],
+    dataMap[matchOptions.partidos],
+    dataMap[matchOptions.temporadas],
+    dataMap[matchOptions.equipos]
+  );
+
+
+const optionsList: matchOptions[] = Object.values(matchOptions) as matchOptions[];
+---
+
+<div id="tables-container" class="w-full space-y-10">
+  {
+    optionsList.map((option) => {
+      const headers = handlePartidos.getHeaders(option);
+      const rows = buildRows(option);
+
+      return (
+        <section id={`table-${option}`} class={`w-full ${filter === option ? "" : "hidden"}`}>
+          <h2 class="text-xl font-semibold mb-2">{option}</h2>
+
+          {
+            rows.length > 0 ? (
+              <div class="flex rounded-md border border-gray-200 w-full h-fit self-center overflow-x-auto">
+                <Table headers={headers}>
+                  {rows.map((row) => (
+                    <tr class="border-b odd:bg-gray-50 hover:bg-gray-100 transition-colors">
+                      {row.map((cell) => (
+                        <td class="px-6 py-4">{cell}</td>
+                      ))}
+
+                      {
+                        // Mantengo exactamente la generación de acciones por fila tal como tenías
+                        handlePartidos
+                          .getActions(option, (id: number) => console.log(`${option} con id ${id} eliminado`))
+                          .map((action) =>
+                            action.type === "link" ? (
+                              <td class="px-6 py-4 text-start">
+                                <a
+                                  class="cursor-pointer"
+                                  href={(action.href ?? "") + row[0]}
+                                  title={action.alt}
+                                >
+                                  <img class="size-6" src={action.icon} alt={action.alt} />
+                                </a>
+                              </td>
+                            ) : (
+                              <td class="px-6 py-4 text-start">
+                                <button
+                                  type="button"
+                                  onclick={`console.log("${option} con id ${row[0]} eliminado")`}
+                                  class="cursor-pointer"
+                                  title={action.alt}
+                                >
+                                  <img class="size-6" src={action.icon} alt={action.alt} />
+                                </button>
+                              </td>
+                            )
+                          )
+                      }
+                    </tr>
+                  ))}
+                </Table>
+              </div>
+            ) : (
+              <p class="text-gray-500 mt-10">No hay {option.toLowerCase()} registrados.</p>
+            )
+          }
+        </section>
+      );
+    })
+  }
+</div>
+<script>
+  import { MatchOptionClient } from "@utils/index";
+
+  // Se ejecuta cuando la página ya cargó
+  document.addEventListener("astro:page-load", async () => {
+    console.log("Astro page loaded: listening for filter changes...");
+
+    window.addEventListener("partidos:filter-changed", async () => {
+      console.log("Filter changed event detected in PartidosProfesorTable");
+
+      const tablesContainer = document.getElementById("tables-container");
+      if (!tablesContainer) return;
+
+      const selectedFilter = await MatchOptionClient.getFilter();
+      
+
+      for (const section of tablesContainer.children) {
+        if (section.id === `table-${selectedFilter}`) {
+          section.classList.remove("hidden");
+        } else {
+          section.classList.add("hidden");
+        }
+      }
+    });
+  });
+</script>

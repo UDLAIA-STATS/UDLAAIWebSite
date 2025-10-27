@@ -16,7 +16,7 @@ const torneo = Astro.props.torneo;
 ---
 
 <FormLayout formTitle="Agregar Torneo" pageTitle="Agregar Torneo" user={user}>
-  <form id="form-torneo" class="flex flex-col w-full max-w-md">
+  <form action="" method="post" id="form-torneo" class="flex flex-col w-full max-w-md">
     <div class="flex gap-2 flex-col mb-4">
       <label for="nombretorneo" class="text-base font-medium"
         >Nombre del Torneo</label
@@ -51,12 +51,13 @@ const torneo = Astro.props.torneo;
 </FormLayout>
 
 <script>
-  import Swal from "sweetalert2";
+  import Swal from "sweetalert2/dist/sweetalert2.js";
   import { actions } from "astro:actions";
-
-  const form = document.querySelector("#form-torneo") as HTMLFormElement;
+  import { navigate } from "astro:transitions/client";
+  import { privateRoutesMap } from "@consts/routes";
 
   document.addEventListener("astro:page-load", () => {
+    const form = document.querySelector("#form-torneo") as HTMLFormElement;
     form?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const formData = new FormData(form);
@@ -65,8 +66,12 @@ const torneo = Astro.props.torneo;
         const { data, error } = await actions.createTorneo(formData);
 
         if (error) throw error;
-        Swal.fire("Éxito", "Torneo creado", "success");
         form.reset();
+        Swal.fire("Éxito", "Torneo creado", "success").then((result) => {
+          if (result.isConfirmed) {
+            navigate(privateRoutesMap.ADMIN_PARTIDOS);
+          }
+        });
       } catch (err) {
         console.error(err as Error);
         Swal.fire("Error", "Error al crear el torneo", "error");

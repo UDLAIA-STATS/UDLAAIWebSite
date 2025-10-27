@@ -5,8 +5,7 @@ export async function fileToBase64(file: File): Promise<string> {
     reader.onload = () => {
       const result = reader.result as string;
       // Remover encabezado tipo data:image/png;base64, si existe
-      const base64Data = result.split(",")[1] || result;
-      resolve(base64Data);
+      resolve(result);
     };
 
     reader.onerror = (error) => {

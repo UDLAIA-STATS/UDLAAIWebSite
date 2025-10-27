@@ -49,13 +49,17 @@ export const getTemporadaById = defineAction({
 export const createTemporada = defineAction({
   accept: "form",
   input: temporadaSchema,
-  handler: async (payload) => {
+  handler: async ({ idtorneo, nombretemporada, tipotemporada }) => {
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
       const res = await fetch(`${baseUrl}/temporadas/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          idtorneo: idtorneo,
+          nombretemporada: nombretemporada,
+          tipotemporada: tipotemporada,
+        }),
       });
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
       return { data: (await res.json()) as Temporada };
@@ -70,18 +74,30 @@ export const createTemporada = defineAction({
 export const updateTemporada = defineAction({
   accept: "form",
   input: temporadaUpdateSchema,
-  handler: async (payload) => {
+  handler: async ({
+    idtemporada,
+    idtorneo,
+    nombretemporada,
+    tipotemporada,
+  }) => {
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
-      const res = await fetch(`${baseUrl}/temporadas/${payload.idtemporada}/update/`, {
-        method: "PUT",
+      const res = await fetch(`${baseUrl}/temporadas/${idtemporada}/update/`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          idtorneo: idtorneo,
+          nombretemporada: nombretemporada,
+          tipotemporada: tipotemporada,
+        }),
       });
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
       return { data: (await res.json()) as Temporada };
     } catch (err) {
-      console.error(`Error al actualizar temporada ${payload.idtemporada}:`, err);
+      console.error(
+        `Error al actualizar temporada ${idtemporada}:`,
+        err
+      );
       throw new Error("No se pudo actualizar la temporada");
     }
   },

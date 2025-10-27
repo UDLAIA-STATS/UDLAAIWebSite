@@ -24,7 +24,11 @@ if (error) {
 
 if (!data) {
   console.error("No data received for equipo");
-  Swal.fire("Error", "No se pudo recuperar los datos del servidor.", "error").then(() => {
+  Swal.fire(
+    "Error",
+    "No se pudo recuperar los datos del servidor.",
+    "error"
+  ).then(() => {
     Astro.redirect(privateRoutesMap.AUTH_ADMIN);
   });
 }
@@ -34,38 +38,32 @@ const equipo: Equipo = data!.data;
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
-
 ---
 
-<FormLayout
-  formTitle="Agregar Partido"
-  pageTitle="Agregar Partido"
-  user={user}
->
+<FormLayout formTitle="Editar Equipo" pageTitle="Editar Equipo" user={user}>
   <form id="form-equipo" class="flex flex-col w-full max-w-md">
+    <input
+      type="number"
+      id="idequipo"
+      hidden
+      name="idequipo"
+      value={equipo?.idequipo ?? ""}
+      class={inputClass}
+    />
     <div class="flex gap-2 flex-col mb-4">
-      <label for="nombreequipo" class="text-base font-medium"
-        >Nombre</label
-      >
-        <input
-            id="nombreequipo"
-            name="nombreequipo"
-            type="text"
-            class={inputClass}
-            value={equipo.nombreequipo}
-        />
+      <label for="nombreequipo" class="text-base font-medium">Nombre</label>
+      <input
+        id="nombreequipo"
+        name="nombreequipo"
+        type="text"
+        class={inputClass}
+        value={equipo.nombreequipo}
+      />
     </div>
 
     <div class="flex gap-2 flex-col mb-4">
-      <label for="logoequipo" class="text-base font-medium"
-        >Logo</label
-      >
-      <input
-        id="logoequipo"
-        name="logoequipo"
-        type="file"
-        class={inputClass}
-      />
+      <label for="logoequipo" class="text-base font-medium">Logo</label>
+      <input id="logoequipo" name="logoequipo" type="file" class={inputClass} />
     </div>
 
     <div class="flex gap-2 justify-center pt-5">
@@ -80,24 +78,38 @@ const user = Astro.cookies.get("user")
 <script>
   import Swal from "sweetalert2";
   import { actions } from "astro:actions";
+import { navigate } from "astro:transitions/client";
+import { privateRoutesMap } from "@consts/index";
+import { fileToBase64 } from "@utils/index";
 
   const form = document.querySelector("#form-equipo") as HTMLFormElement;
 
-  document.addEventListener("astro:page-load", () => {
-    form?.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const formData = new FormData(form);
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    const file: File = formData.get("logoequipo") as File;
+    let base64Logo = null;
+    if (file && file.size > 0) {
+      base64Logo = await fileToBase64(file);
+      formData.set("logoequipo", base64Logo);
+    } else {
+      formData.delete("logoequipo");
+    }
+    console.log("Form Data:", Array.from(formData.entries()));
 
-      try {
-        const { data, error } = await actions.updateEquipo(formData);
+    try {
+      const { data, error } = await actions.updateEquipo(formData);
 
-        if (error) throw error;
-        Swal.fire("Éxito", "Equipo actualizado", "success");
-        form.reset();
-      } catch (err) {
-        console.error(err as Error);
-        Swal.fire("Error", "Error al actualizar el equipo", "error");
-      }
-    });
+      if (error) throw error;
+      Swal.fire("Éxito", "Equipo actualizado", "success").then((result) => {
+        if (result.isConfirmed) {
+          navigate(privateRoutesMap.ADMIN_PARTIDOS);
+        }
+      });
+      form.reset();
+    } catch (err) {
+      console.error(err as Error);
+      Swal.fire("Error", "Error al actualizar el equipo", "error");
+    }
   });
 </script>

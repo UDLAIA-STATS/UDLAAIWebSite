@@ -21,7 +21,6 @@ export const privateRoutesMap = {
 
 export const publicRoutesMap = {
     HOME: "/",
-    TEAMS: "/equipo/equipos",
     PLAYER_STATS: "/equipo/jugadores/estadisticas",
     PLAYER_DETAIL: "/equipo/jugadores/jugador",
     AUTH_LOGIN: "/auth/login",

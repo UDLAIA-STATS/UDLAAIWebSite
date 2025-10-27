@@ -9,8 +9,9 @@ interface Props {
 
 const { title }: Props = Astro.props;
 
-const name = Astro.cookies.get("name")?.value;
-
+const user: LoggedUser | null = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
 ---
 
 <!doctype html>
@@ -32,7 +33,7 @@ const name = Astro.cookies.get("name")?.value;
         </div>
         <div class="text-lg py-4" id="subtitle">
           <span>
-            Bienvenido, {name}.
+            Bienvenido, {user?.nickname}.
           </span>
         </div>
         <div class="py-3 flex flex-col gap-3 w-full">

@@ -17,10 +17,17 @@ import type {
 import * as handlePartidos from "@utils/handle-partidos-table";
 
 interface Props {
-  user: User;
+  torneos: Torneo[];
+  partidos: Partido[];
+  equipos: Equipo[];
+  temporadas: Temporada[];
 }
-
-const PartidosProfesorView: Component<Props> = ({ user }: Props) => {
+const PartidosProfesorView: Component<Props> = ({
+  equipos,
+  partidos,
+  temporadas,
+  torneos,
+}: Props) => {
   // --- Estado del filtro activo y carga ---
   const [currentFilter, setFilter] = createSignal<handlePartidos.matchOptions>(
     handlePartidos.matchOptions.torneos
@@ -28,43 +35,6 @@ const PartidosProfesorView: Component<Props> = ({ user }: Props) => {
   const [headers, setHeaders] = createSignal<string[]>([]);
   const [rows, setRows] = createSignal<any[][]>([]);
   const [loading, setLoading] = createSignal(false);
-
-  // --- Datos simulados ---
-  const torneos: Torneo[] = [
-    {
-      idtorneo: 1,
-      nombretorneo: "Copa Nacional",
-      descripciontorneo: "Torneo oficial de clubes",
-    },
-    { idtorneo: 2, nombretorneo: "Liga Amistosa" },
-  ];
-
-  const equipos: Equipo[] = [
-    { idequipo: 1, nombreequipo: "Águilas FC" },
-    { idequipo: 2, nombreequipo: "Tigres SC" },
-    { idequipo: 3, nombreequipo: "Leones United" },
-  ];
-
-  const partidos: Partido[] = [
-    {
-      idpartido: 1,
-      fechapartido: "2025-05-10",
-      tipopartido: true,
-      idequipolocal: { idequipo: 1, nombreequipo: "Águilas FC" },
-      idequipovisitante: { idequipo: 2, nombreequipo: "Tigres SC" },
-      marcadorequipolocal: 3,
-      marcadorequipovisitante: 2,
-    },
-  ];
-
-  const temporadas: Temporada[] = [
-    {
-      idtemporada: 1,
-      nombretemporada: "Temporada 2025",
-      tipotemporada: true,
-      idtorneo: torneos[0],
-    },
-  ];
 
   // --- Sincronización automática al cambiar de filtro ---
   createEffect(() => {

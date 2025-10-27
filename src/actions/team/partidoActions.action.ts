@@ -5,7 +5,7 @@ import { tomorrowDate } from "@utils/dates";
 
 
 const partidoSchema = z.object({
-  fechapartido: z.date().min(new Date("2000-01-01"), "La fecha es demasiado antigua").max(tomorrowDate(), "La fecha es demasiado futura"),
+  fechapartido: z.string(),
   tipopartido: z.boolean(),
   idequipolocal: z.number().int().positive(),
   idequipovisitante: z.number().int().positive(),
@@ -79,7 +79,7 @@ export const updatePartido = defineAction({
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
       const res = await fetch(`${baseUrl}/partidos/${payload.idpartido}/update/`, {
-        method: "PUT",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });

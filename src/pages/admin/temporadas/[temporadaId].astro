@@ -61,6 +61,14 @@ const torneos: Torneo[] = torneosData?.data ?? [];
   user={user}
 >
   <form id="form-temporada" class="flex flex-col w-full max-w-md">
+    <input
+      type="number"
+      hidden
+      value={temporada?.idtemporada ?? ""}
+      name="idtemporada"
+      id="idtemporada"
+      class="hidden"
+    />
     <div class="flex gap-2 flex-col mb-4">
       <label for="nombretemporada" class="text-base font-medium"
         >Nombre de la Temporada</label
@@ -98,7 +106,7 @@ const torneos: Torneo[] = torneosData?.data ?? [];
             <option
               value={torneo.idtorneo}
               id={`torneo-${torneo.idtorneo}`}
-              selected={torneo.idtorneo === temporada?.idtorneo.idtorneo}
+              selected={torneo.idtorneo === temporada?.idtorneo}
             >
               {torneo.nombretorneo}
             </option>
@@ -110,7 +118,7 @@ const torneos: Torneo[] = torneosData?.data ?? [];
 
   <div class="flex gap-2 justify-center pt-5">
     <button class={buttonClass} type="submit">
-      {temporada ? "Editar Temporada" : "Agregar Temporada"}
+      Editar Temporada
       <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
     </button>
   </div>
@@ -119,34 +127,28 @@ const torneos: Torneo[] = torneosData?.data ?? [];
 <script>
   import Swal from "sweetalert2";
   import { actions } from "astro:actions";
-import { navigate } from "astro:transitions/client";
-import { privateRoutesMap } from "@consts/routes";
+  import { navigate } from "astro:transitions/client";
+  import { privateRoutesMap } from "@consts/routes";
 
   const form = document.querySelector("#form-temporada") as HTMLFormElement;
 
-  document.addEventListener("astro:page-load", () => {
-    form?.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const formData = new FormData(form);
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
 
-      try {
-        const { data, error } = await actions.updateTemporada(formData);
+    try {
+      const { data, error } = await actions.updateTemporada(formData);
 
-        if (error) throw error;
-        Swal.fire(
-          "Éxito",
-          "Temporada actualizada",
-          "success"
-        ).then((result) => {
-          if (result.isConfirmed) {
-            navigate(privateRoutesMap.AUTH_ADMIN);
-          }
-        });
-        form.reset();
-      } catch (err) {
-        console.error(err as Error);
-        Swal.fire("Error", "Error al actualizar la temporada", "error");
-      }
-    });
+      if (error) throw error;
+      Swal.fire("Éxito", "Temporada actualizada", "success").then((result) => {
+        if (result.isConfirmed) {
+          navigate(privateRoutesMap.ADMIN_PARTIDOS);
+        }
+      });
+      form.reset();
+    } catch (err) {
+      console.error(err as Error);
+      Swal.fire("Error", "Error al actualizar la temporada", "error");
+    }
   });
 </script>

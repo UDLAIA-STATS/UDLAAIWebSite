@@ -8,8 +8,6 @@ import DeleteIcon from "@assets/delete_icon_black.svg";
 
 const { REGISTER_PLAYER, EDIT_PLAYER } = privateRoutesMap;
 
-const name = Astro.cookies.get("name")?.value;
-
 const headers = ["Nombre de usuario", "Email", "Rol", "Editar", "Eliminar"];
 
 const users: User[] = [
