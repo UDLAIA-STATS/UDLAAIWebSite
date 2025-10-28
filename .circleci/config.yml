@@ -77,15 +77,18 @@ jobs:
     <<: *defaults
     steps:
       - run:
-          name: 📧 Send Email Notification
+          name: 📧 Send Email Notification (Always runs)
+          when: always
           command: |
             sudo apt-get update && sudo apt-get install -y mailutils
-            if [ "${CIRCLE_JOB_STATUS}" == "success" ]; then
-              SUBJECT="✅ Éxito en el pipeline (${CIRCLE_PROJECT_REPONAME}) - ${CIRCLE_BRANCH}"
-              MESSAGE="El pipeline ha terminado correctamente.\nVer detalles: ${CIRCLE_BUILD_URL}"
+            echo "Preparando notificación de pipeline..."
+
+            if [ "${CIRCLE_WORKFLOW_STATUS}" == "success" ]; then
+              SUBJECT="✅ Éxito en el pipeline: ${CIRCLE_PROJECT_REPONAME} (${CIRCLE_BRANCH})"
+              MESSAGE="El pipeline se completó correctamente.\n\nRepositorio: ${CIRCLE_PROJECT_REPONAME}\nBranch: ${CIRCLE_BRANCH}\nWorkflow: ${CIRCLE_WORKFLOW_ID}\n\nVer detalles:\n${CIRCLE_BUILD_URL}"
             else
-              SUBJECT="❌ Fallo en el pipeline (${CIRCLE_PROJECT_REPONAME}) - ${CIRCLE_BRANCH}"
-              MESSAGE="El pipeline falló. Revisa los logs aquí: ${CIRCLE_BUILD_URL}"
+              SUBJECT="❌ Fallo en el pipeline: ${CIRCLE_PROJECT_REPONAME} (${CIRCLE_BRANCH})"
+              MESSAGE="El pipeline falló.\n\nRepositorio: ${CIRCLE_PROJECT_REPONAME}\nBranch: ${CIRCLE_BRANCH}\nWorkflow: ${CIRCLE_WORKFLOW_ID}\n\nRevisa los logs:\n${CIRCLE_BUILD_URL}"
             fi
 
             echo -e "$MESSAGE" | mail -s "$SUBJECT" david.guaman@udla.edu.ec
