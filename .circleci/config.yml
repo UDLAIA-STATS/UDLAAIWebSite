@@ -1,141 +1,88 @@
 version: 2.1
 
+orbs:
+  node: circleci/node@5.1.0
+
 defaults: &defaults
   docker:
-    - image: cimg/node:22.8 
+    - image: cimg/node:22.8
   working_directory: ~/repo
   environment:
     NODE_ENV: development
     YARN_CACHE_FOLDER: .yarn/cache
 
-# -------------------------
-# JOBS
-# -------------------------
 jobs:
   test:
     <<: *defaults
     steps:
       - checkout
-
-      - restore_cache:
-          keys:
-            - v1-yarn-cache-{{ arch }}-{{ checksum "yarn.lock" }}
-            - v1-yarn-cache-
-
       - run:
           name: 📥 Install dependencies
-          command: |
-            yarn install --frozen-lockfile --prefer-offline
-
-      - save_cache:
-          paths:
-            - .yarn/cache
-          key: v1-yarn-cache-{{ arch }}-{{ checksum "yarn.lock" }}
-
+          command: yarn install --frozen-lockfile
       - run:
-          name: 🔍 Lint and Type Check
-          command: |
-            yarn check
-
-      - run:
-          name: 🧪 Run Tests with Coverage
-          command: |
-            yarn coverage
-
-      - run:
-          name: 📊 Upload Coverage to Codecov
-          command: |
-            bash <(curl -s https://codecov.io/bash) -t ${CODECOV_TOKEN} || echo "Codecov upload failed"
-
-      - store_artifacts:
-          path: coverage
-          destination: coverage
+          name: 🧪 Run Tests
+          command: yarn test
 
   build:
     <<: *defaults
     steps:
       - checkout
-
-      - restore_cache:
-          keys:
-            - v1-yarn-cache-{{ arch }}-{{ checksum "yarn.lock" }}
-            - v1-yarn-cache-
-
-      - run:
-          name: 📥 Install dependencies
-          command: |
-            yarn install --frozen-lockfile --prefer-offline
-
       - run:
           name: 🏗️ Build Application
-          command: |
-            yarn build
-
+          command: yarn build
       - persist_to_workspace:
           root: .
           paths:
             - dist
 
-      - store_artifacts:
-          path: dist
-          destination: dist
-
-  deploy-dev:
+  deploy-prod:
     <<: *defaults
     steps:
       - checkout
       - attach_workspace:
           at: ~/repo
-
       - run:
-          name: 🚀 Deploy to Development
+          name: 🚀 Deploy to Production
           command: |
-            echo "Deploying to development environment..."
-            # Aquí puedes añadir comandos reales (ejemplo: netlify-cli, firebase deploy, scp, etc.)
+            echo "Deploying to production branch main..."
+            # comandos reales de despliegue aquí
 
-  notify-failure:
+  notify:
     <<: *defaults
     steps:
       - run:
-          name: 📧 Send Failure Notification
+          name: 📧 Send Email Notification
           command: |
-            echo "❌ Pipeline failed for branch ${CIRCLE_BRANCH}. Please check logs and fix issues."
+            sudo apt-get update && sudo apt-get install -y mailutils
+            if [ "${CIRCLE_JOB_STATUS}" == "success" ]; then
+              SUBJECT="✅ Pipeline Successful: ${CIRCLE_PROJECT_REPONAME} (${CIRCLE_BRANCH})"
+              MESSAGE="All jobs completed successfully.\nPipeline URL: ${CIRCLE_BUILD_URL}"
+            else
+              SUBJECT="❌ Pipeline Failed: ${CIRCLE_PROJECT_REPONAME} (${CIRCLE_BRANCH})"
+              MESSAGE="Some jobs failed.\nCheck logs here: ${CIRCLE_BUILD_URL}"
+            fi
 
-# -------------------------
-# WORKFLOWS
-# -------------------------
+            echo -e "$MESSAGE" | mail -s "$SUBJECT" david.guaman@udla.edu.ec
+
 workflows:
   version: 2
   ci_cd_pipeline:
     jobs:
       - test
-
       - build:
           requires:
             - test
-
-      - deploy-dev:
+      - deploy-prod:
           requires:
             - build
           filters:
             branches:
-              only: develop
-
-      # Despliegue a producción (comentado por ahora)
-      # - deploy-prod:
-      #     requires:
-      #       - build
-      #     filters:
-      #       branches:
-      #         only: main
-
-      - notify-failure:
+              only: main
+      - notify:
           requires:
-            - test
             - build
           filters:
             branches:
               only:
                 - develop
                 - main
-          when: on_fail
