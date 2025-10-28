@@ -34,9 +34,16 @@ export const registerUser = defineAction({
       console.log("Respuesta del servidor:", response);
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          errorData.detail || `Error ${response.status}: ${response.statusText}`
-        );
+        let errorMessage = "";
+        if(errorData.nombre_usuario && errorData.email_usuario) {
+          errorMessage = "El nombre de usuario y el correo electrónico ya están en uso.";
+        } else if (errorData.nombre_usuario) {
+          errorMessage = "El nombre de usuario ya está en uso.";
+        } else if (errorData.email_usuario) {
+          errorMessage = "El correo electrónico ya está en uso.";
+        }
+
+        throw new Error(errorMessage);
       }
       const data = await response.json();
 

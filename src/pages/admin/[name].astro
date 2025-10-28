@@ -126,7 +126,6 @@ const { super: superRole } = roles;
             class="disabled:bg-gray-300 text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md cursor-pointer flex gap-2"
             type="submit"
             id="btn-login"
-            onclick={`handleUpdate(formData)`}
           >
             Editar Usuario
             <img
@@ -147,6 +146,7 @@ const { super: superRole } = roles;
   import { actions } from "astro:actions";
   import { privateRoutesMap } from "@consts/routes";
   import { navigate } from 'astro:transitions/client';
+import type { User } from "@interfaces/user.interface";
 
   const form = document.querySelector("#form-usuario") as HTMLFormElement;
   const userCredential = "123456789";
@@ -154,19 +154,47 @@ const { super: superRole } = roles;
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const formData = new FormData(form);
-    if (formData.get("password")?.toString().trim() === "") {
+    const name = formData.get("name")?.toString().trim();
+    const email = formData.get("email")?.toString().trim();
+    const password = formData.get("password")?.toString().trim() ?? "";
+    formData.set("name", name ?? "");
+    formData.set("email", email ?? "");
+    formData.set("password", password ?? "");
+
+    const originalName = formData.get("originalName")?.toString().trim() ?? "";
+    const data = await actions.getUserByUsername.orThrow({ username: originalName, userCredential: "123456789" });
+    const user: User = data.data;
+    const regexp = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
+
+
+    if(name === user.nombre_usuario && email === user.email_usuario && (password === "" || password === null)) {
+      Swal.fire(
+        "Error",
+        "No se han realizado cambios en los datos del usuario.",
+        "error"
+      );
+      return;
+    }
+    if(!name || name === "") {
+      Swal.fire(
+        "Error",
+        "El nombre de usuario no puede estar vacío.",
+        "error"
+      );
+    }
+
+    if (!email || email === "" || regexp.test(email) === false) {
+      Swal.fire("Error", "El correo electrónico es inválido.", "error");
+      return;
+    }
+
+    if (password === "") {
       formData.delete("password");
     }
-    if (formData.get("name")?.toString().trim() === "") {
-      formData.delete("name");
-    }
-    if (formData.get("email")?.toString().trim() === "") {
-      formData.delete("email");
-    }
     if (
-      formData.get("name") === null &&
-      formData.get("email") === null &&
-      formData.get("password") === null
+      name === originalName &&
+      email === user.email_usuario &&
+      password === ""
     ) {
       Swal.fire(
         "Error",
@@ -182,7 +210,7 @@ const { super: superRole } = roles;
       if (error) throw error;
       Swal.fire(
         "Éxito",
-        `Usuario ${formData.get("originalName")} actualizado`,
+        `El usuario ${formData.get("originalName")} ha sido actualizado exitósamente.`,
         "success",
 
       ).then((result) => {

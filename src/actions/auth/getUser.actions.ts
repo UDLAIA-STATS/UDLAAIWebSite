@@ -2,11 +2,17 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import type { User } from "@interfaces/user.interface";
+import type { Pagination } from "@interfaces/index";
+import debug from "debug";
 
 export const getUsers = defineAction({
   accept: "json",
-  input: z.string().min(8).max(100),
-  handler: async (userCredential, { cookies }) => {
+  input: z.object({
+    userCredential: z.string().min(8).max(100),
+    page: z.number().int().positive().optional().default(1),
+    pageSize: z.number().int().positive().optional().default(10),
+  }),
+  handler: async ({ userCredential, page, pageSize }, { cookies }) => {
     const baseUrl = import.meta.env.AUTH_URL;
     const loggedInUser = cookies.get("user")
   ? (JSON.parse(cookies.get("user")?.value as string) as LoggedUser)
@@ -22,7 +28,7 @@ export const getUsers = defineAction({
         `${loggedInUser.nickname}:${userCredential}`
       ).toString("base64");
 
-      const response = await fetch(`${baseUrl}/users/`, {
+      const response = await fetch(`${baseUrl}/users/?page=${page}&offset=${pageSize}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -40,8 +46,13 @@ export const getUsers = defineAction({
 
       const data = await response.json();
       console.log("Usuarios obtenidos:", data);
+      const items = data.items as User[];
+      const paginationData = data.pagination as Pagination;
 
-      return { data: data as User[] };
+      return { data: {
+        items: items,
+        paginationData: paginationData
+      } };
     } catch (error) {
       console.error("Error al obtener usuarios:", error);
       throw new Error("No se pudo obtener la lista de usuarios");

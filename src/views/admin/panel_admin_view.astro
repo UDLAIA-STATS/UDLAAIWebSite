@@ -6,7 +6,9 @@ import type { User } from "@interfaces/user.interface";
 import EditIcon from "@assets/edit_icon_black.svg";
 import DeleteIcon from "@assets/delete_icon_black.svg";
 import { actions } from "astro:actions";
-import Swal from "sweetalert2";
+import type { Pagination } from "@interfaces/pagination.interface";
+import OutlinedButton from "@components/buttons/OutlinedButton.astro";
+import arrowNext from "@assets/arrow_next.svg";
 
 const { AUTH_REGISTER, EDIT_USER } = privateRoutesMap;
 
@@ -16,19 +18,20 @@ const user = Astro.cookies.get("user")
 
 const headers = ["Nombre de usuario", "Email", "Rol", "Editar", "Eliminar"];
 
-const { data, error } = await Astro.callAction(actions.getUsers, "123456789");
+const { data, error } = await Astro.callAction(actions.getUsers, {
+  userCredential: "123456789",
+  page: 1,
+  pageSize: 10,
+});
 
-if (error) {
+if (error || !data) {
   console.error("Error fetching users:", error);
-  Swal.fire({
-    icon: "error",
-    title: "Error al obtener los usuarios",
-    text: error.message,
-  });
+  throw new Error("No se pudo obtener la lista de usuarios.");
 }
 
 const users: User[] =
-  data?.data.filter((u) => u.nombre_usuario !== user?.nickname) ?? [];
+  data.data.items.filter((u) => u.nombre_usuario !== user?.nickname) ?? [];
+const paginationData: Pagination = data.data.paginationData as Pagination;
 
 const rows = users.map((u) => [u.nombre_usuario, u.email_usuario, u.rol]);
 
@@ -54,78 +57,97 @@ tableActions.push(
 );
 ---
 
-<div class="flex flex-row justify-between w-full">
-  <h1 class="font-bold text-2xl">Usuarios</h1>
-  <div class="flex flex-row gap-10 w-3/2 justify-end">
-    <a
-      href={AUTH_REGISTER}
-      class="no-underline text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md flex cursor-pointer items-center gap-2"
-    >
-      Agregar Usuario
-    </a>
-    <input
-      type="search"
-      name="search"
-      placeholder="Buscar usuario..."
-      id="search-box"
-      class="rounded-md p-2 w-1/4 focus:outline-none focus:ring-1 focus:ring-black text-black border border-solid border-black"
-    />
+<div class="flex flex-col justify-center w-full">
+  <div class="flex flex-row justify-between w-full">
+    <h1 class="font-bold text-2xl">Usuarios</h1>
+    <div class="flex flex-row gap-10 w-3/2 justify-end">
+      <a
+        href={AUTH_REGISTER}
+        class="no-underline text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md flex cursor-pointer items-center gap-2"
+      >
+        Agregar Usuario
+      </a>
+      <input
+        type="search"
+        name="search"
+        placeholder="Buscar usuario..."
+        id="search-box"
+        class="rounded-md p-2 w-1/4 focus:outline-none focus:ring-1 focus:ring-black text-black border border-solid border-black"
+      />
+    </div>
   </div>
-</div>
-<div
-  class:list={[
-    "flex text-lg mt-3 w-svw justify-center text-black font-medium",
-    users.length === 0 ? "" : "hidden",
-  ]}
->
-  <span>No se encontraron usuarios</span>
-</div>
-<div
-  class:list={[
-    "relative overflow-x-auto w-svw mt-5 flex justify-center",
-    users.length === 0 ? "hidden" : "",
-  ]}
->
-  <Table headers={headers}>
-    {
-      rows.map((row) => (
-        <tr class="border-b" id={`user-row-${row[0]}`}>
-          {row.map((cell) => (
-            <td class="px-6 py-4">{cell}</td>
-          ))}
-          {tableActions &&
-            tableActions.length > 0 &&
-            tableActions.map((action) =>
-              action.type === "link" ? (
-                <td class="px-6 py-4">
-                  <a
-                    class="cursor-pointer no-underline"
-                    href={action.href?.toString() + row[0]}
-                  >
-                    <img class="size-8" src={action.icon} alt={action.alt} />
-                  </a>
-                </td>
-              ) : (
-                action.action && (
+  <div
+    class:list={[
+      "flex text-lg mt-3 w-svw justify-center text-black font-medium",
+      users.length === 0 ? "" : "hidden",
+    ]}
+  >
+    <span>No se encontraron usuarios</span>
+  </div>
+  <div
+    class:list={[
+      "relative overflow-x-auto w-svw mt-5 flex justify-center",
+      users.length === 0 ? "hidden" : "",
+    ]}
+  >
+    <Table headers={headers}>
+      {
+        rows.map((row) => (
+          <tr class="border-b" id={`user-row-${row[0]}`}>
+            {row.map((cell) => (
+              <td class="px-6 py-4">{cell}</td>
+            ))}
+            {tableActions &&
+              tableActions.length > 0 &&
+              tableActions.map((action) =>
+                action.type === "link" ? (
                   <td class="px-6 py-4">
-                    <button
-                      type="button"
-                      id="delete-button"
-                      value={row[0]}
-                      data-delete-user
-                      data-username={row[0]}
-                      class="cursor-pointer"
+                    <a
+                      class="cursor-pointer no-underline"
+                      href={action.href?.toString() + row[0]}
                     >
                       <img class="size-8" src={action.icon} alt={action.alt} />
-                    </button>
+                    </a>
                   </td>
+                ) : (
+                  action.action && (
+                    <td class="px-6 py-4">
+                      <button
+                        type="button"
+                        id="delete-button"
+                        value={row[0]}
+                        data-delete-user
+                        data-username={row[0]}
+                        class="cursor-pointer"
+                      >
+                        <img
+                          class="size-8"
+                          src={action.icon}
+                          alt={action.alt}
+                        />
+                      </button>
+                    </td>
+                  )
                 )
-              )
-            )}
-        </tr>
-      ))
-    }
-  </Table>
+              )}
+          </tr>
+        ))
+      }
+    </Table>
+  </div>
+  <div class="w-full flex flex-col justify-center mt-3">
+    <div class:list={[
+      "self-center mt-4",
+      paginationData.total_pages <= 1 ? "hidden" : "",
+    ]}>
+      Página {paginationData.current_page} de {paginationData.total_pages}
+    </div>
+    <div id="navigation" class="flex flex-row justify-center gap-5 my-10">
+        <OutlinedButton label="Anterior" iconSrc={arrowNext.src} iconPosition="left" />
+        <OutlinedButton label="Siguiente" iconSrc={arrowNext.src} iconRotation={180} />
+        
+    </div>
+  </div>
 </div>
 
 <script>
@@ -133,69 +155,69 @@ tableActions.push(
   import Swal from "sweetalert2";
   import { navigate } from "astro:transitions/client";
 
-  document.addEventListener("astro:page-load", async () => {
-    const users = await actions.getUsers("123456789");
-    const searchBox = document.getElementById("search-box") as HTMLInputElement;
+  const users = await actions.getUsers({
+    userCredential: "123456789",
+    page: 1,
+    pageSize: 20,
+  });
+  const searchBox = document.getElementById("search-box") as HTMLInputElement;
 
-    document.addEventListener("click", async (event) => {
-      const target = event.target as HTMLElement;
-      if (target.closest("[data-delete-user]")) {
-        const button = target.closest(
-          "[data-delete-user]"
-        ) as HTMLButtonElement;
-        const username = button.getAttribute("data-username");
+  document.addEventListener("click", async (event) => {
+    const target = event.target as HTMLElement;
+    if (target.closest("[data-delete-user]")) {
+      const button = target.closest("[data-delete-user]") as HTMLButtonElement;
+      const username = button.getAttribute("data-username");
 
-        if (username) {
-          const formData = new FormData();
-          formData.append("nickname", username);
-          formData.append("userCredential", "123456789");
-          Swal.fire({
-            title: `¿Estás seguro de eliminar al usuario ${username}?`,
-            text: "Esta acción no se puede deshacer.",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "Eliminar",
-            cancelButtonText: "Cancelar",
-          }).then(async (result) => {
-            if (result.isConfirmed) {
-              const { data, error } = await actions.deleteUser(formData);
-              if (error) {
-                Swal.fire({
-                  icon: "error",
-                  title: "Error al eliminar el usuario",
-                  text: error.message,
-                });
-              } else {
-                Swal.fire(
-                  "Éxito",
-                  `Usuario ${username} eliminado`,
-                  "success"
-                ).then(() => {
-                  navigate("/admin");
-                });
-              }
+      if (username) {
+        const formData = new FormData();
+        formData.append("nickname", username);
+        formData.append("userCredential", "123456789");
+        Swal.fire({
+          title: `¿Estás seguro de eliminar al usuario ${username}?`,
+          text: "Esta acción no se puede deshacer.",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Eliminar",
+          cancelButtonText: "Cancelar",
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            const { data, error } = await actions.deleteUser(formData);
+            if (error) {
+              Swal.fire({
+                icon: "error",
+                title: "Error al eliminar el usuario",
+                text: error.message,
+              });
+            } else {
+              Swal.fire(
+                "Éxito",
+                `Usuario ${username} eliminado`,
+                "success"
+              ).then(() => {
+                navigate("/admin");
+              });
             }
-          });
+          }
+        });
+      }
+    }
+  });
+
+  searchBox.addEventListener("input", async () => {
+    const search = searchBox.value;
+    const rows = document.querySelectorAll("tr[id^='user-row-']");
+    rows.forEach((row) => {
+      const usernameCell = row.querySelector("td:first-child");
+      if (usernameCell) {
+        const username = usernameCell.textContent || "";
+        if (username.toLowerCase().includes(search.toLowerCase())) {
+          row.classList.remove("hidden");
+        } else {
+          row.classList.add("hidden");
         }
       }
-    });
-
-    searchBox.addEventListener("input", async () => {
-      const search = searchBox.value;
-      const rows = document.querySelectorAll("tr[id^='user-row-']");
-      rows.forEach((row) => {
-        const usernameCell = row.querySelector("td:first-child");
-        if (usernameCell) {
-          const username = usernameCell.textContent || "";
-          if (username.toLowerCase().includes(search.toLowerCase())) {
-            row.classList.remove("hidden");
-          } else {
-            row.classList.add("hidden");
-          }
-        }
-      });
     });
   });
 </script>

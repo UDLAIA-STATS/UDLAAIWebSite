@@ -2,7 +2,6 @@ import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 
 export const logout = defineAction({
-  input: z.null(),
   handler: async (_, { cookies }) => {
     try {
         cookies.delete("user", { path: "/" });

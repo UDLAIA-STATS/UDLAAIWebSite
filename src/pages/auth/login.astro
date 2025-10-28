@@ -83,18 +83,22 @@ const loggedInUser = Astro.cookies.get("user")
 
 <script>
   import { actions } from "astro:actions";
+import { navigate } from "astro:transitions/client";
   import Swal from "sweetalert2";
 
-  const form = document.querySelector("form");
-  const btnSubmit = form!.querySelector(
+  const form = document.querySelector("form") as HTMLFormElement;
+  const btnSubmit = form.querySelector(
     "button[type='submit']"
   ) as HTMLButtonElement;
 
-  form?.addEventListener("submit", async (e) => {
-      e.preventDefault();
+  btnSubmit.addEventListener("click", async () => {
       btnSubmit.setAttribute("disabled", "disabled");
 
       const formData = new FormData(form);
+      const username = formData.get("name") as string;
+      const password = formData.get("password") as string;
+      formData.set("name", username.trim());
+      formData.set("password", password.trim());
 
       const { data, error } = await actions.login(formData);
 
@@ -102,13 +106,17 @@ const loggedInUser = Astro.cookies.get("user")
         Swal.fire({
           icon: "error",
           title: "Error al iniciar sesión",
-          text: error.message,
+          text: "Usuario o contraseña incorrectos.",
         });
         btnSubmit.removeAttribute("disabled");
         return;
       }
 
       btnSubmit.removeAttribute("disabled");
-      window.location.replace("/");
+      navigate("/");
+  });
+
+  form.addEventListener("submit", async (e) => {
+      e.preventDefault();
     });
 </script>
