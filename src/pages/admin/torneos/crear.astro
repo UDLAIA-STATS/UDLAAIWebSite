@@ -24,6 +24,7 @@ const torneo = Astro.props.torneo;
       <input
         type="text"
         id="nombretorneo"
+        maxlength="100"
         name="nombretorneo"
         class={inputClass}
         required
@@ -37,6 +38,8 @@ const torneo = Astro.props.torneo;
       <textarea
         id="descripciontorneo"
         name="descripciontorneo"
+        maxlength="250"
+        minlength="0"
         class={inputClass}
         rows="3"></textarea>
     </div>
@@ -57,25 +60,49 @@ const torneo = Astro.props.torneo;
   import { privateRoutesMap } from "@consts/routes";
 
   document.addEventListener("astro:page-load", () => {
+  const btnSubmit = document.querySelector(
+      'button[type="submit"]'
+    ) as HTMLButtonElement;
     const form = document.querySelector("#form-torneo") as HTMLFormElement;
-    form?.addEventListener("submit", async (e) => {
-      e.preventDefault();
+    
+    btnSubmit.addEventListener("click", async () => {
+      btnSubmit.disabled = true;
+      btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
       const formData = new FormData(form);
+      const nombreTorneo = formData.get("nombretorneo")?.toString().trim() ?? "";
+      if(nombreTorneo.length === 0){
+        Swal.fire("Error", "El nombre del torneo es obligatorio", "error");
+        btnSubmit.disabled = false;
+        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+        return;
+      }
 
       try {
         const { data, error } = await actions.createTorneo(formData);
 
-        if (error) throw error;
+        if (error) {
+          Swal.fire("Error", error.message, "error");
+          btnSubmit.disabled = false;
+          btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+          return;
+        };
         form.reset();
         Swal.fire("Éxito", "Torneo creado", "success").then((result) => {
           if (result.isConfirmed) {
             navigate(privateRoutesMap.ADMIN_PARTIDOS);
           }
         });
+        btnSubmit.disabled = false;
+        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+        return;
       } catch (err) {
         console.error(err as Error);
         Swal.fire("Error", "Error al crear el torneo", "error");
       }
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
     });
   });
 </script>
