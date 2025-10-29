@@ -27,7 +27,7 @@ if (!data) {
   Swal.fire(
     "Error",
     "No se pudo recuperar los datos del servidor.",
-    "error"
+    "error",
   ).then(() => {
     Astro.redirect(privateRoutesMap.AUTH_ADMIN);
   });
@@ -66,9 +66,12 @@ const user = Astro.cookies.get("user")
       <input id="logoequipo" name="logoequipo" type="file" class={inputClass} />
     </div>
 
-    <div class="flex gap-2 justify-center pt-5">
+    <div class="flex justify-center text-center mt-5 mx-5 pt-2 gap-5">
+      <button class={buttonClass} type="button" id="btn-cancel">
+        Cancelar
+      </button>
       <button class={buttonClass} type="submit">
-        Agregar Equipo
+        Actualizar Equipo
         <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
       </button>
     </div>
@@ -78,14 +81,23 @@ const user = Astro.cookies.get("user")
 <script>
   import Swal from "sweetalert2";
   import { actions } from "astro:actions";
-import { navigate } from "astro:transitions/client";
-import { privateRoutesMap } from "@consts/index";
-import { fileToBase64 } from "@utils/index";
+  import { navigate } from "astro:transitions/client";
+  import { privateRoutesMap } from "@consts/index";
+  import { fileToBase64 } from "@utils/index";
 
   const form = document.querySelector("#form-equipo") as HTMLFormElement;
   const btnSubmit = document.querySelector(
-    'button[type="submit"]'
+    'button[type="submit"]',
   ) as HTMLButtonElement;
+
+  const btnCancel = document.getElementById(
+    "btn-cancel"
+  ) as HTMLButtonElement;
+
+  btnCancel.addEventListener("click", (e) => {
+    e.preventDefault();
+    navigate(privateRoutesMap.ADMIN_PARTIDOS);
+  });
 
   btnSubmit.addEventListener("click", async () => {
     btnSubmit.disabled = true;
@@ -110,7 +122,7 @@ import { fileToBase64 } from "@utils/index";
         btnSubmit.disabled = false;
         btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
         return;
-      };
+      }
       Swal.fire("Éxito", "Equipo actualizado", "success").then((result) => {
         if (result.isConfirmed) {
           navigate(privateRoutesMap.ADMIN_PARTIDOS);

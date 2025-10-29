@@ -16,7 +16,12 @@ const torneo = Astro.props.torneo;
 ---
 
 <FormLayout formTitle="Agregar Torneo" pageTitle="Agregar Torneo" user={user}>
-  <form action="" method="post" id="form-torneo" class="flex flex-col w-full max-w-md">
+  <form
+    action=""
+    method="post"
+    id="form-torneo"
+    class="flex flex-col w-full max-w-md"
+  >
     <div class="flex gap-2 flex-col mb-4">
       <label for="nombretorneo" class="text-base font-medium"
         >Nombre del Torneo</label
@@ -43,8 +48,10 @@ const torneo = Astro.props.torneo;
         class={inputClass}
         rows="3"></textarea>
     </div>
-
-    <div class="flex gap-2 justify-center pt-5">
+    <div class="flex justify-center text-center mt-5 mx-5 pt-2 gap-5">
+      <button class={buttonClass} type="button" id="btn-cancel">
+        Cancelar
+      </button>
       <button class={buttonClass} type="submit">
         Guardar Torneo
         <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
@@ -60,17 +67,27 @@ const torneo = Astro.props.torneo;
   import { privateRoutesMap } from "@consts/routes";
 
   document.addEventListener("astro:page-load", () => {
-  const btnSubmit = document.querySelector(
-      'button[type="submit"]'
+    const btnSubmit = document.querySelector(
+      'button[type="submit"]',
     ) as HTMLButtonElement;
     const form = document.querySelector("#form-torneo") as HTMLFormElement;
-    
+
+    const btnCancel = document.getElementById(
+    "btn-cancel"
+  ) as HTMLButtonElement;
+
+  btnCancel.addEventListener("click", (e) => {
+    e.preventDefault();
+    navigate(privateRoutesMap.ADMIN_PARTIDOS);
+  });
+
     btnSubmit.addEventListener("click", async () => {
       btnSubmit.disabled = true;
       btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
       const formData = new FormData(form);
-      const nombreTorneo = formData.get("nombretorneo")?.toString().trim() ?? "";
-      if(nombreTorneo.length === 0){
+      const nombreTorneo =
+        formData.get("nombretorneo")?.toString().trim() ?? "";
+      if (nombreTorneo.length === 0) {
         Swal.fire("Error", "El nombre del torneo es obligatorio", "error");
         btnSubmit.disabled = false;
         btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
@@ -85,7 +102,7 @@ const torneo = Astro.props.torneo;
           btnSubmit.disabled = false;
           btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
           return;
-        };
+        }
         form.reset();
         Swal.fire("Éxito", "Torneo creado", "success").then((result) => {
           if (result.isConfirmed) {

@@ -208,7 +208,10 @@ const torneo: Torneo = torneos.find(
       />
     </div>
 
-    <div class="flex gap-2 justify-center pt-5">
+    <div class="flex justify-center text-center mt-5 mx-5 pt-2 gap-5">
+      <button class={buttonClass} type="button" id="btn-cancel">
+        Cancelar
+      </button>
       <button class={buttonClass} type="submit">
         Actualizar Partido
         <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
@@ -228,6 +231,15 @@ const torneo: Torneo = torneos.find(
   const btnSubmit = document.querySelector(
     'button[type="submit"]',
   ) as HTMLButtonElement;
+
+  const btnCancel = document.getElementById(
+    "btn-cancel"
+  ) as HTMLButtonElement;
+
+  btnCancel.addEventListener("click", (e) => {
+    e.preventDefault();
+    navigate(privateRoutesMap.ADMIN_PARTIDOS);
+  });
 
   btnSubmit.addEventListener("click", async () => {
     btnSubmit.disabled = true;

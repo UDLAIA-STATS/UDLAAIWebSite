@@ -14,7 +14,7 @@ const user = Astro.cookies.get("user")
 const { data, error } = await Astro.callAction(actions.getEquipos, {});
 const { data: torneoData, error: torneoError } = await Astro.callAction(
   actions.getTorneos,
-  {}
+  {},
 );
 
 if (error) {
@@ -162,8 +162,10 @@ const torneos: Torneo[] = torneoData?.data ?? [];
         class={inputClass}
       />
     </div>
-
-    <div class="flex gap-2 justify-center pt-5">
+    <div class="flex justify-center text-center mt-5 mx-5 pt-2 gap-5">
+      <button class={buttonClass} type="button" id="btn-cancel">
+        Cancelar
+      </button>
       <button class={buttonClass} type="submit">
         Agregar Partido
         <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
@@ -177,13 +179,22 @@ const torneos: Torneo[] = torneoData?.data ?? [];
   import { actions } from "astro:actions";
   import { navigate } from "astro:transitions/client";
   import { privateRoutesMap } from "@consts/index";
-import type { Torneo } from "@interfaces/index";
-import type { Partido } from "@interfaces/partido.interface";
+  import type { Torneo } from "@interfaces/index";
+  import type { Partido } from "@interfaces/partido.interface";
 
   const form = document.querySelector("#form-partido") as HTMLFormElement;
   const btnSubmit = document.querySelector(
-    'button[type="submit"]'
+    'button[type="submit"]',
   ) as HTMLButtonElement;
+
+  const btnCancel = document.getElementById(
+    "btn-cancel"
+  ) as HTMLButtonElement;
+
+  btnCancel.addEventListener("click", (e) => {
+    e.preventDefault();
+    navigate(privateRoutesMap.ADMIN_PARTIDOS);
+  });
 
   btnSubmit.addEventListener("click", async () => {
     btnSubmit.disabled = true;
@@ -198,7 +209,7 @@ import type { Partido } from "@interfaces/partido.interface";
       Swal.fire(
         "Error",
         "El equipo local y el equipo visitante no pueden ser el mismo.",
-        "error"
+        "error",
       );
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
@@ -225,7 +236,8 @@ import type { Partido } from "@interfaces/partido.interface";
     try {
       const { data, error } = await actions.createPartido(formData);
       console.log("Partido creation response:", data);
-      const { data: torneoData, error: torneError } = await actions.getTorneos();
+      const { data: torneoData, error: torneError } =
+        await actions.getTorneos();
 
       if (!data) {
         console.error("No data received for partido creation");
@@ -234,7 +246,6 @@ import type { Partido } from "@interfaces/partido.interface";
         btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
         return;
       }
-
 
       if (torneError || error) {
         console.error("Error fetching torneos:", torneError);
@@ -247,14 +258,15 @@ import type { Partido } from "@interfaces/partido.interface";
       const partido = data.data;
 
       const torneo: Torneo = torneoData?.data.find(
-        (torneo: Torneo) => torneo.idtorneo === Number(formData.get("idtorneo"))
+        (torneo: Torneo) =>
+          torneo.idtorneo === Number(formData.get("idtorneo")),
       ) as Torneo;
 
-
-      const { data: torneoPartido, error: torneoPartidoError } = await actions.createTorneoPartido({
-        idpartido: data?.data.idpartido,
-        idtorneo: torneo.idtorneo,
-      })
+      const { data: torneoPartido, error: torneoPartidoError } =
+        await actions.createTorneoPartido({
+          idpartido: data?.data.idpartido,
+          idtorneo: torneo.idtorneo,
+        });
 
       Swal.fire("Éxito", "Partido creado", "success").then((result) => {
         if (result.isConfirmed) {

@@ -34,7 +34,7 @@ if (!data) {
   Swal.fire(
     "Error",
     "No se pudo recuperar los datos del servidor.",
-    "warning"
+    "warning",
   ).then((result) => {
     if (result.isConfirmed) {
       Astro.redirect(privateRoutesMap.ADMIN_PARTIDOS);
@@ -56,14 +56,14 @@ const torneo: Torneo = data!.data;
   />
   <form id="form-torneo" class="flex flex-col w-full max-w-md">
     <input
-        type="number"
-        id="idtorneo"
-        hidden
-        name="idtorneo"
-        value={torneo?.idtorneo ?? ""}
-        class={inputClass}
-        required
-      />
+      type="number"
+      id="idtorneo"
+      hidden
+      name="idtorneo"
+      value={torneo?.idtorneo ?? ""}
+      class={inputClass}
+      required
+    />
     <div class="flex gap-2 flex-col mb-4">
       <label for="nombretorneo" class="text-base font-medium"
         >Nombre del Torneo</label
@@ -89,10 +89,12 @@ const torneo: Torneo = data!.data;
         rows="3">{torneo?.descripciontorneo ?? ""}</textarea
       >
     </div>
-
-    <div class="flex gap-2 justify-center pt-5">
+    <div class="flex justify-center text-center mt-5 mx-5 pt-2 gap-5">
+      <button class={buttonClass} type="button" id="btn-cancel">
+        Cancelar
+      </button>
       <button class={buttonClass} type="submit">
-        {torneo ? "Actualizar Torneo" : "Guardar Torneo"}
+        Actualizar Torneo
         <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
       </button>
     </div>
@@ -102,13 +104,22 @@ const torneo: Torneo = data!.data;
 <script>
   import Swal from "sweetalert2";
   import { actions } from "astro:actions";
-import { privateRoutesMap } from "@consts/routes";
-import { navigate } from "astro:transitions/client";
+  import { privateRoutesMap } from "@consts/routes";
+  import { navigate } from "astro:transitions/client";
 
   const form = document.querySelector("#form-torneo") as HTMLFormElement;
   const btnSubmit = document.querySelector(
-    'button[type="submit"]'
+    'button[type="submit"]',
   ) as HTMLButtonElement;
+
+  const btnCancel = document.getElementById(
+    "btn-cancel"
+  ) as HTMLButtonElement;
+
+  btnCancel.addEventListener("click", (e) => {
+    e.preventDefault();
+    navigate(privateRoutesMap.ADMIN_PARTIDOS);
+  });
 
   btnSubmit.addEventListener("click", async () => {
     btnSubmit.disabled = true;
@@ -116,23 +127,37 @@ import { navigate } from "astro:transitions/client";
     const formData = new FormData(form);
     const nombreTorneo = formData.get("nombretorneo")?.toString().trim() ?? "";
     const idTorneo = formData.get("idtorneo")?.toString().trim() ?? "";
-    const descripcionTorneo = formData.get("descripciontorneo")?.toString().trim() ?? "";
-    if(nombreTorneo.length === 0) {
+    const descripcionTorneo =
+      formData.get("descripciontorneo")?.toString().trim() ?? "";
+    if (nombreTorneo.length === 0) {
       Swal.fire("Error", "El nombre del torneo es obligatorio", "error");
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
       return;
     }
-    const data = await actions.getTorneoById.orThrow({ id: Number.parseInt(idTorneo) });
+    const data = await actions.getTorneoById.orThrow({
+      id: Number.parseInt(idTorneo),
+    });
     const torneo = data.data;
     if (!torneo) {
-      Swal.fire("Error", "No se pudo validar los datos del torneo, intente nuevamente", "error");
+      Swal.fire(
+        "Error",
+        "No se pudo validar los datos del torneo, intente nuevamente",
+        "error",
+      );
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
       return;
     }
-    if (torneo.nombretorneo === nombreTorneo && torneo.descripciontorneo === descripcionTorneo) {
-      Swal.fire("Información", "No se realizaron cambios en los datos del torneo", "info");
+    if (
+      torneo.nombretorneo === nombreTorneo &&
+      torneo.descripciontorneo === descripcionTorneo
+    ) {
+      Swal.fire(
+        "Información",
+        "No se realizaron cambios en los datos del torneo",
+        "info",
+      );
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
       return;

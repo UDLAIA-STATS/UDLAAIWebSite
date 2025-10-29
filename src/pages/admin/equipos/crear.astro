@@ -13,7 +13,12 @@ const user = Astro.cookies.get("user")
 ---
 
 <FormLayout formTitle="Agregar Partido" pageTitle="Agregar Partido" user={user}>
-  <form action="" method="post" id="form-equipo" class="flex flex-col w-full max-w-md">
+  <form
+    action=""
+    method="post"
+    id="form-equipo"
+    class="flex flex-col w-full max-w-md"
+  >
     <div class="flex gap-2 flex-col mb-4">
       <label for="nombreequipo" class="text-base font-medium">Nombre</label>
       <input
@@ -28,15 +33,13 @@ const user = Astro.cookies.get("user")
 
     <div class="flex gap-2 flex-col mb-4" hidden>
       <label for="logoequipo" class="text-base font-medium">Logo</label>
-      <input
-        id="logoequipo"
-        name="logoequipo"
-        type="file"
-        class={inputClass}
-      />
+      <input id="logoequipo" name="logoequipo" type="file" class={inputClass} />
     </div>
 
-    <div class="flex gap-2 justify-center pt-5">
+    <div class="flex justify-center text-center mt-5 mx-5 pt-2 gap-5">
+      <button class={buttonClass} type="button" id="btn-cancel">
+        Cancelar
+      </button>
       <button class={buttonClass} type="submit">
         Agregar Equipo
         <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
@@ -53,8 +56,17 @@ const user = Astro.cookies.get("user")
 
   const form = document.querySelector("#form-equipo") as HTMLFormElement;
   const btnSubmit = document.querySelector(
-    'button[type="submit"]'
+    'button[type="submit"]',
   ) as HTMLButtonElement;
+
+  const btnCancel = document.getElementById(
+    "btn-cancel"
+  ) as HTMLButtonElement;
+
+  btnCancel.addEventListener("click", (e) => {
+    e.preventDefault();
+    navigate(privateRoutesMap.ADMIN_PARTIDOS);
+  });
 
   btnSubmit.addEventListener("click", async () => {
     btnSubmit.disabled = true;
@@ -76,7 +88,7 @@ const user = Astro.cookies.get("user")
         btnSubmit.disabled = false;
         btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
         return;
-      };
+      }
       form.reset();
       Swal.fire("Éxito", "Equipo creado", "success").then((result) => {
         if (result.isConfirmed) {

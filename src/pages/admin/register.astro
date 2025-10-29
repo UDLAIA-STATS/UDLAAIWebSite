@@ -92,7 +92,7 @@ import { navigate } from "astro:transitions/client";
     "btn-cancel"
   ) as HTMLButtonElement;
 
-  btnCancel?.addEventListener("click", (e) => {
+  btnCancel.addEventListener("click", (e) => {
     e.preventDefault();
     navigate(privateRoutesMap.AUTH_ADMIN);
   });
