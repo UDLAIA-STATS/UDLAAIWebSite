@@ -19,6 +19,7 @@ const user = Astro.cookies.get("user")
       <input
         id="nombreequipo"
         name="nombreequipo"
+        maxlength="100"
         type="text"
         class={inputClass}
         required
@@ -47,13 +48,17 @@ const user = Astro.cookies.get("user")
 <script>
   import Swal from "sweetalert2";
   import { actions } from "astro:actions";
-import { privateRoutesMap } from "@consts/routes";
-import { navigate } from "astro:transitions/client";
+  import { privateRoutesMap } from "@consts/routes";
+  import { navigate } from "astro:transitions/client";
 
   const form = document.querySelector("#form-equipo") as HTMLFormElement;
+  const btnSubmit = document.querySelector(
+    'button[type="submit"]'
+  ) as HTMLButtonElement;
 
-  form?.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  btnSubmit.addEventListener("click", async () => {
+    btnSubmit.disabled = true;
+    btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
     const formData = new FormData(form);
 
     const logo: File = formData.get("logoequipo") as File;
@@ -66,16 +71,27 @@ import { navigate } from "astro:transitions/client";
     try {
       const { data, error } = await actions.createEquipo(formData);
 
-      if (error) throw error;
+      if (error) {
+        Swal.fire("Error", "Error al crear el equipo", "error");
+        btnSubmit.disabled = false;
+        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+        return;
+      };
       form.reset();
       Swal.fire("Éxito", "Equipo creado", "success").then((result) => {
         if (result.isConfirmed) {
           navigate(privateRoutesMap.ADMIN_PARTIDOS);
         }
       });
+      btnSubmit.disabled = false;
+      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
     } catch (err) {
       console.error(err as Error);
       Swal.fire("Error", "Error al crear el equipo", "error");
     }
+  });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
   });
 </script>

@@ -83,9 +83,14 @@ import { privateRoutesMap } from "@consts/index";
 import { fileToBase64 } from "@utils/index";
 
   const form = document.querySelector("#form-equipo") as HTMLFormElement;
+  const btnSubmit = document.querySelector(
+    'button[type="submit"]'
+  ) as HTMLButtonElement;
 
-  form?.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  btnSubmit.addEventListener("click", async () => {
+    btnSubmit.disabled = true;
+    btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
+
     const formData = new FormData(form);
     const file: File = formData.get("logoequipo") as File;
     let base64Logo = null;
@@ -100,16 +105,27 @@ import { fileToBase64 } from "@utils/index";
     try {
       const { data, error } = await actions.updateEquipo(formData);
 
-      if (error) throw error;
+      if (error) {
+        Swal.fire("Error", "Error al actualizar el equipo", "error");
+        btnSubmit.disabled = false;
+        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+        return;
+      };
       Swal.fire("Éxito", "Equipo actualizado", "success").then((result) => {
         if (result.isConfirmed) {
           navigate(privateRoutesMap.ADMIN_PARTIDOS);
         }
       });
       form.reset();
+      btnSubmit.disabled = false;
+      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
     } catch (err) {
       console.error(err as Error);
       Swal.fire("Error", "Error al actualizar el equipo", "error");
     }
+  });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
   });
 </script>
