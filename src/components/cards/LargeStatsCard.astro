@@ -1,5 +1,5 @@
 ---
-import type { Player } from "@interfaces/player.interface";
+import type { PlayerStatistic } from "@interfaces/player.interface";
 import CardDetail from "@components/cards/CardDetail.astro";
 import OutlinedButton from "@components/buttons/OutlinedButton.astro";
 import CardContainer from "@components/cards/CardContainer.astro";
@@ -7,7 +7,7 @@ import LazyImage from "@components/image/LazyImage.astro";
 
 
 interface Props {
-  player: Player;
+  player: PlayerStatistic;
 }
 
 const { player } = Astro.props;

@@ -1,0 +1,149 @@
+---
+import { privateRoutesMap } from "@consts/routes";
+import { Table } from "@components/tables/Table";
+import type { TableActions } from "@interfaces/table-actions.interface";
+import type { User } from "@interfaces/user.interface";
+import EditIcon from "@assets/edit_icon_black.svg";
+import DeleteIcon from "@assets/delete_icon_black.svg";
+import NotAuthorized from "@components/shared/NotAuthorized.astro";
+import AdminPanelLayout from "@layouts/AdminPanelLayout.astro";
+import PanelAdminView from "@views/admin/panel_admin_view.astro";
+import Pagination from "@components/shared/Pagination.astro";
+import { PlayerService } from "@services/playerService";
+import type { Player } from "@interfaces/index";
+
+const { REGISTER_PLAYER, EDIT_PLAYER } = privateRoutesMap;
+
+const headers = ["Nombre", "Apellido", "Posición", "Número de camiseta", "Editar", "Eliminar"];
+
+const searchParams = Astro.url.searchParams;
+const pageParam = Number(searchParams.get("page") ?? 1);
+
+
+const user = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
+
+const { data: players, total, pages }: { data: Player[]; total: number; pages: number } = await PlayerService.getPaginated(pageParam);
+
+const rows = players.map((u) => [u.name, u.lastname, u.position, u.shirtNumber]);
+
+function handleDelete(username: string) {
+  console.log(`Usuario ${username} eliminado`);
+}
+
+const actions: TableActions[] = [];
+
+actions.push(
+  {
+    href: `${EDIT_PLAYER}/`,
+    icon: EditIcon.src,
+    alt: "Editar jugador",
+    type: "link",
+  },
+  {
+    action: handleDelete,
+    icon: DeleteIcon.src,
+    alt: "Eliminar jugador",
+    type: "button",
+  }
+);
+
+
+
+---
+
+
+<AdminPanelLayout title="Panel de Administración">
+  {
+    !user ? (
+      <NotAuthorized/>
+    ) : (
+        <div class="flex flex-col w-full h-full gap-5">
+
+        <div class="flex flex-row justify-between w-full">
+    <h1 class="font-bold text-2xl">Jugadores</h1>
+    <div class="flex flex-row gap-10 w-3/2 justify-end">
+      <a
+        href={REGISTER_PLAYER}
+        class="no-underline text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md flex cursor-pointer items-center gap-2"
+        >
+        Agregar Jugador
+      </a>
+      <input
+        type="search"
+        name="search"
+        placeholder="Buscar jugador..."
+        id="search-box"
+        class="rounded-md p-2 w-1/4 focus:outline-none focus:ring-1 focus:ring-black text-black border border-solid border-black"
+        />
+    </div>
+  </div>
+  <div class="relative overflow-x-auto w-svw mt-5 flex justify-center">
+    <Table headers={headers}>
+      {
+          rows.map((row) => (
+              <tr class="border-b">
+            {row.map((cell) => (
+                <td class="px-6 py-4">{cell}</td>
+            ))}
+            {actions &&
+              actions.length > 0 &&
+              actions.map((action) =>
+              action.type === "link" ? (
+                  <td class="px-6 py-4">
+                    <a
+                      class="cursor-pointer no-underline"
+                      href={action.href?.toString() ?? "" + row[0]}
+                      >
+                      <img class="size-8" src={action.icon} alt={action.alt} />
+                    </a>
+                  </td>
+                ) : (
+                    action.action && (
+                        <td class="px-6 py-4">
+                      <button
+                        type="button"
+                        id="delete-button"
+                        value={row[0]}
+                        data-delete-user
+                        data-username={row[0]}
+                        class="cursor-pointer"
+                        >
+                        <img
+                          class="size-8"
+                          src={action.icon}
+                          alt={action.alt}
+                          />
+                      </button>
+                    </td>
+                  )
+                )
+            )}
+          </tr>
+        ))
+    }
+    </Table>
+  </div>
+  <div class={`mt-2 ${pages <= 1 ? 'hidden' : ''}`}>
+  <Pagination totalPages={pages} />
+  </div>
+  </div>
+    )
+  }
+</AdminPanelLayout>
+
+
+
+  <script>
+  document.addEventListener("click", (event) => {
+    const target = event.target as HTMLElement;
+    if (target.closest("[data-delete-user]")) {
+      const button = target.closest("[data-delete-user]") as HTMLButtonElement;
+      const username = button.getAttribute("data-username");
+      if (username) {
+        console.log(`Jugador ${username} eliminado`);
+      }
+    }
+  });
+</script>

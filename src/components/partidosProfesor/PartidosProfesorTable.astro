@@ -11,9 +11,10 @@ import { privateRoutesMap } from "@consts/routes";
 
 interface Props {
   filter: matchOptions;
+  page?: number;
 }
 
-const { filter }: Props = Astro.props;
+const { filter, page = 1 }: Props = Astro.props;
 
 const { data: dataMatch, error: errorMatch } = await Astro.callAction(
   actions.getDataByFilter,
@@ -45,6 +46,14 @@ const dataMap: Record<string, any[]> = {
   [matchOptions.equipos]: (dataMatch?.equipos as Equipo[]) ?? [],
 };
 
+for(const key in dataMap) {
+  const data = dataMap[key];
+  if (!data || data.length === 0) continue;
+  const offset = 10;
+  const paginatedData = data.slice((page - 1) * offset, page * offset);
+  dataMap[key] = paginatedData;
+}
+
 // Helper para llamar getRows siempre con los 4 argumentos (pueden ser [])
 const buildRows = (option: matchOptions) =>
   handlePartidos.getRows(
@@ -74,7 +83,7 @@ const optionsList: matchOptions[] = Object.values(
           <h2 class="text-xl font-semibold mb-2">{option}</h2>
 
           {rows.length > 0 ? (
-            <div class="flex rounded-md border border-gray-200 w-full h-fit self-center overflow-x-auto">
+            <div class="flex rounded-md w-full h-fit self-center overflow-x-auto">
               <Table headers={headers}>
                 {rows.map((row) => (
                   <tr class="border-b odd:bg-gray-50 hover:bg-gray-100 transition-colors">

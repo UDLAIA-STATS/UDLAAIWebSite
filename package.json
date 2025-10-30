@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
+    "@astrojs/db": "^0.18.2",
     "@astrojs/netlify": "^6.5.11",
     "@astrojs/solid-js": "^5.1.1",
     "@nanostores/solid": "^1.1.1",

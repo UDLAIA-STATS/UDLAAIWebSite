@@ -1,0 +1,73 @@
+---
+import type { GetStaticPaths } from "astro";
+import { matchOptions } from "@utils/handle-partidos-table";
+import { actions } from "astro:actions";
+import type { Torneo } from "@interfaces/torneos.interface";
+import { privateRoutesMap } from "@consts/routes";
+import Layout from "@layouts/Layout.astro";
+import AdminPanelLayout from "@layouts/AdminPanelLayout.astro";
+import PartidosSideBar from "@components/partidosProfesor/PartidosSideBar.astro";
+import NotAuthorized from "@components/shared/NotAuthorized.astro";
+import type { Link } from "@interfaces/link.interface";
+import PartidosProfesorTable from "@components/partidosProfesor/PartidosProfesorTable.astro";
+import Pagination from "@components/shared/Pagination.astro";
+
+const user: LoggedUser | null = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
+
+const searchParams = Astro.url.searchParams;
+const pageParam = Number(searchParams.get("page") ?? 1);
+
+const { data, error } = await Astro.callAction(actions.getTorneos, {});
+
+if (error) {
+  console.error("Error fetching torneos data:", error);
+  return Astro.redirect("/");
+}
+
+const torneos: Torneo[] = data?.data ?? [];
+
+const offset = 20;
+const totalPages = Math.ceil(torneos.length / offset);
+const paginatedTorneos = torneos.slice(
+  (pageParam - 1) * offset,
+  pageParam * offset
+);
+
+const sidebarLinks: Link[] = [
+  { name: "Torneos", href: "/admin/torneos//?page=1" },
+  { name: "Partidos", href: "/admin/partidos//?page=1" },
+  { name: "Temporadas", href: "/admin/temporadas//?page=1" },
+  { name: "Equipos", href: "/admin/equipos/?page=1" },
+];
+---
+
+<AdminPanelLayout title="Gestión de Torneos y Partidos">
+  <div id="GestionTorneosPartidos" class="my-5 h-svh w-full max-w-7xl">
+    {
+      user ? (
+        <div class="flex flex-col justify-center align-center gap-5 w-full">
+          <div class="flex flex-row justify-between gap-10 w-full">
+            <div class="w-fit">
+              <PartidosSideBar
+                items={sidebarLinks}
+                selectedItem={matchOptions.torneos}
+              />
+            </div>
+            <div class="flex flex-col items-center self-center justify-end w-3/4">
+              <PartidosProfesorTable filter={matchOptions.torneos} />
+            </div>
+          </div>
+          <div class={`${totalPages <= 1 ? 'hidden' : 'block'} w-full`}>
+            <Pagination totalPages={totalPages} />
+          </div>
+        </div>
+      ) : (
+        <div class="md:w-svw lg:w-shw w-shw flex flex-wrap justify-self-start flex-col">
+          <NotAuthorized />
+        </div>
+      )
+    }
+  </div>
+</AdminPanelLayout>

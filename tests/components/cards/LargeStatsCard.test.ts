@@ -1,9 +1,9 @@
 import { expect, test } from "vitest";
 import LargeStatsCard from "../../../src/components/cards/LargeStatsCard.astro";
 import { renderAstroComponent } from "../../helpers.ts";
-import type { Player } from "../../../src/interfaces/player.interface.ts"; 
+import type { PlayerStatistic } from "../../../src/interfaces/player.interface.ts"; 
 test("LargeStatsCard renders player stats correctly", async () => {
-  const mockPlayer: Player = {
+  const mockPlayer: PlayerStatistic = {
     position: "Delantero",
     team: "UDLA FC",
     shirtNumber: 10,

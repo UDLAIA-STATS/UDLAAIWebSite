@@ -5,6 +5,8 @@ import tailwindcss from "@tailwindcss/vite";
 import solidJs from "@astrojs/solid-js";
 import netlify from "@astrojs/netlify";
 
+import db from "@astrojs/db";
+
 // https://astro.build/config
 export default defineConfig({
   vite: {
@@ -12,7 +14,7 @@ export default defineConfig({
     ssr: {
     },
   },
-  integrations: [solidJs()],
+  integrations: [solidJs(), db()],
   site: "http://localhost:4321", //'https://udlaia-stats.netlify.app',
   base: "/",
   trailingSlash: "ignore",
