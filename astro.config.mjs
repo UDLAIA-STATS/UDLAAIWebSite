@@ -14,7 +14,7 @@ export default defineConfig({
     ssr: {
     },
   },
-  integrations: [solidJs(), db()],
+  integrations: [solidJs()],
   site: "http://localhost:4321", //'https://udlaia-stats.netlify.app',
   base: "/",
   trailingSlash: "ignore",

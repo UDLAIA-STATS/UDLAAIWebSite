@@ -142,25 +142,23 @@ const { super: superRole } = roles;
   const form = document.querySelector("form");
   const btnSubmit = form!.querySelector("button[type='submit']");
 
-  document.addEventListener("astro:page-load", () => {
-    form?.addEventListener("submit", async (e) => {
-      e.preventDefault();
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-      const formData = new FormData(form);
+    const formData = new FormData(form);
 
-      const photo = formData.get("photo");
-      console.log(photo);
+    const photo = formData.get("photo");
+    console.log(photo);
 
-      const { data, error } = await actions.registerPlayer(formData);
+    const { data, error } = await actions.registerPlayer(formData);
 
-      if (error) {
-        console.error("Error:", error);
-        alert("Error: " + error.message);
-      } else {
-        console.log("Success:", data);
-        alert("Jugador registrado exitosamente");
-        form.reset();
-      }
-    });
+    if (error) {
+      console.error("Error:", error);
+      alert("Error: " + error.message);
+    } else {
+      console.log("Success:", data);
+      alert("Jugador registrado exitosamente");
+      form.reset();
+    }
   });
 </script>

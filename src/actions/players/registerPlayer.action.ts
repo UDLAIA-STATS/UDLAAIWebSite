@@ -1,5 +1,6 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
+import { PlayerService } from "@services/playerService";
 
 export const registerPlayer = defineAction({
   accept: "form",
@@ -11,6 +12,6 @@ export const registerPlayer = defineAction({
     photo: z.instanceof(File),
   }),
   handler: async ({ name, lastname, shirtNumber, position, photo }) => {
-    return { message: `Hello, ${name}!` };
+    
   },
 });
