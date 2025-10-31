@@ -42,9 +42,6 @@
       ],
       "@utils/*": [
         "./src/utils/*"
-      ],
-      "@db/*": [
-        "./src/db/*"
       ]
     },
     "jsx": "preserve",
