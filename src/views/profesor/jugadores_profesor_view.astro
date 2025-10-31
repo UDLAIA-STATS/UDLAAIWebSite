@@ -1,29 +1,36 @@
-z---
+---
 import { privateRoutesMap } from "@consts/routes";
 import { Table } from "@components/tables/Table";
 import type { TableActions } from "@interfaces/table-actions.interface";
 import type { User } from "@interfaces/user.interface";
 import EditIcon from "@assets/edit_icon_black.svg";
 import DeleteIcon from "@assets/delete_icon_black.svg";
-
+import { actions } from "astro:actions";
+import type { Player } from "@interfaces/player.interface";
 const { REGISTER_PLAYER, EDIT_PLAYER } = privateRoutesMap;
 
-const headers = ["Nombre de usuario", "Email", "Rol", "Editar", "Eliminar"];
+const headers = ["Nombre", "Apellido",  "Posición", "Numero de camiseta", "Editar", "Eliminar"];
 
-const users: User[] = [
-  { nombre_usuario: "Juan Perez", email_usuario: "H8h1o@example.com", rol: "Admin" },
-  { nombre_usuario: "Maria López", email_usuario: "mlopez@example.com", rol: "Usuario" },
-];
+const { data, error } = await Astro.callAction(actions.getPlayers, {});
 
-const rows = users.map((u) => [u.nombre_usuario, u.email_usuario, u.rol]);
+if (error || !data) {
+  console.error("Error fetching players:", error);
+  throw new Error("No se pudo obtener la lista de jugadores.");
+}
+
+const users: Player[] = data.data?.data ?? [];
+const total = data.data?.total ?? 0;
+const pages = data.data?.pages ?? 0;
+
+const rows = users.map((u) => [u.name, u.lastname, u.position, u.shirtNumber]);
 
 function handleDelete(username: string) {
   console.log(`Usuario ${username} eliminado`);
 }
 
-const actions: TableActions[] = [];
+const tableActions: TableActions[] = [];
 
-actions.push(
+tableActions.push(
   {
     href: `${EDIT_PLAYER}/`,
     icon: EditIcon.src,
@@ -55,7 +62,7 @@ actions.push(
         name="search"
         placeholder="Buscar jugador..."
         id="search-box"
-        class="rounded-md p-2 w-1/4 focus:outline-none focus:ring-1 focus:ring-[#000] text-black border border-solid border-[#000]"
+        class="rounded-md p-2 w-1/4 focus:outline-none focus:ring-1 focus:ring-black text-black border border-solid border-black"
       />
     </div>
   </div>
@@ -67,14 +74,14 @@ actions.push(
             {row.map((cell) => (
               <td class="px-6 py-4">{cell}</td>
             ))}
-            {actions &&
-              actions.length > 0 &&
-              actions.map((action) =>
+            {tableActions &&
+              tableActions.length > 0 &&
+              tableActions.map((action) =>
                 action.type === "link" ? (
                   <td class="px-6 py-4">
                     <a
                       class="cursor-pointer no-underline"
-                      href={action.href?.toString() + row[0]}
+                      href={action.href?.toString() ?? "" + row[0]}
                     >
                       <img class="size-8" src={action.icon} alt={action.alt} />
                     </a>
@@ -107,6 +114,7 @@ actions.push(
   </div>
 
   <script>
+    const searchInput = document.getElementById("search-box") as HTMLInputElement;  
   document.addEventListener("click", (event) => {
     const target = event.target as HTMLElement;
     if (target.closest("[data-delete-user]")) {
@@ -117,4 +125,20 @@ actions.push(
       }
     }
   });
+
+  searchInput.addEventListener("input", () => {
+    const search = searchInput.value;
+    const rows = document.querySelectorAll("tr[id^='user-row-']");
+    rows.forEach((row) => {
+      const usernameCell = row.querySelector("td:first-child");
+      if (usernameCell) {
+        const username = usernameCell.textContent || "";
+        if (username.toLowerCase().includes(search.toLowerCase())) {
+          row.classList.remove("hidden");
+        } else {
+          row.classList.add("hidden");
+        }
+      }
+    });
+  })
 </script>

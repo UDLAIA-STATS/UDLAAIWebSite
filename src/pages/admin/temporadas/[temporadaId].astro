@@ -28,14 +28,14 @@ if (errorData) {
   console.error("Error fetching torneos:", errorData);
   Swal.fire("Error", "Error al cargar los torneos", "error").then((result) => {
     if (result.isConfirmed) {
-      Astro.redirect(privateRoutesMap.AUTH_ADMIN);
+      Astro.redirect(privateRoutesMap.VER_TEMPORADAS);
     }
   });
 } else if (errorTemporada) {
   console.error("Error fetching temporada:", errorTemporada);
   Swal.fire("Error", "Error al cargar la temporada", "error").then((result) => {
     if (result.isConfirmed) {
-      Astro.redirect(privateRoutesMap.AUTH_ADMIN);
+      Astro.redirect(privateRoutesMap.VER_TEMPORADAS);
     }
   });
 }
@@ -47,7 +47,7 @@ if (!torneosData || !temporadaData) {
     "No se pudo recuperar los datos del servidor.",
     "error",
   ).then(() => {
-    Astro.redirect(privateRoutesMap.AUTH_ADMIN);
+    Astro.redirect(privateRoutesMap.VER_TEMPORADAS);
   });
 }
 
@@ -145,7 +145,7 @@ const torneos: Torneo[] = torneosData?.data ?? [];
 
   btnCancel.addEventListener("click", (e) => {
     e.preventDefault();
-    navigate(privateRoutesMap.ADMIN_PARTIDOS);
+    navigate(privateRoutesMap.VER_TEMPORADAS);
   });
 
   btnSubmit.addEventListener("click", async () => {
@@ -172,7 +172,7 @@ const torneos: Torneo[] = torneosData?.data ?? [];
       }
       Swal.fire("Éxito", "Temporada actualizada", "success").then((result) => {
         if (result.isConfirmed) {
-          navigate(privateRoutesMap.ADMIN_PARTIDOS);
+          navigate(privateRoutesMap.VER_TEMPORADAS);
         }
       });
       form.reset();
@@ -184,7 +184,4 @@ const torneos: Torneo[] = torneosData?.data ?? [];
     }
   });
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-  });
 </script>

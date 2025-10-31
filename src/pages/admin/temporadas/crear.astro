@@ -34,8 +34,6 @@ const torneos: Torneo[] = data?.data ?? [];
   user={user}
 >
   <form
-    action=""
-    method="post"
     id="form-temporada"
     class="flex flex-col w-full max-w-md"
   >
@@ -105,7 +103,7 @@ const torneos: Torneo[] = data?.data ?? [];
 
   btnCancel.addEventListener("click", (e) => {
     e.preventDefault();
-    navigate(privateRoutesMap.ADMIN_PARTIDOS);
+    navigate(privateRoutesMap.VER_TEMPORADAS);
   });
 
   btnSubmit.addEventListener("click", async () => {
@@ -130,7 +128,7 @@ const torneos: Torneo[] = data?.data ?? [];
       }
       Swal.fire("Éxito", "Temporada creada", "success").then((result) => {
         if (result.isConfirmed) {
-          navigate(privateRoutesMap.ADMIN_PARTIDOS);
+          navigate(privateRoutesMap.VER_TEMPORADAS);
         }
       });
       form.reset();
@@ -140,7 +138,4 @@ const torneos: Torneo[] = data?.data ?? [];
     }
   });
 
-  form?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-  });
 </script>

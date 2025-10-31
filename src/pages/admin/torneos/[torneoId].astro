@@ -46,15 +46,15 @@ const torneo: Torneo = data!.data;
 ---
 
 <FormLayout formTitle="Editar Torneo" pageTitle="Editar Torneo" user={user}>
-  <input
-    type="text"
-    hidden
-    value={torneo?.idtorneo ?? ""}
-    name="idtorneo"
-    id="idtorneo"
-    class="hidden"
-  />
   <form id="form-torneo" class="flex flex-col w-full max-w-md">
+    <input
+      type="text"
+      hidden
+      value={torneo?.idtorneo ?? ""}
+      name="idtorneo"
+      id="idtorneo"
+      class="hidden"
+    />
     <input
       type="number"
       id="idtorneo"
@@ -118,7 +118,7 @@ const torneo: Torneo = data!.data;
 
   btnCancel.addEventListener("click", (e) => {
     e.preventDefault();
-    navigate(privateRoutesMap.ADMIN_PARTIDOS);
+    navigate(privateRoutesMap.VER_TORNEOS);
   });
 
   btnSubmit.addEventListener("click", async () => {
@@ -174,7 +174,7 @@ const torneo: Torneo = data!.data;
       }
       Swal.fire("Éxito", "Torneo actualizado", "success").then((result) => {
         if (result.isConfirmed) {
-          navigate(privateRoutesMap.ADMIN_PARTIDOS);
+          navigate(privateRoutesMap.VER_TORNEOS);
         }
       });
       form.reset();
@@ -184,7 +184,4 @@ const torneo: Torneo = data!.data;
     }
   });
 
-  form?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-  });
 </script>

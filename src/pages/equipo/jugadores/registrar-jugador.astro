@@ -138,6 +138,8 @@ const { super: superRole } = roles;
 
 <script>
   import { actions } from "astro:actions";
+import { navigate } from "astro:transitions/client";
+import Swal from "sweetalert2";
 
   const form = document.querySelector("form");
   const btnSubmit = form!.querySelector("button[type='submit']");
@@ -156,8 +158,16 @@ const { super: superRole } = roles;
       console.error("Error:", error);
       alert("Error: " + error.message);
     } else {
-      console.log("Success:", data);
-      alert("Jugador registrado exitosamente");
+      Swal.fire({
+        icon: "success",
+        title: "Jugador registrado",
+        text: "El jugador ha sido registrado exitosamente.",
+        confirmButtonText: "Aceptar",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/admin/jugadores");
+        }
+      });
       form.reset();
     }
   });

@@ -52,7 +52,7 @@ export class PlayerService {
     const pages = Math.ceil(players.length / PAGE_SIZE);
     const offset = (page - 1) * PAGE_SIZE;
     const data = players.slice(offset, offset + PAGE_SIZE);
-    return { data, total: players.length, pages };
+    return { data: players, total: players.length, pages };
   }
 
   /** Actualizar parcialmente un jugador */

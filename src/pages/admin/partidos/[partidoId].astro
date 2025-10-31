@@ -73,7 +73,7 @@ const torneo: Torneo = torneos.find(
 ---
 
 <FormLayout formTitle="Editar Partido" pageTitle="Editar Partido" user={user}>
-  <form action="" id="form-partido" class="flex flex-col w-full max-w-md">
+  <form id="form-partido" class="flex flex-col w-full max-w-md">
     <input
       type="number"
       hidden
@@ -317,7 +317,4 @@ const torneo: Torneo = torneos.find(
     }
   });
 
-  form?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-  });
 </script>

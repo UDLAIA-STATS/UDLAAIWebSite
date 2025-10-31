@@ -43,8 +43,6 @@ const torneos: Torneo[] = torneoData?.data ?? [];
 
 <FormLayout formTitle="Agregar Partido" pageTitle="Agregar Partido" user={user}>
   <form
-    action=""
-    method="post"
     id="form-partido"
     class="flex flex-col w-full max-w-md"
   >
@@ -180,7 +178,6 @@ const torneos: Torneo[] = torneoData?.data ?? [];
   import { navigate } from "astro:transitions/client";
   import { privateRoutesMap } from "@consts/index";
   import type { Torneo } from "@interfaces/index";
-  import type { Partido } from "@interfaces/partido.interface";
 
   const form = document.querySelector("#form-partido") as HTMLFormElement;
   const btnSubmit = document.querySelector(

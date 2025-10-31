@@ -17,7 +17,7 @@ if (error) {
   console.error("Error fetching equipo:", error);
   Swal.fire("Error", "Error al cargar el equipo", "error").then((result) => {
     if (result.isConfirmed) {
-      Astro.redirect(privateRoutesMap.AUTH_ADMIN);
+      Astro.redirect(privateRoutesMap.VER_EQUIPOS);
     }
   });
 }
@@ -29,7 +29,7 @@ if (!data) {
     "No se pudo recuperar los datos del servidor.",
     "error",
   ).then(() => {
-    Astro.redirect(privateRoutesMap.AUTH_ADMIN);
+    Astro.redirect(privateRoutesMap.VER_EQUIPOS);
   });
 }
 
@@ -96,7 +96,7 @@ const user = Astro.cookies.get("user")
 
   btnCancel.addEventListener("click", (e) => {
     e.preventDefault();
-    navigate(privateRoutesMap.ADMIN_PARTIDOS);
+    navigate(privateRoutesMap.VER_EQUIPOS);
   });
 
   btnSubmit.addEventListener("click", async () => {
@@ -125,7 +125,7 @@ const user = Astro.cookies.get("user")
       }
       Swal.fire("Éxito", "Equipo actualizado", "success").then((result) => {
         if (result.isConfirmed) {
-          navigate(privateRoutesMap.ADMIN_PARTIDOS);
+          navigate(privateRoutesMap.VER_EQUIPOS);
         }
       });
       form.reset();
@@ -135,9 +135,5 @@ const user = Astro.cookies.get("user")
       console.error(err as Error);
       Swal.fire("Error", "Error al actualizar el equipo", "error");
     }
-  });
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
   });
 </script>

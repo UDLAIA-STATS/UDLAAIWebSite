@@ -1,13 +1,19 @@
 ---
-import { matchOptions } from "@utils/handle-partidos-table";
+import { getAddHref, matchOptions } from "@utils/handle-partidos-table";
 import { actions } from "astro:actions";
-import type { Equipo, Partido, Temporada, Torneo } from "@interfaces/torneos.interface";
+import type {
+  Equipo,
+  Partido,
+  Temporada,
+  Torneo,
+} from "@interfaces/torneos.interface";
 import AdminPanelLayout from "@layouts/AdminPanelLayout.astro";
 import PartidosSideBar from "@components/partidosProfesor/PartidosSideBar.astro";
 import NotAuthorized from "@components/shared/NotAuthorized.astro";
 import type { Link } from "@interfaces/link.interface";
 import PartidosProfesorTable from "@components/partidosProfesor/PartidosProfesorTable.astro";
 import Pagination from "@components/shared/Pagination.astro";
+import { buttonClass } from "@consts/styles";
 
 const user: LoggedUser | null = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
@@ -52,11 +58,17 @@ const sidebarLinks: Link[] = [
                 selectedItem={matchOptions.equipos}
               />
             </div>
-            <div class="flex flex-col items-center self-center justify-end w-3/4">
+            <div class="flex flex-col items-start self-start justify-start w-3/4">
+              <div class="mb-5">
+                <a class={buttonClass} href={getAddHref(matchOptions.equipos)}>
+                  Crear Equipo
+                </a>
+              </div>
+
               <PartidosProfesorTable filter={matchOptions.equipos} />
             </div>
           </div>
-          <div class={`${totalPages <= 1 ? 'hidden' : 'block'} w-full`}>
+          <div class={`${totalPages <= 1 ? "hidden" : "block"} w-full`}>
             <Pagination totalPages={totalPages} />
           </div>
         </div>

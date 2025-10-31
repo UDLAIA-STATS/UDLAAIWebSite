@@ -17,8 +17,6 @@ const torneo = Astro.props.torneo;
 
 <FormLayout formTitle="Agregar Torneo" pageTitle="Agregar Torneo" user={user}>
   <form
-    action=""
-    method="post"
     id="form-torneo"
     class="flex flex-col w-full max-w-md"
   >
@@ -78,7 +76,7 @@ const torneo = Astro.props.torneo;
 
   btnCancel.addEventListener("click", (e) => {
     e.preventDefault();
-    navigate(privateRoutesMap.ADMIN_PARTIDOS);
+    navigate(privateRoutesMap.VER_TORNEOS);
   });
 
     btnSubmit.addEventListener("click", async () => {
@@ -106,7 +104,7 @@ const torneo = Astro.props.torneo;
         form.reset();
         Swal.fire("Éxito", "Torneo creado", "success").then((result) => {
           if (result.isConfirmed) {
-            navigate(privateRoutesMap.ADMIN_PARTIDOS);
+            navigate(privateRoutesMap.VER_TORNEOS);
           }
         });
         btnSubmit.disabled = false;
@@ -118,8 +116,5 @@ const torneo = Astro.props.torneo;
       }
     });
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-    });
   });
 </script>

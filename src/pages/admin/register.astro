@@ -84,7 +84,7 @@ import { actions } from "astro:actions";
 import { navigate } from "astro:transitions/client";
   import Swal from "sweetalert2";
 
-  const form = document.querySelector("form");
+  const form = document.querySelector("form") as HTMLFormElement;
   const btnSubmit = form!.querySelector(
     "button[type='submit']"
   ) as HTMLButtonElement;
@@ -97,7 +97,7 @@ import { navigate } from "astro:transitions/client";
     navigate(privateRoutesMap.AUTH_ADMIN);
   });
 
-  form?.addEventListener("submit", async (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     btnSubmit.setAttribute("disabled", "disabled");
     const formData = new FormData(form);
