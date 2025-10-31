@@ -190,7 +190,7 @@ const torneos: Torneo[] = torneoData?.data ?? [];
 
   btnCancel.addEventListener("click", (e) => {
     e.preventDefault();
-    navigate(privateRoutesMap.ADMIN_PARTIDOS);
+    navigate(privateRoutesMap.VER_PARTIDOS);
   });
 
   btnSubmit.addEventListener("click", async () => {
@@ -267,7 +267,7 @@ const torneos: Torneo[] = torneoData?.data ?? [];
 
       Swal.fire("Éxito", "Partido creado", "success").then((result) => {
         if (result.isConfirmed) {
-          navigate(privateRoutesMap.ADMIN_PARTIDOS);
+          navigate(privateRoutesMap.VER_PARTIDOS);
         }
       });
       btnSubmit.disabled = false;

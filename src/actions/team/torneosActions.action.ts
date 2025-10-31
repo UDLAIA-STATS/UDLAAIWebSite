@@ -1,6 +1,7 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import type { Torneo } from "@interfaces/torneos.interface";
+import debug from "debug";
 
 const torneoSchema = z.object({
   nombretorneo: z.string().min(2).max(100),
@@ -61,7 +62,8 @@ export const createTorneo = defineAction({
       });
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `Error ${res.status}: ${res.statusText}`);
+        debug.log(errorData);
+        throw new Error(errorData || `Error ${res.status}: ${res.statusText}`);
       };
       return { data: (await res.json()) as Torneo };
     } catch (err) {

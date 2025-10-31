@@ -148,21 +148,11 @@ tableActions.push(
             ))}
           </Table>
         </div>
-        <div class="w-full flex flex-col justify-center mt-3">
-          <div
-            class:list={[
-              "self-center mt-4",
-              paginationData.total_pages <= 1 ? "hidden" : "",
-            ]}
-          >
-            Página {paginationData.current_page} de {paginationData.total_pages}
-          </div>
           <div
             id="navigation"
-            class={`flex flex-row justify-center gap-5 my-10 ${paginationData.total_pages <= 1 ? 'hidden' : ''}`}
+            class={`flex flex-row justify-center gap-5 my-5 ${paginationData.total_pages <= 1 ? 'hidden' : ''}`}
           >
             <PaginationComponent totalPages={paginationData.total_pages} />
-          </div>
         </div>
       </div>
     )

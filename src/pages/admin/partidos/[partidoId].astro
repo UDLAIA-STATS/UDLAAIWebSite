@@ -238,7 +238,7 @@ const torneo: Torneo = torneos.find(
 
   btnCancel.addEventListener("click", (e) => {
     e.preventDefault();
-    navigate(privateRoutesMap.ADMIN_PARTIDOS);
+    navigate(privateRoutesMap.VER_PARTIDOS);
   });
 
   btnSubmit.addEventListener("click", async () => {
@@ -306,7 +306,7 @@ const torneo: Torneo = torneos.find(
       Swal.fire("Éxito", "Partido actualizado", "success").then(
         async (result) => {
           if (result.isConfirmed) {
-            await navigate(privateRoutesMap.ADMIN_PARTIDOS);
+            await navigate(privateRoutesMap.VER_PARTIDOS);
           }
         },
       );
