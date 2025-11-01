@@ -58,7 +58,7 @@ const torneos: Torneo[] = torneoData?.data ?? [];
 
     <div class="flex gap-2 flex-col mb-4">
       <label for="idtorneo" class="text-base font-medium">Torneo</label>
-      <select name="idtorneo" class={inputClass} id="idtorneo" required>
+      <select name="idtorneo" class={inputClass} id="idtorneo">
         <option value="" disabled selected>Selecciona un torneo</option>
         {
           torneos.map((torneo: Torneo) => (
@@ -78,7 +78,6 @@ const torneos: Torneo[] = torneoData?.data ?? [];
         name="idequipolocal"
         class={inputClass}
         id="idequipolocal"
-        required
       >
         <option value="" disabled selected>Selecciona un equipo</option>
         {
@@ -102,7 +101,6 @@ const torneos: Torneo[] = torneoData?.data ?? [];
         name="idequipovisitante"
         class={inputClass}
         id="idequipovisitante"
-        required
       >
         <option value="" disabled selected>Selecciona un equipo</option>
         {
@@ -128,7 +126,6 @@ const torneos: Torneo[] = torneoData?.data ?? [];
         type="number"
         min="0"
         max="100"
-        required
         class={inputClass}
       />
     </div>
@@ -143,7 +140,6 @@ const torneos: Torneo[] = torneoData?.data ?? [];
         type="number"
         min="0"
         max="100"
-        required
         class={inputClass}
       />
     </div>
@@ -156,7 +152,6 @@ const torneos: Torneo[] = torneoData?.data ?? [];
         id="fechapartido"
         name="fechapartido"
         type="date"
-        required
         class={inputClass}
       />
     </div>
@@ -188,9 +183,12 @@ const torneos: Torneo[] = torneoData?.data ?? [];
     "btn-cancel"
   ) as HTMLButtonElement;
 
-  btnCancel.addEventListener("click", (e) => {
-    e.preventDefault();
+  btnCancel.addEventListener("click", () => {
     navigate(privateRoutesMap.VER_PARTIDOS);
+  });
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
   });
 
   btnSubmit.addEventListener("click", async () => {
@@ -198,20 +196,32 @@ const torneos: Torneo[] = torneoData?.data ?? [];
     btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
 
     const formData = new FormData(form);
-    const date = formData.get("fechapartido") as string;
-    formData.set("fechapartido", new Date(date).toISOString());
-    const nombreLocal = formData.get("idequipolocal");
-    const nombreVisitante = formData.get("idequipovisitante");
-    if (nombreLocal === nombreVisitante) {
-      Swal.fire(
-        "Error",
-        "El equipo local y el equipo visitante no pueden ser el mismo.",
-        "error",
-      );
+    const tipoPartido = formData.get("tipopartido")?.toString().trim() ?? "" ;
+    const nombreTorneo = formData.get("idtorneo")?.toString().trim() ?? "";
+    const nombreLocal = formData.get("idequipolocal")?.toString().trim() ?? "";
+    const nombreVisitante = formData.get("idequipovisitante")?.toString().trim() ?? "";
+    const marcadorLocal = formData.get("marcadorequipolocal")?.toString().trim() ?? "";
+    const marcadorVisitante = formData.get("marcadorequipovisitante")?.toString().trim() ?? "";
+    const date = formData.get("fechapartido")?.toString().trim() ?? "";
+    const validationsErrors = {
+      torneo: nombreLocal === "" || nombreVisitante === "" ? "Debe seleccionar un equipo local." : "",
+      torneosIguales: ( nombreLocal !== "" && nombreVisitante !== "")  && (nombreLocal === nombreVisitante) ? "El equipo local y el equipo visitante no pueden ser el mismo." : "",
+      marcadorLocal: marcadorLocal === "" ? "El marcador del equipo local es obligatorio." : "",
+      marcadorVisitante: marcadorVisitante === "" ? "El marcador del equipo visitante es obligatorio." : "",
+      nombreTorneo: nombreTorneo === "" || nombreLocal === "Selecciona un torneo" ? "Seleccione un torneo." : "",
+      fecha: date === "" ? "La fecha del partido es obligatoria." : "",
+    }
+
+    if(Object.values(validationsErrors).some((msg) => msg !== "")) {
+      const errorMessages = Object.values(validationsErrors).filter((msg) => msg !== "");
+      Swal.fire("Error", errorMessages.join("<br/>"), "error");
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
       return;
     }
+
+    formData.set("fechapartido", new Date(date).toISOString());
+    
     const { data: equipoLocal, error: equipoError } =
       await actions.getEquipoByName({ nombre: nombreLocal as string });
     const { data: equipoVisitante, error: visitanteError } =
@@ -228,11 +238,9 @@ const torneos: Torneo[] = torneoData?.data ?? [];
     formData.set("idequipolocal", String(equipoLocal?.data.idequipo));
     formData.set("idequipovisitante", String(equipoVisitante?.data.idequipo));
 
-    console.log("Form Data:", Array.from(formData.entries()));
 
     try {
       const { data, error } = await actions.createPartido(formData);
-      console.log("Partido creation response:", data);
       const { data: torneoData, error: torneError } =
         await actions.getTorneos();
 
@@ -251,8 +259,6 @@ const torneos: Torneo[] = torneoData?.data ?? [];
         btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
         return;
       }
-
-      const partido = data.data;
 
       const torneo: Torneo = torneoData?.data.find(
         (torneo: Torneo) =>
@@ -279,7 +285,4 @@ const torneos: Torneo[] = torneoData?.data ?? [];
     }
   });
 
-  form?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-  });
 </script>

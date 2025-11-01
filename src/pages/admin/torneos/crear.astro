@@ -21,7 +21,6 @@ const user = Astro.cookies.get("user")
         maxlength="100"
         name="nombretorneo"
         class={inputClass}
-        required
       />
     </div>
 
@@ -67,18 +66,29 @@ import Swal from "sweetalert2";
       e.preventDefault();
       navigate(privateRoutesMap.VER_TORNEOS);
     });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+    });
     
     btnSubmit.addEventListener("click", async () => {
       btnSubmit.disabled = true;
       btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
       const formData = new FormData(form);
       const nombreTorneo = formData.get("nombretorneo")?.toString().trim() ?? "";
-      if (nombreTorneo.length === 0) {
-        Swal.fire("Error", "El nombre del torneo es obligatorio", "error");
-        btnSubmit.disabled = false;
-        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-        return;
-      }
+      const descripcionTorneo = formData.get("descripciontorneo")?.toString().trim() ?? "";
+      const validaciones = {
+        nombreMuyCorto: nombreTorneo != "" && nombreTorneo.length < 5 ? "El nombre del torneo es muy corto" : "",
+        nombreTorneoFaltante: nombreTorneo.length === 0 ? "El nombre del torneo es obligatorio" : ""
+      };
+
+      if(Object.values(validaciones).some((msg) => msg !== "")) {
+      const errorMessages = Object.values(validaciones).filter((msg) => msg !== "");
+      Swal.fire("Error", errorMessages.join("<br/>"), "error");
+      btnSubmit.disabled = false;
+      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+      return;
+    }
       
       try {
         const { data, error } = await actions.createTorneo(formData);
@@ -105,5 +115,6 @@ import Swal from "sweetalert2";
       }
     });
   });
+  
   </script>
   

@@ -1,12 +1,9 @@
 ---
 import AdminPanelLayout from "@layouts/AdminPanelLayout.astro";
 import NotAuthorized from "@components/shared/NotAuthorized.astro";
-import { PartidosButtons } from "@components/partidosProfesor/PartidosProfesorButtons";
 import PartidosSideBar from "@components/partidosProfesor/PartidosSideBar.astro";
-import PartidosTable from "@components/partidosProfesor/PartidosProfesorTable.astro";
 import * as handlePartidos from "@utils/handle-partidos-table";
 import { MatchOptionClient } from "@utils/index";
-import type { server } from "@actions/index";
 import type { Link } from "@interfaces/index";
 
 const user: LoggedUser | null = Astro.cookies.get("user")

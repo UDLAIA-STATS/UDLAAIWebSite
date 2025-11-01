@@ -33,10 +33,7 @@ const torneos: Torneo[] = data?.data ?? [];
   pageTitle={"Agregar Temporada"}
   user={user}
 >
-  <form
-    id="form-temporada"
-    class="flex flex-col w-full max-w-md"
-  >
+  <form id="form-temporada" class="flex flex-col w-full max-w-md">
     <div class="flex gap-2 flex-col mb-4">
       <label for="nombretemporada" class="text-base font-medium"
         >Nombre de la Temporada</label
@@ -47,7 +44,6 @@ const torneos: Torneo[] = data?.data ?? [];
         type="text"
         maxlength="100"
         class={inputClass}
-        required
       />
     </div>
 
@@ -63,7 +59,7 @@ const torneos: Torneo[] = data?.data ?? [];
 
     <div class="flex gap-2 flex-col mb-4">
       <label for="idtorneo" class="text-base font-medium">Torneo</label>
-      <select name="idtorneo" class={inputClass} id="idtorneo" required>
+      <select name="idtorneo" class={inputClass} id="idtorneo">
         <option value="" disabled selected>Selecciona un torneo</option>
         {
           torneos.map((torneo: Torneo) => (
@@ -94,16 +90,16 @@ const torneos: Torneo[] = data?.data ?? [];
 
   const form = document.querySelector("#form-temporada") as HTMLFormElement;
   const btnSubmit = document.querySelector(
-    'button[type="submit"]',
+    'button[type="submit"]'
   ) as HTMLButtonElement;
+  const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
 
-  const btnCancel = document.getElementById(
-    "btn-cancel"
-  ) as HTMLButtonElement;
-
-  btnCancel.addEventListener("click", (e) => {
-    e.preventDefault();
+  btnCancel.addEventListener("click", () => {
     navigate(privateRoutesMap.VER_TEMPORADAS);
+  });
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
   });
 
   btnSubmit.addEventListener("click", async () => {
@@ -115,7 +111,39 @@ const torneos: Torneo[] = data?.data ?? [];
     const tipoTemporada =
       formData.get("tipotemporada")?.toString().trim() ?? "";
     const nombreTorneo = formData.get("idtorneo")?.toString().trim() ?? "";
-    console.log("Datos del formulario de temporadas: " + formData.entries());
+    const validationsErrors = {
+      nombreTemporada:
+        nombreTemporada.length === 0
+          ? "El nombre de la temporada es obligatorio."
+          : "",
+      tipoTemporada:
+        tipoTemporada.length === 0
+          ? "El tipo de temporada es obligatorio."
+          : "",
+      nombreTorneo:
+        nombreTorneo.length === 0 || nombreTorneo === "Selecciona un torneo"
+          ? "El torneo es obligatorio."
+          : "",
+      nombreMuyCorto:
+        nombreTemporada != "" && nombreTemporada.length < 5
+          ? "El nombre de la temporada es muy corto."
+          : "",
+    };
+
+    if (Object.values(validationsErrors).some((msg) => msg !== "")) {
+      const errorMessages = Object.values(validationsErrors).filter(
+        (msg) => msg !== ""
+      );
+      Swal.fire("Error", errorMessages.join("<br/>"), "error").then(
+        (result) => {
+          if (result.isConfirmed) {
+            btnSubmit.disabled = false;
+            btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+          }
+        }
+      );
+      return;
+    }
 
     try {
       const { data, error } = await actions.createTemporada(formData);
@@ -137,5 +165,4 @@ const torneos: Torneo[] = data?.data ?? [];
       Swal.fire("Error", "Error al crear el partido", "error");
     }
   });
-
 </script>
