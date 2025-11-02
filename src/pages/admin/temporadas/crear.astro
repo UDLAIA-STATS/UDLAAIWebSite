@@ -87,6 +87,7 @@ const torneos: Torneo[] = data?.data ?? [];
   import { actions } from "astro:actions";
   import { navigate } from "astro:transitions/client";
   import { privateRoutesMap } from "@consts/routes";
+import validateTemporadas from "@utils/validation/admin/temporadas-validation";
 
   const form = document.querySelector("#form-temporada") as HTMLFormElement;
   const btnSubmit = document.querySelector(
@@ -106,35 +107,10 @@ const torneos: Torneo[] = data?.data ?? [];
     btnSubmit.disabled = true;
     btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
     const formData = new FormData(form);
-    const nombreTemporada =
-      formData.get("nombretemporada")?.toString().trim() ?? "";
-    const tipoTemporada =
-      formData.get("tipotemporada")?.toString().trim() ?? "";
-    const nombreTorneo = formData.get("idtorneo")?.toString().trim() ?? "";
-    const validationsErrors = {
-      nombreTemporada:
-        nombreTemporada.length === 0
-          ? "El nombre de la temporada es obligatorio."
-          : "",
-      tipoTemporada:
-        tipoTemporada.length === 0
-          ? "El tipo de temporada es obligatorio."
-          : "",
-      nombreTorneo:
-        nombreTorneo.length === 0 || nombreTorneo === "Selecciona un torneo"
-          ? "El torneo es obligatorio."
-          : "",
-      nombreMuyCorto:
-        nombreTemporada != "" && nombreTemporada.length < 5
-          ? "El nombre de la temporada es muy corto."
-          : "",
-    };
+    const errorMessage = validateTemporadas(formData);
 
-    if (Object.values(validationsErrors).some((msg) => msg !== "")) {
-      const errorMessages = Object.values(validationsErrors).filter(
-        (msg) => msg !== ""
-      );
-      Swal.fire("Error", errorMessages.join("<br/>"), "error").then(
+    if (errorMessage.length > 0) {
+      Swal.fire("Error", errorMessage, "error").then(
         (result) => {
           if (result.isConfirmed) {
             btnSubmit.disabled = false;

@@ -81,7 +81,8 @@ const loggedInUser = Astro.cookies.get("user")
 </Layout>
 
 <script>
-  import { actions } from "astro:actions";
+  import validateLogin from "@utils/validation/auth/login-validation";
+import { actions } from "astro:actions";
   import { navigate } from "astro:transitions/client";
   import Swal from "sweetalert2";
 
@@ -92,20 +93,21 @@ const loggedInUser = Astro.cookies.get("user")
   document.addEventListener("astro:page-load", async () => {
       btnSubmit.addEventListener("click", async () => {
     btnSubmit.disabled = true;
-    btnSubmit.classList.add("opacity-75", "cursor-not-allowed");
+    btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
 
     const formData = new FormData(form);
     const username = formData.get("name")?.toString().trim() ?? "";
     const password = formData.get("password")?.toString().trim() ?? "";
 
-    if (!username || !password) {
+    const errorMessages = validateLogin(formData);
+    if (errorMessages.length > 0) {
       Swal.fire({
-        icon: "warning",
-        title: "Campos incompletos",
-        text: "Por favor, complete todos los campos requeridos.",
+        icon: "error",
+        title: "Error de validación",
+        html: errorMessages,
       });
       btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-75", "cursor-not-allowed");
+      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
       return;
     }
 
@@ -121,12 +123,12 @@ const loggedInUser = Astro.cookies.get("user")
         text: "Usuario o contraseña incorrectos.",
       });
       btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-75", "cursor-not-allowed");
+      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
       return;
     }
 
     btnSubmit.disabled = false;
-    btnSubmit.classList.remove("opacity-75", "cursor-not-allowed");
+    btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
     navigate("/");
   });
   });

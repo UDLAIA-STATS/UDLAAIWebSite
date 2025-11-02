@@ -123,10 +123,10 @@ const { super: superRole } = roles;
           />
         </div>
         <div class="flex justify-center text-center mt-5 mx-5 pt-2 gap-5">
-            <button class={buttonClass} type="button" id="btn-cancel">
-              Cancelar
-            </button>
-            <button
+          <button class={buttonClass} type="button" id="btn-cancel">
+            Cancelar
+          </button>
+          <button
             class="disabled:bg-gray-300 text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md cursor-pointer flex gap-2"
             type="submit"
             id="btn-login"
@@ -138,7 +138,7 @@ const { super: superRole } = roles;
               alt=""
             />
           </button>
-          </div>
+        </div>
       </form>
     </div>
   </section>
@@ -149,14 +149,16 @@ const { super: superRole } = roles;
   import Swal from "sweetalert2/dist/sweetalert2.js";
   import { actions } from "astro:actions";
   import { privateRoutesMap } from "@consts/routes";
-  import { navigate } from 'astro:transitions/client';
-import type { User } from "@interfaces/user.interface";
+  import { navigate } from "astro:transitions/client";
+  import type { User } from "@interfaces/user.interface";
+  import validateUsers from "@utils/validation/admin/usuarios-validiation";
 
   const form = document.querySelector("#form-usuario") as HTMLFormElement;
   const userCredential = "123456789";
-  const btnCancel = document.getElementById(
-    "btn-cancel"
+  const btnSubmit = form!.querySelector(
+    "button[type='submit']"
   ) as HTMLButtonElement;
+  const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
 
   btnCancel.addEventListener("click", (e) => {
     e.preventDefault();
@@ -165,38 +167,48 @@ import type { User } from "@interfaces/user.interface";
 
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
+    btnSubmit.disabled = true;
+    btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
     const formData = new FormData(form);
     const name = formData.get("name")?.toString().trim();
     const email = formData.get("email")?.toString().trim();
     const password = formData.get("password")?.toString().trim() ?? "";
+
+    const errorMessage = validateUsers(formData);
+
+    if (errorMessage.length > 0) {
+      Swal.fire("Error", errorMessage, "error");
+      btnSubmit.disabled = false;
+      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+      return;
+    }
+
     formData.set("name", name ?? "");
     formData.set("email", email ?? "");
     formData.set("password", password ?? "");
 
     const originalName = formData.get("originalName")?.toString().trim() ?? "";
-    const data = await actions.getUserByUsername.orThrow({ username: originalName, userCredential: "123456789" });
+    const data = await actions.getUserByUsername.orThrow({
+      username: originalName,
+      userCredential: "123456789",
+    });
     const user: User = data.data;
-    const regexp = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
+    const regexp = new RegExp(
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    );
 
-
-    if(name === user.nombre_usuario && email === user.email_usuario && (password === "" || password === null)) {
+    if (
+      name === user.nombre_usuario &&
+      email === user.email_usuario &&
+      (password === "" || password === null)
+    ) {
       Swal.fire(
         "Error",
         "No se han realizado cambios en los datos del usuario.",
         "error"
       );
-      return;
-    }
-    if(!name || name === "") {
-      Swal.fire(
-        "Error",
-        "El nombre de usuario no puede estar vacío.",
-        "error"
-      );
-    }
-
-    if (!email || email === "" || regexp.test(email) === false) {
-      Swal.fire("Error", "El correo electrónico es inválido.", "error");
+      btnSubmit.disabled = false;
+      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
       return;
     }
 
@@ -213,6 +225,8 @@ import type { User } from "@interfaces/user.interface";
         "Debe modificar al menos un campo para actualizar el usuario",
         "error"
       );
+      btnSubmit.disabled = false;
+      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
       return;
     }
     formData.append("userCredential", userCredential);
@@ -223,19 +237,19 @@ import type { User } from "@interfaces/user.interface";
       Swal.fire(
         "Éxito",
         `El usuario ${formData.get("originalName")} ha sido actualizado exitósamente.`,
-        "success",
-
+        "success"
       ).then((result) => {
         if (result.isConfirmed) {
-          navigate(
-            privateRoutesMap.ADMINS_USERS
-          )
+          navigate(privateRoutesMap.ADMINS_USERS);
         }
       });
       form.reset();
     } catch (err) {
       console.error(err as Error);
       Swal.fire("Error", "Error al actualizar el usuario", "error");
+    } finally {
+      btnSubmit.disabled = false;
+      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
     }
   });
 </script>
