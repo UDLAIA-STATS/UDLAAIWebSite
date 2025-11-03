@@ -2,6 +2,7 @@ import { matchOptions } from "@utils/handle-partidos-table";
 import { match } from "assert";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
+import debug from "debug";
 
 export const getDataByFilter = defineAction({
   accept: "json",
@@ -15,15 +16,16 @@ export const getDataByFilter = defineAction({
     try {
       let responses: Record<string, any[]> = {};
 
-      for (const filter of Object.values(matchOptions)) {
-          const endpoint = `${baseUrl}/${filter.toLowerCase()}/all/`;
-          const response = await fetch(endpoint);
-          if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-    
-          const data = await response.json();
-          responses[filter] = data;
-          
+        const endpoint = `${baseUrl}/${filterOption}/all/`;
+        if (!endpoint) throw new Error(`Filtro inválido: ${filterOption}`);
+        const response = await fetch(endpoint);
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
+    
+        const data = await response.json();
+        responses[filter] = data;
+          
 
         console.log(responses);
         

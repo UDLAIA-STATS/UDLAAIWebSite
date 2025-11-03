@@ -14,6 +14,8 @@ import type { Link } from "@interfaces/link.interface";
 import PartidosProfesorTable from "@components/partidosProfesor/PartidosProfesorTable.astro";
 import Pagination from "@components/shared/Pagination.astro";
 import { buttonClass } from "@consts/styles";
+import PartidosProfesorActions from "@components/partidosProfesor/TableActions.astro";
+import type { SortOptions } from "@interfaces/index";
 
 const user: LoggedUser | null = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
@@ -44,6 +46,10 @@ const sidebarLinks: Link[] = [
   { name: "Temporadas", href: "/admin/temporadas//?page=1" },
   { name: "Equipos", href: "/admin/equipos/?page=1" },
 ];
+
+const sortOptions: SortOptions[] = [
+  { searchParam: "nombreequipo", displayName: "Nombre" },
+];
 ---
 
 <AdminPanelLayout title="Gestión de Torneos y Partidos">
@@ -59,11 +65,13 @@ const sidebarLinks: Link[] = [
               />
             </div>
             <div class="flex flex-col items-start self-start justify-start w-3/4">
-              <div class="mb-5">
-                <a class={buttonClass} href={getAddHref(matchOptions.equipos)}>
-                  Crear Equipo
-                </a>
-              </div>
+              <PartidosProfesorActions
+                canSort={true}
+                sortByOptions={sortOptions}
+                buttonLabel="Crear Equipo"
+                placeholderText="Buscar equipo..."
+                buttonHref={getAddHref(matchOptions.equipos)}
+              />
 
               <PartidosProfesorTable filter={matchOptions.equipos} />
             </div>
@@ -80,3 +88,24 @@ const sidebarLinks: Link[] = [
     }
   </div>
 </AdminPanelLayout>
+
+<script>
+  const searchBox = document.getElementById("search-box") as HTMLInputElement;
+
+  searchBox.addEventListener("input", async () => {
+    const search = searchBox.value;
+    const rows = document.querySelectorAll("tr[id^='match-equipos-']");
+    console.log("Filtrando equipos con término:", rows);
+    rows.forEach((row) => {
+      const nameCell = row.querySelector("td:nth-child(2)");
+      if (nameCell) {
+        const name = nameCell?.textContent ?? "";
+        if (name.toLowerCase().includes(search.toLowerCase())) {
+          row.classList.remove("hidden");
+        } else {
+          row.classList.add("hidden");
+        }
+      } 
+    });
+  });
+</script>

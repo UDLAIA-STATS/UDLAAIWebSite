@@ -1,13 +1,12 @@
 ---
 import { privateRoutesMap } from "@consts/routes";
 import { Table } from "@components/tables/Table";
-import type { TableActions } from "@interfaces/table-actions.interface";
+import type { SortOptions, TableActions } from "@interfaces/table-actions.interface";
 import type { User } from "@interfaces/user.interface";
 import EditIcon from "@assets/edit_icon_black.svg";
 import DeleteIcon from "@assets/delete_icon_black.svg";
 import { actions } from "astro:actions";
-import OutlinedButton from "@components/buttons/OutlinedButton.astro";
-import arrowNext from "@assets/arrow_next.svg";
+import TableActionsComponent from "@components/partidosProfesor/TableActions.astro";
 import AdminPanelLayout from "@layouts/AdminPanelLayout.astro";
 import NotAuthorized from "@components/shared/NotAuthorized.astro";
 import PaginationComponent from "@components/shared/Pagination.astro";
@@ -17,6 +16,8 @@ const { AUTH_REGISTER, EDIT_USER } = privateRoutesMap;
 
 const searchParams = Astro.url.searchParams;
 const pageParam = Number(searchParams.get("page") ?? 1);
+const sortParam = searchParams.get("sortBy") ?? "";
+const orderParam = searchParams.get("orderBy") ?? "asc";
 
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
@@ -61,6 +62,12 @@ tableActions.push(
     type: "button",
   }
 );
+
+const sortOptions: SortOptions[] = [
+  { searchParam: "nombre_usuario", displayName: "Nombre de usuario" },
+  { searchParam: "email_usuario", displayName: "Email" },
+  { searchParam: "rol", displayName: "Rol" },
+];
 ---
 
 <AdminPanelLayout title="Panel de Administración">
@@ -72,18 +79,13 @@ tableActions.push(
         <div class="flex flex-row justify-between w-full">
           <h1 class="font-bold text-2xl">Usuarios</h1>
           <div class="flex flex-row gap-10 w-3/2 justify-end">
-            <a
-              href={AUTH_REGISTER}
-              class="no-underline text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md flex cursor-pointer items-center gap-2"
-            >
-              Agregar Usuario
-            </a>
-            <input
-              type="search"
-              name="search"
-              placeholder="Buscar usuario..."
-              id="search-box"
-              class="rounded-md p-2 w-1/4 focus:outline-none focus:ring-1 focus:ring-black text-black border border-solid border-black"
+            <TableActionsComponent
+              buttonPosition="right"
+              canSort={true}
+              sortByOptions={sortOptions}
+              buttonLabel="Crear Usuario"
+              buttonHref={AUTH_REGISTER}
+              placeholderText="Buscar usuario..."
             />
           </div>
         </div>
@@ -219,14 +221,16 @@ tableActions.push(
     const rows = document.querySelectorAll("tr[id^='user-row-']");
     rows.forEach((row) => {
       const usernameCell = row.querySelector("td:first-child");
-      if (usernameCell) {
-        const username = usernameCell.textContent || "";
-        if (username.toLowerCase().includes(search.toLowerCase())) {
+      const emailCell = row.querySelector("td:nth-child(2)");
+      if (usernameCell || emailCell) {
+        const username = usernameCell?.textContent ?? "";
+        const email = emailCell?.textContent ?? "";
+        if (username.toLowerCase().includes(search.toLowerCase()) || email.toLowerCase().includes(search.toLowerCase())) {
           row.classList.remove("hidden");
         } else {
           row.classList.add("hidden");
         }
-      }
+      } 
     });
   });
 </script>

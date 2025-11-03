@@ -5,9 +5,7 @@ import type { Torneo, Partido, Temporada, Equipo } from "@interfaces/index";
 import { matchOptions } from "@utils/handle-partidos-table";
 import { actions } from "astro:actions";
 import Swal from "sweetalert2";
-import { MatchOptionClient } from "@utils/index";
-import { navigate } from "astro:transitions/client";
-import { privateRoutesMap } from "@consts/routes";
+
 
 interface Props {
   filter: matchOptions;
@@ -15,6 +13,10 @@ interface Props {
 }
 
 const { filter, page = 1 }: Props = Astro.props;
+
+const searchParams = Astro.url.searchParams;
+const sortParam = searchParams.get("sortBy") ?? "";
+const orderParam = searchParams.get("orderBy") ?? "asc";
 
 const { data: dataMatch, error: errorMatch } = await Astro.callAction(
   actions.getDataByFilter,
@@ -40,13 +42,54 @@ if (!dataMatch) {
 
 // Mapeo para pasar los arrays a getRows sin condicionales repetitivos
 const dataMap: Record<string, any[]> = {
-  [matchOptions.torneos]: (dataMatch?.torneos as Torneo[]) ?? [],
-  [matchOptions.partidos]: (dataMatch?.partidos as Partido[]) ?? [],
-  [matchOptions.temporadas]: (dataMatch?.temporadas as Temporada[]) ?? [],
-  [matchOptions.equipos]: (dataMatch?.equipos as Equipo[]) ?? [],
+  [matchOptions.torneos]:
+    (dataMatch?.torneos as Torneo[]).sort((a, b) => {
+      if(sortParam && orderParam) {
+        const fieldA = (a as any)[sortParam];
+        const fieldB = (b as any)[sortParam];
+        if(fieldA < fieldB) return orderParam === "asc" ? -1 : 1;
+        if(fieldA > fieldB) return orderParam === "asc" ? 1 : -1;
+      }
+      return a.idtorneo - b.idtorneo;
+    }) ??
+    [],
+  [matchOptions.partidos]:
+    (dataMatch?.partidos as Partido[]).sort(
+      (a, b) => {
+        if(sortParam && orderParam) {
+          const fieldA = (a as any)[sortParam];
+          const fieldB = (b as any)[sortParam];
+          if(fieldA < fieldB) return orderParam === "asc" ? -1 : 1;
+          if(fieldA > fieldB) return orderParam === "asc" ? 1 : -1;
+        }
+        return a.idpartido - b.idpartido;
+      }
+    ) ?? [],
+  [matchOptions.temporadas]:
+    (dataMatch?.temporadas as Temporada[]).sort(
+      (a, b) => {
+        if(sortParam && orderParam) {
+          const fieldA = (a as any)[sortParam];
+          const fieldB = (b as any)[sortParam];
+          if(fieldA < fieldB) return orderParam === "asc" ? -1 : 1;
+          if(fieldA > fieldB) return orderParam === "asc" ? 1 : -1;
+        }
+        return a.idtemporada - b.idtemporada;
+      }
+    ) ?? [],
+  [matchOptions.equipos]:
+    (dataMatch?.equipos as Equipo[]).sort((a, b) => {
+      if(sortParam && orderParam) {
+        const fieldA = (a as any)[sortParam];
+        const fieldB = (b as any)[sortParam];
+        if(fieldA < fieldB) return orderParam === "asc" ? -1 : 1;
+        if(fieldA > fieldB) return orderParam === "asc" ? 1 : -1;
+      }
+      return b.idequipo - a.idequipo;
+    }) ?? [],
 };
 
-for(const key in dataMap) {
+for (const key in dataMap) {
   const data = dataMap[key];
   if (!data || data.length === 0) continue;
   const offset = 10;
@@ -64,85 +107,77 @@ const buildRows = (option: matchOptions) =>
     dataMap[matchOptions.equipos]
   );
 
-const optionsList: matchOptions[] = Object.values(
-  matchOptions
-) as matchOptions[];
+const headers = handlePartidos.getHeaders(filter);
+const rows = buildRows(filter);
 ---
 
 <div id="tables-container" class="w-full space-y-10">
-  {
-    optionsList.map((option) => {
-      const headers = handlePartidos.getHeaders(option);
-      const rows = buildRows(option);
+  <section id={`table-${filter}`} class={`w-full`}>
+    <h2 class="text-xl font-semibold mb-2">{filter}</h2>
 
-      return (
-        <section
-          id={`table-${option}`}
-          class={`w-full ${filter === option ? "" : "hidden"}`}
-        >
-          <h2 class="text-xl font-semibold mb-2">{option}</h2>
-
-          {rows.length > 0 ? (
-            <div class="flex rounded-md w-full h-fit self-center overflow-x-auto">
-              <Table headers={headers}>
-                {rows.map((row) => (
-                  <tr class="border-b odd:bg-gray-50 hover:bg-gray-100 transition-colors">
-                    {row.map((cell) => (
-                      <td class="px-6 py-4">{cell}</td>
-                    ))}
-
-                    {
-                      // Mantengo exactamente la generación de acciones por fila tal como tenías
-                      handlePartidos
-                        .getActions(option, (id: number) =>
-                          console.log(`${option} con id ${id} eliminado`)
-                        )
-                        .map((action) =>
-                          action.type === "link" ? (
-                            <td class="px-6 py-4 text-start">
-                              <a
-                                class="cursor-pointer"
-                                href={(action.href ?? "") + row[0]}
-                                title={action.alt}
-                              >
-                                <img
-                                  class="size-6"
-                                  src={action.icon}
-                                  alt={action.alt}
-                                />
-                              </a>
-                            </td>
-                          ) : (
-                            <td class="px-6 py-4 text-start">
-                              <button
-                                type="button"
-                                data-id={row[0]}
-                                class="cursor-pointer"
-                                title={action.alt}
-                              >
-                                <img
-                                  class="size-6"
-                                  src={action.icon}
-                                  alt={action.alt}
-                                />
-                              </button>
-                            </td>
-                          )
-                        )
-                    }
-                  </tr>
+    {
+      rows.length > 0 ? (
+        <div class="flex rounded-md w-full h-fit self-center overflow-x-auto">
+          <Table headers={headers}>
+            {rows.map((row) => (
+              <tr
+                class="border-b odd:bg-gray-50 hover:bg-gray-100 transition-colors"
+                id={`match-${filter.toLowerCase()}-${row[0]}`}
+              >
+                {row.map((cell) => (
+                  <td class="px-6 py-4">{cell}</td>
                 ))}
-              </Table>
-            </div>
-          ) : (
-            <p class="text-gray-500 mt-10">
-              No hay {option.toLowerCase()} registrados.
-            </p>
-          )}
-        </section>
-      );
-    })
-  }
+
+                {
+                  // Mantengo exactamente la generación de acciones por fila tal como tenías
+                  handlePartidos
+                    .getActions(filter, (id: number) =>
+                      console.log(`${filter} con id ${id} eliminado`)
+                    )
+                    .map((action) =>
+                      action.type === "link" ? (
+                        <td class="px-6 py-4 text-start">
+                          <a
+                            class="cursor-pointer"
+                            href={(action.href ?? "") + row[0]}
+                            title={action.alt}
+                          >
+                            <img
+                              class="size-6"
+                              src={action.icon}
+                              alt={action.alt}
+                            />
+                          </a>
+                        </td>
+                      ) : (
+                        <td class="px-6 py-4 text-start">
+                          <button
+                            type="button"
+                            data-id={row[0]}
+                            class="cursor-pointer"
+                            title={action.alt}
+                          >
+                            <img
+                              class="size-6"
+                              src={action.icon}
+                              alt={action.alt}
+                            />
+                          </button>
+                        </td>
+                      )
+                    )
+                }
+              </tr>
+            ))}
+          </Table>
+        </div>
+      ) : (
+        <p class="text-gray-500 mt-10">
+          No hay {filter.toLowerCase()} registrados.
+        </p>
+      )
+    }
+  </section>
 </div>
 <script>
   import { privateRoutesMap } from "@consts/routes";
@@ -161,11 +196,13 @@ const optionsList: matchOptions[] = Object.values(
           console.error("Error deleting torneo:", error);
           Swal.fire("Error", error.message, "error");
         } else {
-          Swal.fire("Éxito", "Torneo eliminado", "success").then(async (result) => {
-            if (result.isConfirmed) {
-              await navigate(privateRoutesMap.ADMIN_PARTIDOS);
+          Swal.fire("Éxito", "Torneo eliminado", "success").then(
+            async (result) => {
+              if (result.isConfirmed) {
+                await navigate(privateRoutesMap.ADMIN_PARTIDOS);
+              }
             }
-          });
+          );
         }
         break;
       case matchOptions.partidos:
@@ -176,11 +213,13 @@ const optionsList: matchOptions[] = Object.values(
           console.error("Error deleting partido:", partidoError);
           Swal.fire("Error", partidoError?.message, "error");
         } else {
-          Swal.fire("Éxito", "Partido eliminado", "success").then(async (result) => {
-            if (result.isConfirmed) {
-              await navigate(privateRoutesMap.ADMIN_PARTIDOS);
+          Swal.fire("Éxito", "Partido eliminado", "success").then(
+            async (result) => {
+              if (result.isConfirmed) {
+                await navigate(privateRoutesMap.ADMIN_PARTIDOS);
+              }
             }
-          });
+          );
         }
         break;
       case matchOptions.temporadas:
@@ -191,25 +230,30 @@ const optionsList: matchOptions[] = Object.values(
           console.error("Error deleting temporada:", temporadaError);
           Swal.fire("Error", temporadaError?.message, "error");
         } else {
-          Swal.fire("Éxito", "Temporada eliminada", "success").then(async (result) => {
-            if (result.isConfirmed) {
-              await navigate(privateRoutesMap.ADMIN_PARTIDOS);
+          Swal.fire("Éxito", "Temporada eliminada", "success").then(
+            async (result) => {
+              if (result.isConfirmed) {
+                await navigate(privateRoutesMap.ADMIN_PARTIDOS);
+              }
             }
-          });
+          );
         }
         break;
       case matchOptions.equipos:
         console.log(`Equipo con id ${id} eliminado`);
-        const { data: equipoData, error: equipoError } = await actions.deleteEquipo({ idequipo: id });
+        const { data: equipoData, error: equipoError } =
+          await actions.deleteEquipo({ idequipo: id });
         if (equipoError) {
           console.error("Error deleting equipo:", equipoError);
           Swal.fire("Error", equipoError?.message, "error");
         } else {
-          Swal.fire("Éxito", "Equipo eliminado", "success").then(async (result) => {
-            if (result.isConfirmed) {
-              await navigate(privateRoutesMap.ADMIN_PARTIDOS);
+          Swal.fire("Éxito", "Equipo eliminado", "success").then(
+            async (result) => {
+              if (result.isConfirmed) {
+                await navigate(privateRoutesMap.ADMIN_PARTIDOS);
+              }
             }
-          });
+          );
         }
         break;
       default:

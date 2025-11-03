@@ -12,6 +12,8 @@ import type { Link } from "@interfaces/link.interface";
 import PartidosProfesorTable from "@components/partidosProfesor/PartidosProfesorTable.astro";
 import Pagination from "@components/shared/Pagination.astro";
 import { buttonClass } from "@consts/styles";
+import PartidosProfesorActions from "@components/partidosProfesor/TableActions.astro";
+import type { SortOptions } from "@interfaces/index";
 
 const user: LoggedUser | null = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
@@ -42,6 +44,10 @@ const sidebarLinks: Link[] = [
   { name: "Temporadas", href: "/admin/temporadas//?page=1" },
   { name: "Equipos", href: "/admin/equipos/?page=1" },
 ];
+
+const sortOptions: SortOptions[] = [
+  { searchParam: "nombretorneo", displayName: "Nombre" },
+];
 ---
 
 <AdminPanelLayout title="Gestión de Torneos y Partidos">
@@ -57,15 +63,17 @@ const sidebarLinks: Link[] = [
               />
             </div>
             <div class="flex flex-col items-start self-start justify-start w-3/4">
-              <div class="mb-5">
-                <a class={buttonClass} href={getAddHref(matchOptions.torneos)}>
-                  Crear Torneo
-                </a>
-              </div>
+              <PartidosProfesorActions
+                canSort={true}
+                sortByOptions={sortOptions}
+                buttonLabel="Crear Torneo"
+                placeholderText="Buscar torneo..."
+                buttonHref={getAddHref(matchOptions.torneos)}
+              />
               <PartidosProfesorTable filter={matchOptions.torneos} />
             </div>
           </div>
-          <div class={`${totalPages <= 1 ? 'hidden' : 'block'} w-full`}>
+          <div class={`${totalPages <= 1 ? "hidden" : "block"} w-full`}>
             <Pagination totalPages={totalPages} />
           </div>
         </div>
@@ -77,3 +85,22 @@ const sidebarLinks: Link[] = [
     }
   </div>
 </AdminPanelLayout>
+
+<script>
+  const searchBox = document.getElementById("search-box") as HTMLInputElement;
+
+  searchBox.addEventListener("input", async () => {
+    const search = searchBox.value;
+    const rows = document.querySelectorAll("tr[id^='match-torneos-']");
+    rows.forEach((row) => {
+      const nombreText =
+        row.querySelector("td:nth-child(2)")?.textContent?.trim() || "";
+
+      if (nombreText.toLowerCase().includes(search.toLowerCase())) {
+        row.classList.remove("hidden");
+      } else {
+        row.classList.add("hidden");
+      }
+    });
+  });
+</script>
