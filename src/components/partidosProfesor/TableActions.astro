@@ -51,9 +51,14 @@ const orderParam = searchParams.get("orderBy") ?? "asc";
                    focus:ring-1 focus:outline-none
                    transition"
             >
-              <option value="">-- Selecciona --</option>
+              <option value="" disabled selected>
+                -- Selecciona --
+              </option>
               {sortByOptions.map((option) => (
-                <option value={option.searchParam.toLowerCase()} selected={sortParam === option.searchParam.toLowerCase()}>
+                <option
+                  value={option.searchParam.toLowerCase()}
+                  selected={sortParam === option.searchParam.toLowerCase()}
+                >
                   {option.displayName}
                 </option>
               ))}
@@ -70,7 +75,9 @@ const orderParam = searchParams.get("orderBy") ?? "asc";
                    focus:ring-1 focus:outline-none
                    transition"
             >
-              <option value="asc" selected={orderParam === "asc"}>Asc</option>
+              <option value="asc" selected={orderParam === "asc"}>
+                Asc
+              </option>
               <option value="desc" selected={orderParam === "desc"}>
                 Desc
               </option>
@@ -96,7 +103,7 @@ const orderParam = searchParams.get("orderBy") ?? "asc";
 </div>
 
 <script>
-import { navigate } from "astro:transitions/client";
+  import { navigate } from "astro:transitions/client";
 
   const sortBySelect = document.getElementById(
     "sortBySelect"
@@ -125,6 +132,7 @@ import { navigate } from "astro:transitions/client";
       currentUrl.searchParams.set("sortBy", sortBySelect.value);
     } else {
       currentUrl.searchParams.delete("orderBy");
+      currentUrl.searchParams.set("orderBy", selectedOrderBy);
     }
     navigate(currentUrl.toString());
   });

@@ -14,6 +14,7 @@ import Pagination from "@components/shared/Pagination.astro";
 import { buttonClass } from "@consts/styles";
 import PartidosProfesorActions from "@components/partidosProfesor/TableActions.astro";
 import type { SortOptions } from "@interfaces/index";
+import { matchSidebarLinks } from "@consts/navbar-links";
 
 const user: LoggedUser | null = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
@@ -38,12 +39,7 @@ const paginatedTorneos = torneos.slice(
   pageParam * offset
 );
 
-const sidebarLinks: Link[] = [
-  { name: "Torneos", href: "/admin/torneos//?page=1" },
-  { name: "Partidos", href: "/admin/partidos//?page=1" },
-  { name: "Temporadas", href: "/admin/temporadas//?page=1" },
-  { name: "Equipos", href: "/admin/equipos/?page=1" },
-];
+const sidebarLinks: Link[] = matchSidebarLinks;
 
 const sortOptions: SortOptions[] = [
   { searchParam: "nombretorneo", displayName: "Nombre" },

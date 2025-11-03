@@ -50,7 +50,9 @@ const dataMap: Record<string, any[]> = {
         if(fieldA < fieldB) return orderParam === "asc" ? -1 : 1;
         if(fieldA > fieldB) return orderParam === "asc" ? 1 : -1;
       }
-      return a.idtorneo - b.idtorneo;
+      return orderParam === "asc"
+        ? a.idtorneo - b.idtorneo
+        : b.idtorneo - a.idtorneo;
     }) ??
     [],
   [matchOptions.partidos]:
@@ -62,7 +64,9 @@ const dataMap: Record<string, any[]> = {
           if(fieldA < fieldB) return orderParam === "asc" ? -1 : 1;
           if(fieldA > fieldB) return orderParam === "asc" ? 1 : -1;
         }
-        return a.idpartido - b.idpartido;
+        return orderParam === "asc"
+          ? a.idpartido - b.idpartido
+          : b.idpartido - a.idpartido;
       }
     ) ?? [],
   [matchOptions.temporadas]:
@@ -74,7 +78,9 @@ const dataMap: Record<string, any[]> = {
           if(fieldA < fieldB) return orderParam === "asc" ? -1 : 1;
           if(fieldA > fieldB) return orderParam === "asc" ? 1 : -1;
         }
-        return a.idtemporada - b.idtemporada;
+        return orderParam === "asc"
+          ? a.idtemporada - b.idtemporada
+          : b.idtemporada - a.idtemporada;
       }
     ) ?? [],
   [matchOptions.equipos]:
@@ -85,7 +91,9 @@ const dataMap: Record<string, any[]> = {
         if(fieldA < fieldB) return orderParam === "asc" ? -1 : 1;
         if(fieldA > fieldB) return orderParam === "asc" ? 1 : -1;
       }
-      return b.idequipo - a.idequipo;
+      return orderParam === "asc"
+        ? a.idequipo - b.idequipo
+        : b.idequipo - a.idequipo;
     }) ?? [],
 };
 

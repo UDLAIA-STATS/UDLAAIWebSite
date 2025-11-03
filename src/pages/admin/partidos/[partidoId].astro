@@ -6,6 +6,7 @@ import { actions } from "astro:actions";
 import type {
   Equipo,
   Partido,
+  Temporada,
   Torneo,
   TorneoPartido,
 } from "@interfaces/torneos.interface";
@@ -33,6 +34,12 @@ const { data: torneoData, error: errorTorneos } = await Astro.callAction(
   actions.getTorneos,
   {},
 );
+
+const { data: temporadaData, error: temporadaError } = await Astro.callAction(
+  actions.getTemporadas,
+  {}
+);
+
 const { data: torneoPartidoData, error: errorTorneoPartido } =
   await Astro.callAction(actions.getTorneoPartidosById, {
     idPartido: Number.parseInt(partidoId ?? "0"),
@@ -47,15 +54,19 @@ if (errorPartido) {
 } else if (errorTorneos) {
   console.error("Error fetching torneos:", errorTorneos);
   throw new Error("Error al cargar los torneos");
+} else if (temporadaError) {
+  console.error("Error fetching temporadas:", temporadaError);
+  throw new Error("Error al cargar las temporadas");
 }
 
-if (!equiposData || !partidoData || !torneoData) {
+if (!equiposData || !partidoData || !torneoData || !temporadaData) {
   console.error("No data received for equipos");
   throw new Error("No se recibieron datos necesarios desde el servidor.");
 }
 
 const torneos: Torneo[] = torneoData?.data ?? [];
 const equipos: Equipo[] = equiposData?.data ?? [];
+const temporadas: Temporada[] = temporadaData?.data ?? []; 
 const partido: Partido = partidoData!.data;
 
 let torneoPartido: TorneoPartido = {
@@ -70,6 +81,10 @@ if (torneoPartidoData) {
 const torneo: Torneo = torneos.find(
   (t) => t.idtorneo === torneoPartido.idtorneo,
 ) as Torneo;
+const temporada: Temporada = temporadas.find(
+  (temporada: Temporada) => temporada.idtorneo === torneo.idtorneo,
+) as Temporada;
+
 ---
 
 <FormLayout formTitle="Editar Partido" pageTitle="Editar Partido" user={user}>
@@ -91,6 +106,24 @@ const torneo: Torneo = torneos.find(
         <option value="amistoso" selected={!partido.tipopartido}
           >Amistoso</option
         >
+      </select>
+    </div>
+
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="idtemporada" class="text-base font-medium">Temporada</label>
+      <select name="idtemporada" class={inputClass} id="idtemporada">
+        <option value="" disabled selected>Selecciona una temporada</option>
+        {
+          temporadas.map((temporada: Temporada) => (
+            <option
+              value={temporada.idtemporada}
+              id={`temporada-${temporada.idtemporada}`}
+              selected={temporada.idtorneo === torneo.idtorneo}
+            >
+              {temporada.nombretemporada}
+            </option>
+          ))
+        }
       </select>
     </div>
 
@@ -225,17 +258,56 @@ const torneo: Torneo = torneos.find(
   import { actions } from "astro:actions";
   import { privateRoutesMap } from "@consts/routes";
   import { navigate } from "astro:transitions/client";
-  import type { Torneo } from "@interfaces/index";
+  import type { Temporada, Torneo } from "@interfaces/index";
 import validatePartidos from "@utils/validation/admin/partidos-validation";
 
   const form = document.querySelector("#form-partido") as HTMLFormElement;
   const btnSubmit = document.querySelector(
     'button[type="submit"]',
   ) as HTMLButtonElement;
+    const temporadaSelect = document.getElementById(
+    "idtemporada"
+  ) as HTMLSelectElement;
 
   const btnCancel = document.getElementById(
     "btn-cancel"
   ) as HTMLButtonElement;
+
+  temporadaSelect.addEventListener("change", async () => {
+    const selectedTemporadaId = temporadaSelect.value;
+    if (!selectedTemporadaId) return;
+
+    const dataTemporada = await actions.getTemporadaById.orThrow({
+      id: Number(selectedTemporadaId),
+    });
+
+    const selectedTemporada: Temporada = dataTemporada.data;
+
+    if (selectedTemporada) {
+      const torneoSelect = document.getElementById(
+        `idtorneo`
+      ) as HTMLSelectElement;
+
+      torneoSelect.innerHTML = "";
+
+      const placeholder = new Option("Selecciona un torneo", "");
+      placeholder.disabled = true;
+      placeholder.selected = true;
+      torneoSelect.add(placeholder);
+
+      // Filtrar torneos únicos si tienes varias temporadas con el mismo torneo
+      const torneosUnicosMap = new Map<number, string>();
+      torneosUnicosMap.set(
+        selectedTemporada.idtorneo,
+        selectedTemporada.torneo_nombre
+      );
+
+      // Agregar las opciones al select
+      torneosUnicosMap.forEach((nombre, id) => {
+        torneoSelect.add(new Option(nombre, id.toString()));
+      });
+    }
+  });
 
   btnCancel.addEventListener("click", (e) => {
     e.preventDefault();
