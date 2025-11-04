@@ -26,6 +26,12 @@ const headers = [
   "Eliminar",
 ];
 
+const sortOptions: SortOptions[] = [
+  { searchParam: "name", displayName: "Nombre" },
+  { searchParam: "lastname", displayName: "Apellido" },
+  { searchParam: "shirtNumber", displayName: "Número de camiseta" },
+];
+
 const searchParams = Astro.url.searchParams;
 const pageParam = Number(searchParams.get("page") ?? 1);
 
@@ -48,7 +54,20 @@ const rows = players.map((u) => [
   u.lastname,
   u.position,
   u.shirtNumber,
-]);
+]).sort((a, b) => {
+  if (sortOptions.length > 0) {
+    const index = headers.indexOf(
+      sortOptions.find((option) => option.searchParam === "name")
+        ?.displayName ?? ""
+    );
+    if (index !== -1) {
+      const valueA = a[index] as string;
+      const valueB = b[index] as string;
+      return valueA.localeCompare(valueB);
+    }
+  }
+  return 0;
+});
 
 function handleDelete(username: string) {
   console.log(`Usuario ${username} eliminado`);
@@ -70,12 +89,6 @@ actions.push(
     type: "button",
   }
 );
-
-const sortOptions: SortOptions[] = [
-  { searchParam: "name", displayName: "Nombre" },
-  { searchParam: "lastname", displayName: "Apellido" },
-  { searchParam: "shirtNumber", displayName: "Número de camiseta" },
-];
 ---
 
 <AdminPanelLayout title="Panel de Administración">
@@ -84,18 +97,15 @@ const sortOptions: SortOptions[] = [
       <NotAuthorized />
     ) : (
       <div class="flex flex-col w-full h-full gap-5">
-        <div class="flex flex-row justify-between w-full">
-          <h1 class="font-bold text-2xl">Jugadores</h1>
-          <div class="flex flex-row gap-10 w-full justify-end">
+        <div class="flex flex-row gap-5 items-baseline justify-between w-full">
+          <h1 class="font-bold text-2xl pr-5">Jugadores</h1>
             <TableActionsComponent
-              buttonPosition="right"
               canSort={true}
               sortByOptions={sortOptions}
               placeholderText="Buscar jugador..."
               buttonLabel="Crear Jugador"
               buttonHref={REGISTER_PLAYER}
             />
-          </div>
         </div>
         <div class="relative overflow-x-auto w-svw mt-5 flex justify-center">
           <Table headers={headers}>

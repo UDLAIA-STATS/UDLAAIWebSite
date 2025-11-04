@@ -93,6 +93,16 @@ const { super: superRole } = roles;
             value={user.nombre_usuario}
           />
         </div>
+
+        <div class="flex flex-col gap-2 mb-4 px-5">
+          <label class="text-base font-medium" for="rol">Rol</label>
+          <select id="rol" name="rol" class={inputClass} required>
+            <option value="" selected disabled>-- Selecciona --</option>
+            <option value="superuser">Administrador</option>
+            <option value="profesor">Profesor</option>
+          </select>
+        </div>
+
         <div class="flex flex-col gap-2 mb-4 px-5">
           <label class="text-base font-medium" for="email">
             Correo Electrónico

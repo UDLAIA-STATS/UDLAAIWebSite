@@ -24,7 +24,7 @@ export default function VideoContainer() {
     if (creatingNew()) {
       Swal.fire({
         icon: "info",
-        title: "Ya estás creando un partido",
+        title: "Ya estás ingresando un video",
         text: "Completa los datos o sube el video antes de iniciar otro.",
       });
       return;
@@ -102,8 +102,8 @@ export default function VideoContainer() {
     if (!creatingNew()) {
       Swal.fire({
         icon: "warning",
-        title: "Crea un partido primero",
-        text: "Presiona 'Crear Partido' para iniciar el proceso.",
+        title: "Subida no iniciada",
+        text: "Presiona 'Iniciar' para comenzar con el proceso.",
       });
       return;
     }
@@ -129,7 +129,7 @@ export default function VideoContainer() {
       Swal.fire({
         icon: "success",
         title: "Video subido correctamente",
-        text: "Tu partido fue creado con éxito.",
+        text: "Tu análisis está siendo procesado.",
       });
       setCreatingNew(false);
       setNombrePartido("");
@@ -160,8 +160,8 @@ export default function VideoContainer() {
           <FilledButton
             icon={Add.src}
             id="createNew"
-            alt="Crear Partido"
-            label="Crear Partido"
+            alt="Generar Análisis"
+            label="Generar Análisis"
             className="mt-3"
             onClick={handleCrearPartido}
           />
@@ -238,7 +238,7 @@ export default function VideoContainer() {
       ) : (
         <div class="flex justify-center items-center h-[60vh] text-gray-600">
           <p class="text-lg font-medium">
-            Presiona “Crear Partido” para iniciar un nuevo registro.
+            Presiona Generar Análisis” para iniciar un nuevo registro.
           </p>
         </div>
       )}

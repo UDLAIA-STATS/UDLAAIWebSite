@@ -40,7 +40,33 @@ const users: User[] =
   data.data.items.filter((u) => u.nombre_usuario !== user?.nickname) ?? [];
 const paginationData: Pagination = data.data.paginationData as Pagination;
 
-const rows = users.map((u) => [u.nombre_usuario, u.email_usuario, u.rol]);
+const sortOptions: SortOptions[] = [
+  { searchParam: "nombre_usuario", displayName: "Nombre de usuario" },
+  { searchParam: "email_usuario", displayName: "Email" },
+  { searchParam: "rol", displayName: "Rol" },
+];
+
+const rows = users.map((u) => [u.nombre_usuario, u.email_usuario, u.rol]).sort(
+  (a, b) => {
+    if (sortParam && orderParam) {
+      const index = headers.indexOf(
+        sortOptions.find(
+          (option) => option.searchParam === sortParam
+        )?.displayName ?? ""
+      );
+      if (index !== -1) {
+        const valueA = a[index] as string;
+        const valueB = b[index] as string;
+        if (orderParam === "asc") {
+          return valueA.localeCompare(valueB);
+        } else {
+          return valueB.localeCompare(valueA);
+        }
+      }
+    }
+    return 0;
+  }
+);
 
 function handleDelete(username: string) {
   console.log(`Usuario ${username} eliminado`);
@@ -63,11 +89,7 @@ tableActions.push(
   }
 );
 
-const sortOptions: SortOptions[] = [
-  { searchParam: "nombre_usuario", displayName: "Nombre de usuario" },
-  { searchParam: "email_usuario", displayName: "Email" },
-  { searchParam: "rol", displayName: "Rol" },
-];
+
 ---
 
 <AdminPanelLayout title="Panel de Administración">
@@ -76,18 +98,15 @@ const sortOptions: SortOptions[] = [
       <NotAuthorized />
     ) : (
       <div class="flex flex-col justify-center w-full">
-        <div class="flex flex-row justify-between w-full">
-          <h1 class="font-bold text-2xl">Usuarios</h1>
-          <div class="flex flex-row gap-10 w-3/2 justify-end">
+        <div class="flex flex-row gap-5 items-baseline justify-between w-full">
+          <h1 class="font-bold text-2xl pr-5">Usuarios</h1>
             <TableActionsComponent
-              buttonPosition="right"
               canSort={true}
               sortByOptions={sortOptions}
               buttonLabel="Crear Usuario"
               buttonHref={AUTH_REGISTER}
               placeholderText="Buscar usuario..."
             />
-          </div>
         </div>
         <div
           class:list={[
