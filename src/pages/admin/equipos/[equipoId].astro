@@ -84,7 +84,7 @@ const user = Astro.cookies.get("user")
   import { navigate } from "astro:transitions/client";
   import { privateRoutesMap } from "@consts/index";
   import { fileToBase64 } from "@utils/index";
-  import validateEquipos from "@utils/validation/admin/equipos-validation";
+  import { validateEquipos, isEquipoUpdated } from "@utils/validation/admin/equipos-validation";
 
   const form = document.querySelector("#form-equipo") as HTMLFormElement;
   const btnSubmit = document.querySelector(
@@ -111,14 +111,24 @@ const user = Astro.cookies.get("user")
         icon: "error",
         title: "Error",
         html: errorMessage,
-      }).then((result) => {
-        if (result.isConfirmed) {
-          btnSubmit.disabled = false;
-          btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-        }
       });
       return;
     }
+
+    const equipoData = await actions.getEquipoById.orThrow({
+      id: Number.parseInt(formData.get("idequipo") as string),
+    });
+    const isChanged = isEquipoUpdated(
+      equipoData.data,
+      formData
+    );
+
+    if (!isChanged) {
+      Swal.fire("Información", "No se han detectado cambios en el equipo.", "info").then(() => {
+      });
+      return;
+    }
+
     const file: File = formData.get("logoequipo") as File;
     let base64Logo = null;
     if (file && file.size > 0) {
@@ -134,8 +144,6 @@ const user = Astro.cookies.get("user")
 
       if (error) {
         Swal.fire("Error", "Error al actualizar el equipo", "error");
-        btnSubmit.disabled = false;
-        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
         return;
       }
       Swal.fire("Éxito", "Equipo actualizado", "success").then((result) => {
@@ -144,11 +152,13 @@ const user = Astro.cookies.get("user")
         }
       });
       form.reset();
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+      
     } catch (err) {
       console.error(err as Error);
       Swal.fire("Error", "Error al actualizar el equipo", "error");
+    } finally {
+      btnSubmit.disabled = false;
+      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
     }
   });
 </script>

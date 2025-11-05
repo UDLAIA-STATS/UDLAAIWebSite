@@ -8,10 +8,11 @@ import type {
   Partido,
   Temporada,
   Torneo,
-  TorneoPartido,
 } from "@interfaces/torneos.interface";
-import { buttonClass, inputClass } from "@consts/index";
+import { buttonClass, inputClass, privateRoutesMap } from "@consts/index";
 import Swal from "sweetalert2";
+import debug from "debug";
+import { navigate } from "astro:transitions/client";
 
 const { partidoId } = Astro.params;
 
@@ -19,106 +20,69 @@ const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
 
+// === Fetch de datos base ===
 const { data: partidoData, error: errorPartido } = await Astro.callAction(
   actions.getPartidoById,
-  {
-    id: Number.parseInt(partidoId ?? "0"),
-  },
+  { id: Number.parseInt(partidoId ?? "0") }
 );
 const { data: equiposData, error: errorEquipos } = await Astro.callAction(
   actions.getEquipos,
-  {},
+  { pageSize: 1000 }
 );
-
 const { data: torneoData, error: errorTorneos } = await Astro.callAction(
   actions.getTorneos,
-  {},
+  { pageSize: 1000 }
 );
-
-const { data: temporadaData, error: temporadaError } = await Astro.callAction(
+const { data: temporadaData, error: errorTemporadas } = await Astro.callAction(
   actions.getTemporadas,
-  {}
+  { pageSize: 1000 }
 );
 
-const { data: torneoPartidoData, error: errorTorneoPartido } =
-  await Astro.callAction(actions.getTorneoPartidosById, {
-    idPartido: Number.parseInt(partidoId ?? "0"),
+if (errorPartido || errorEquipos || errorTorneos || errorTemporadas) {
+  console.error("Error al recuperar datos necesarios:", {
+    errorPartido,
+    errorEquipos,
+    errorTorneos,
+    errorTemporadas,
   });
-
-if (errorPartido) {
-  console.error("Error fetching partido:", errorPartido);
-  throw new Error("Error al cargar el partido");
-} else if (errorEquipos) {
-  console.error("Error fetching equipos:", errorEquipos);
-  throw new Error("Error al cargar los equipos");
-} else if (errorTorneos) {
-  console.error("Error fetching torneos:", errorTorneos);
-  throw new Error("Error al cargar los torneos");
-} else if (temporadaError) {
-  console.error("Error fetching temporadas:", temporadaError);
-  throw new Error("Error al cargar las temporadas");
+  throw new Error("Error al recuperar datos para editar el partido.");
 }
 
-if (!equiposData || !partidoData || !torneoData || !temporadaData) {
-  console.error("No data received for equipos");
-  throw new Error("No se recibieron datos necesarios desde el servidor.");
-}
-
-const torneos: Torneo[] = torneoData?.data ?? [];
+const partido: Partido = partidoData?.data;
 const equipos: Equipo[] = equiposData?.data ?? [];
-const temporadas: Temporada[] = temporadaData?.data ?? []; 
-const partido: Partido = partidoData!.data;
-
-let torneoPartido: TorneoPartido = {
-  idpartido: 0,
-  idtorneo: 0,
-};
-
-if (torneoPartidoData) {
-  torneoPartido = torneoPartidoData!.data;
-}
-
-const torneo: Torneo = torneos.find(
-  (t) => t.idtorneo === torneoPartido.idtorneo,
-) as Torneo;
-const temporada: Temporada = temporadas.find(
-  (temporada: Temporada) => temporada.idtorneo === torneo.idtorneo,
-) as Temporada;
-
+const torneos: Torneo[] = torneoData?.data ?? [];
+const temporadas: Temporada[] = temporadaData?.data ?? [];
 ---
 
 <FormLayout formTitle="Editar Partido" pageTitle="Editar Partido" user={user}>
   <form id="form-partido" class="flex flex-col w-full max-w-md">
-    <input
-      type="number"
-      hidden
-      value={partido?.idpartido ?? ""}
-      name="idpartido"
-      id="idpartido"
-      class="hidden"
-    />
+    <input type="hidden" name="idpartido" value={partido.idpartido} />
+
+    <!-- Fecha del partido -->
     <div class="flex gap-2 flex-col mb-4">
-      <label for="tipopartido" class="text-base font-medium"
-        >Tipo de partido</label
+      <label for="fechapartido" class="text-base font-medium"
+        >Fecha del Partido</label
       >
-      <select name="tipopartido" class={inputClass} id="tipopartido">
-        <option value="oficial" selected={partido.tipopartido}>Oficial</option>
-        <option value="amistoso" selected={!partido.tipopartido}
-          >Amistoso</option
-        >
-      </select>
+      <input
+        id="fechapartido"
+        name="fechapartido"
+        type="date"
+        class={inputClass}
+        required
+        value={new Date(partido.fechapartido).toISOString().split("T")[0]}
+      />
     </div>
 
+    <!-- Temporada -->
     <div class="flex gap-2 flex-col mb-4">
       <label for="idtemporada" class="text-base font-medium">Temporada</label>
-      <select name="idtemporada" class={inputClass} id="idtemporada">
-        <option value="" disabled selected>Selecciona una temporada</option>
+      <select name="idtemporada" class={inputClass} id="idtemporada" required>
+        <option value="" disabled>Selecciona una temporada</option>
         {
           temporadas.map((temporada: Temporada) => (
             <option
               value={temporada.idtemporada}
-              id={`temporada-${temporada.idtemporada}`}
-              selected={temporada.idtorneo === torneo.idtorneo}
+              selected={temporada.idtemporada === partido.idtemporada}
             >
               {temporada.nombretemporada}
             </option>
@@ -127,6 +91,7 @@ const temporada: Temporada = temporadas.find(
       </select>
     </div>
 
+    <!-- Torneo -->
     <div class="flex gap-2 flex-col mb-4">
       <label for="idtorneo" class="text-base font-medium">Torneo</label>
       <select name="idtorneo" class={inputClass} id="idtorneo" required>
@@ -135,8 +100,7 @@ const temporada: Temporada = temporadas.find(
           torneos.map((torneo: Torneo) => (
             <option
               value={torneo.idtorneo}
-              id={`torneo-${torneo.idtorneo}`}
-              selected={torneo.idtorneo === torneoPartido.idtorneo}
+              selected={torneo.idtorneo === partido.idtorneo}
             >
               {torneo.nombretorneo}
             </option>
@@ -145,6 +109,7 @@ const temporada: Temporada = temporadas.find(
       </select>
     </div>
 
+    <!-- Equipos -->
     <div class="flex gap-2 flex-col mb-4">
       <label for="idequipolocal" class="text-base font-medium"
         >Equipo Local</label
@@ -155,13 +120,12 @@ const temporada: Temporada = temporadas.find(
         id="idequipolocal"
         required
       >
-        <option value="" disabled selected>Selecciona un equipo</option>
+        <option value="" disabled>Selecciona un equipo</option>
         {
           equipos.map((equipo: Equipo) => (
             <option
-              value={equipo.nombreequipo}
-              selected={equipo.idequipo === partido?.idequipolocal}
-              id={`equipo-${equipo.idequipo}`}
+              value={equipo.idequipo}
+              selected={equipo.idequipo === partido.idequipolocal}
             >
               {equipo.nombreequipo}
             </option>
@@ -180,13 +144,12 @@ const temporada: Temporada = temporadas.find(
         id="idequipovisitante"
         required
       >
-        <option value="" disabled selected>Selecciona un equipo</option>
+        <option value="" disabled>Selecciona un equipo</option>
         {
           equipos.map((equipo: Equipo) => (
             <option
-              value={equipo.nombreequipo}
-              selected={equipo.idequipo === partido?.idequipovisitante}
-              id={`equipo-${equipo.idequipo}`}
+              value={equipo.idequipo}
+              selected={equipo.idequipo === partido.idequipovisitante}
             >
               {equipo.nombreequipo}
             </option>
@@ -195,6 +158,7 @@ const temporada: Temporada = temporadas.find(
       </select>
     </div>
 
+    <!-- Marcadores -->
     <div class="flex gap-2 flex-col mb-4">
       <label for="marcadorequipolocal" class="text-base font-medium"
         >Marcador Equipo Local</label
@@ -203,11 +167,10 @@ const temporada: Temporada = temporadas.find(
         id="marcadorequipolocal"
         name="marcadorequipolocal"
         type="number"
-        value={partido?.marcadorequipolocal ?? ""}
         min="0"
         max="100"
-        required
         class={inputClass}
+        value={partido.marcadorequipolocal ?? ""}
       />
     </div>
 
@@ -221,30 +184,14 @@ const temporada: Temporada = temporadas.find(
         type="number"
         min="0"
         max="100"
-        required
-        value={partido?.marcadorequipovisitante ?? ""}
         class={inputClass}
-      />
-    </div>
-
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="fechapartido" class="text-base font-medium"
-        >Fecha del Partido</label
-      >
-      <input
-        id="fechapartido"
-        name="fechapartido"
-        type="date"
-        required
-        value={new Date(partido.fechapartido).toISOString().split("T")[0]}
-        class={inputClass}
+        value={partido.marcadorequipovisitante ?? ""}
       />
     </div>
 
     <div class="flex justify-center text-center mt-5 mx-5 pt-2 gap-5">
-      <button class={buttonClass} type="button" id="btn-cancel">
-        Cancelar
-      </button>
+      <button class={buttonClass} type="button" id="btn-cancel">Cancelar</button
+      >
       <button class={buttonClass} type="submit">
         Actualizar Partido
         <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
@@ -256,138 +203,111 @@ const temporada: Temporada = temporadas.find(
 <script>
   import Swal from "sweetalert2";
   import { actions } from "astro:actions";
-  import { privateRoutesMap } from "@consts/routes";
   import { navigate } from "astro:transitions/client";
-  import type { Temporada, Torneo } from "@interfaces/index";
-import validatePartidos from "@utils/validation/admin/partidos-validation";
+  import { privateRoutesMap } from "@consts/index";
+  import { validatePartidos, isPartidoUpdated } from "@utils/validation/admin/partidos-validation";
+  import type { Torneo } from "@interfaces/index";
 
   const form = document.querySelector("#form-partido") as HTMLFormElement;
-  const btnSubmit = document.querySelector(
-    'button[type="submit"]',
+  const btnSubmit = form.querySelector(
+    'button[type="submit"]'
   ) as HTMLButtonElement;
-    const temporadaSelect = document.getElementById(
+  const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
+
+  const torneosData = await actions.getTorneos.orThrow({ pageSize: 1000 });
+  const torneos: Torneo[] = torneosData.data ?? [];
+
+  const selectTemporada = document.getElementById(
     "idtemporada"
   ) as HTMLSelectElement;
+  const selectTorneo = document.getElementById("idtorneo") as HTMLSelectElement;
 
-  const btnCancel = document.getElementById(
-    "btn-cancel"
-  ) as HTMLButtonElement;
+  // === Filtrar torneos por temporada ===
+  selectTemporada.addEventListener("change", () => {
+    const temporadaSeleccionada = selectTemporada.value;
 
-  temporadaSelect.addEventListener("change", async () => {
-    const selectedTemporadaId = temporadaSelect.value;
-    if (!selectedTemporadaId) return;
+    selectTorneo.innerHTML =
+      '<option value="" disabled selected>Selecciona un torneo</option>';
 
-    const dataTemporada = await actions.getTemporadaById.orThrow({
-      id: Number(selectedTemporadaId),
-    });
+    const torneosFiltrados = torneos.filter(
+      (torneo) => torneo.idtemporada === Number(temporadaSeleccionada)
+    );
 
-    const selectedTemporada: Temporada = dataTemporada.data;
-
-    if (selectedTemporada) {
-      const torneoSelect = document.getElementById(
-        `idtorneo`
-      ) as HTMLSelectElement;
-
-      torneoSelect.innerHTML = "";
-
-      const placeholder = new Option("Selecciona un torneo", "");
-      placeholder.disabled = true;
-      placeholder.selected = true;
-      torneoSelect.add(placeholder);
-
-      // Filtrar torneos únicos si tienes varias temporadas con el mismo torneo
-      const torneosUnicosMap = new Map<number, string>();
-      torneosUnicosMap.set(
-        selectedTemporada.idtorneo,
-        selectedTemporada.torneo_nombre
-      );
-
-      // Agregar las opciones al select
-      torneosUnicosMap.forEach((nombre, id) => {
-        torneoSelect.add(new Option(nombre, id.toString()));
-      });
+    if (torneosFiltrados.length === 0) {
+      selectTorneo.innerHTML = "";
+      const option = document.createElement("option");
+      option.value = "";
+      option.textContent = "No hay torneos para esta temporada";
+      selectTorneo.appendChild(option);
+      return;
     }
+
+    torneosFiltrados.forEach((torneo) => {
+      const option = document.createElement("option");
+      option.value = String(torneo.idtorneo);
+      option.textContent = torneo.nombretorneo;
+      selectTorneo.appendChild(option);
+    });
   });
 
-  btnCancel.addEventListener("click", (e) => {
+  // === Acciones de los botones ===
+  btnCancel.addEventListener("click", () =>
+    navigate(privateRoutesMap.VER_PARTIDOS)
+  );
+
+  form.addEventListener("submit", (e) => {
     e.preventDefault();
-    navigate(privateRoutesMap.VER_PARTIDOS);
   });
 
   btnSubmit.addEventListener("click", async () => {
-    btnSubmit.disabled = true;
-    btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
     const formData = new FormData(form);
     const errorMessage = validatePartidos(formData);
-    if (errorMessage.length > 0) {
+    
+    if (errorMessage) {
       Swal.fire("Error", errorMessage, "error");
+      return;
+    }
+    const partidoData = await actions.getPartidoById.orThrow({
+      id: Number.parseInt(formData.get("idpartido")?.toString() ?? "0"),
+    });
+    const partido = partidoData.data ?? {};
+    const isChanged = isPartidoUpdated(partido, formData);
+
+    if (!isChanged) {
+      await Swal.fire("Información", "No se han detectado cambios en el partido.", "info");
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
       return;
     }
-    
-    const nombreLocal = formData.get("idequipolocal");
-    const nombreVisitante = formData.get("idequipovisitante");    
-    const { data: equipoLocal, error: equipoError } =
-      await actions.getEquipoByName({ nombre: nombreLocal as string });
-    const { data: equipoVisitante, error: visitanteError } =
-      await actions.getEquipoByName({ nombre: nombreVisitante as string });
 
-    formData.set("idequipolocal", String(equipoLocal?.data.idequipo));
-    formData.set("idequipovisitante", String(equipoVisitante?.data.idequipo));
-    const date = formData.get("fechapartido") as string;
-    formData.set("fechapartido", new Date(date).toISOString());
-    console.log("Fecha partido formateada:", formData.get("fechapartido"));
+    formData.set(
+      "fechapartido",
+      new Date(formData.get("fechapartido") as string).toISOString()
+    );
 
-    console.log("Form Data:", Array.from(formData.entries()));
     try {
       const { data, error } = await actions.updatePartido(formData);
 
-      if (error) throw error;
-
-      const { data: torneoData, error: torneError } =
-        await actions.getTorneos();
-
-      if (!data) {
-        console.error("No data received for partido creation");
+      if (error || !data) {
+        Swal.fire("Error", "No se pudo actualizar el partido", "error");
         btnSubmit.disabled = false;
         btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
         return;
       }
 
-      if (torneError || error) {
-        console.error("Error fetching torneos:", torneError);
-        btnSubmit.disabled = false;
-        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-        return;
-      }
-      console.log("Partido update response:", data);
-      const partido = data.data;
-      console.log("Recuperando torneo para el partido...");
-      const torneo: Torneo = torneoData?.data.find(
-        (torneo: Torneo) =>
-          torneo.idtorneo === Number(formData.get("idtorneo")),
-      ) as Torneo;
-      console.log("Torneo recuperado:", torneo);
-
-      const { data: torneoPartido, error: torneoPartidoError } =
-        await actions.updateTorneoPartido({
-          idpartido: partido.idpartido,
-          idtorneo: torneo.idtorneo,
-        });
-
-      Swal.fire("Éxito", "Partido actualizado", "success").then(
-        async (result) => {
+      Swal.fire("Éxito", "Partido actualizado correctamente", "success").then(
+        (result) => {
           if (result.isConfirmed) {
-            await navigate(privateRoutesMap.VER_PARTIDOS);
+            navigate(privateRoutesMap.VER_PARTIDOS);
           }
-        },
+        }
       );
-      form.reset();
     } catch (err) {
-      console.error(err as Error);
-      Swal.fire("Error", "Error al editar el partido", "error");
+      console.error(err);
+      Swal.fire("Error", "Error inesperado al actualizar el partido", "error");
+    } finally {
+      btnSubmit.disabled = false;
+      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
     }
   });
-
 </script>

@@ -1,7 +1,7 @@
 ---
 import { privateRoutesMap } from "@consts/routes";
 import { Table } from "@components/tables/Table";
-import type { SortOptions, TableActions } from "@interfaces/table-actions.interface";
+import type { SortOptions, TableActions, TableContent } from "@interfaces/table-actions.interface";
 import type { User } from "@interfaces/user.interface";
 import EditIcon from "@assets/edit_icon_black.svg";
 import DeleteIcon from "@assets/delete_icon_black.svg";
@@ -23,7 +23,13 @@ const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
 
-const headers = ["Nombre de usuario", "Email", "Rol", "Editar", "Eliminar"];
+const headers: TableContent[] = [
+  { data: "Nombre de usuario" },
+  { data: "Email" },
+  { data: "Rol" },
+  { data: "Editar" },
+  { data: "Eliminar" },  
+];
 
 const { data, error } = await Astro.callAction(actions.getUsers, {
   userCredential: "123456789",
@@ -50,9 +56,13 @@ const rows = users.map((u) => [u.nombre_usuario, u.email_usuario, u.rol]).sort(
   (a, b) => {
     if (sortParam && orderParam) {
       const index = headers.indexOf(
-        sortOptions.find(
-          (option) => option.searchParam === sortParam
-        )?.displayName ?? ""
+        sortOptions[0]
+          ? headers.find(
+              (header) =>
+                header.data.toLowerCase() ===
+                sortOptions[0].displayName.toLowerCase()
+            )!
+          : headers[0]
       );
       if (index !== -1) {
         const valueA = a[index] as string;

@@ -2,19 +2,30 @@
 import FormLayout from "@layouts/FormLayout.astro";
 import arrowNext from "@assets/arrow_next.svg";
 import { buttonClass, inputClass } from "@consts/index";
+import { actions } from "astro:actions";
 
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
 
+const { data: dataTemporadas, error } = await Astro.callAction(actions.getTemporadas, {
+  page: 1,
+  pageSize: 1000,
+});
+
+if (error) {
+  console.error("Error fetching temporadas:", error);
+  throw new Error("No se pudo obtener la lista de temporadas.");
+}
+
+const temporadas = dataTemporadas?.data ?? [];
 ---
 
 <FormLayout formTitle="Agregar Torneo" pageTitle="Agregar Torneo" user={user}>
   <form id="form-torneo" class="flex flex-col w-full max-w-md">
+    <!-- Nombre del torneo -->
     <div class="flex gap-2 flex-col mb-4">
-      <label for="nombretorneo" class="text-base font-medium"
-        >Nombre del Torneo</label
-      >
+      <label for="nombretorneo" class="text-base font-medium">Nombre del Torneo</label>
       <input
         type="text"
         id="nombretorneo"
@@ -24,10 +35,54 @@ const user = Astro.cookies.get("user")
       />
     </div>
 
+    <!-- Temporada -->
     <div class="flex gap-2 flex-col mb-4">
-      <label for="descripciontorneo" class="text-base font-medium"
-        >Descripción</label
-      >
+      <label for="idtemporada" class="text-base font-medium">Temporada</label>
+      <select name="idtemporada" id="idtemporada" class={inputClass}>
+        <option value="" disabled selected>Selecciona una temporada</option>
+        {
+          temporadas.map((temp) => (
+            <option value={temp.idtemporada}>{temp.nombretemporada}</option>
+          ))
+        }
+      </select>
+    </div>
+
+    <!-- Fechas -->
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="fechainiciotorneo" class="text-base font-medium">Fecha de Inicio</label>
+      <input
+        type="date"
+        id="fechainiciotorneo"
+        name="fechainiciotorneo"
+        class={inputClass}
+      />
+    </div>
+
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="fechafintorneo" class="text-base font-medium">Fecha de Fin</label>
+      <input
+        type="date"
+        id="fechafintorneo"
+        name="fechafintorneo"
+        class={inputClass}
+      />
+    </div>
+
+    <!-- Torneo activo -->
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="torneoactivo" class="text-base font-medium">
+        Activo
+      </label>
+      <select name="torneoactivo" id="torneoactivo" class={inputClass}>
+        <option value="true" selected>Sí</option>
+        <option value="false">No</option>
+      </select>
+    </div>
+
+    <!-- Descripción -->
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="descripciontorneo" class="text-base font-medium">Descripción</label>
       <textarea
         id="descripciontorneo"
         name="descripciontorneo"
@@ -36,11 +91,13 @@ const user = Astro.cookies.get("user")
         class={inputClass}
         rows="3"></textarea>
     </div>
+
+    <!-- Botones -->
     <div class="flex justify-center text-center mt-5 mx-5 pt-2 gap-5">
       <button class={buttonClass} type="button" id="btn-cancel">
         Cancelar
       </button>
-      <button class={buttonClass} type="submit">
+      <button class={buttonClass} type="button" id="btn-submit">
         Guardar Torneo
         <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
       </button>
@@ -49,67 +106,67 @@ const user = Astro.cookies.get("user")
 </FormLayout>
 
 <script>
+  import Swal from "sweetalert2";
   import { actions } from "astro:actions";
   import { navigate } from "astro:transitions/client";
   import { privateRoutesMap } from "@consts/routes";
-import Swal from "sweetalert2";
-import validateTorneo from "@utils/validation/admin/torneo-validation";
+  import {validateTorneo} from "@utils/validation/admin/torneo-validation";
 
-  document.addEventListener("DOMContentLoaded", async () => {   
-    const btnSubmit = document.querySelector(
-      'button[type="submit"]'
-    ) as HTMLButtonElement;
-    const form = document.querySelector("#form-torneo") as HTMLFormElement;
-    
-    const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
-    
-    btnCancel.addEventListener("click", (e) => {
-      e.preventDefault();
-      navigate(privateRoutesMap.VER_TORNEOS);
-    });
+  const btnSubmit = document.getElementById("btn-submit") as HTMLButtonElement;
+  const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
+  const form = document.getElementById("form-torneo") as HTMLFormElement;
 
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-    });
-    
-    btnSubmit.addEventListener("click", async () => {
-      btnSubmit.disabled = true;
-      btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
-      const formData = new FormData(form);
-      const errorMessage = validateTorneo(formData);
+  btnCancel.addEventListener("click", () => {
+    navigate(privateRoutesMap.VER_TORNEOS);
+  });
 
-      if(errorMessage.length > 0) {
+  btnSubmit.addEventListener("click", async () => {
+    btnSubmit.disabled = true;
+    btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
+
+    const formData = new FormData(form);
+    const errorMessage = validateTorneo(formData);
+
+    if (errorMessage) {
       Swal.fire("Error", errorMessage, "error");
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
       return;
     }
-      
-      try {
-        const { data, error } = await actions.createTorneo(formData);
-        
-        if (error) {
-          console.error(error);
-          Swal.fire("Error", "Ya existe un torneo con ese nombre", "error");
-          btnSubmit.disabled = false;
-          btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-          return;
-        }
-        form.reset();
-        Swal.fire("Éxito", "Torneo creado", "success").then((result) => {
-          if (result.isConfirmed) {
-            navigate(privateRoutesMap.VER_TORNEOS);
-          }
-        });
+
+    // Normalización de datos antes de enviar
+    console.log("torneo Activo" + formData.get("torneoactivo"));
+    const torneoActivo =
+      (formData.get("torneoactivo") === "true") ? true : false;
+
+    const fechaInicio = new Date(formData.get("fechainiciotorneo") as string);
+    const fechaFin = new Date(formData.get("fechafintorneo") as string);
+
+    formData.set("fechainiciotorneo", fechaInicio.toISOString());
+    formData.set("fechafintorneo", fechaFin.toISOString());
+    formData.set("torneoactivo", torneoActivo.toString());
+
+    try {
+      const { data, error } = await actions.createTorneo(formData);
+
+      if (error) {
+        Swal.fire("Error", "Ya existe un torneo con ese nombre", "error");
         btnSubmit.disabled = false;
         btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
         return;
-      } catch (err) {
-        console.error(err as Error);
-        Swal.fire("Error", "Error al crear el torneo", "error");
       }
-    });
+
+      Swal.fire("Éxito", "Torneo creado exitosamente", "success").then(() => {
+        navigate(privateRoutesMap.VER_TORNEOS);
+      });
+
+      form.reset();
+    } catch (err) {
+      console.error("Error al crear torneo:", err);
+      Swal.fire("Error", "Ocurrió un problema al crear el torneo", "error");
+    } finally {
+      btnSubmit.disabled = false;
+      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+    }
   });
-  
-  </script>
-  
+</script>

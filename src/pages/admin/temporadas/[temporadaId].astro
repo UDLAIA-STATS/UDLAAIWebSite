@@ -2,11 +2,8 @@
 import "@styles/global.css";
 import FormLayout from "@layouts/FormLayout.astro";
 import arrowNext from "@assets/arrow_next.svg";
-import NotAuthorized from "@components/shared/NotAuthorized.astro";
-import { actions } from "astro:actions";
-import { roles } from "@consts/roles";
-import type { Equipo, Temporada, Torneo } from "@interfaces/torneos.interface";
 import Swal from "sweetalert2";
+import { actions } from "astro:actions";
 import { privateRoutesMap, buttonClass, inputClass } from "@consts/index";
 
 const { temporadaId } = Astro.params;
@@ -15,44 +12,19 @@ const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
 
-const { data: torneosData, error: errorData } = await Astro.callAction(
-  actions.getTorneos,
-  {},
-);
 const { data: temporadaData, error: errorTemporada } = await Astro.callAction(
   actions.getTemporadaById,
-  { id: Number.parseInt(temporadaId ?? "0") },
+  { id: Number.parseInt(temporadaId ?? "0") }
 );
 
-if (errorData) {
-  console.error("Error fetching torneos:", errorData);
-  Swal.fire("Error", "Error al cargar los torneos", "error").then((result) => {
-    if (result.isConfirmed) {
-      Astro.redirect(privateRoutesMap.VER_TEMPORADAS);
-    }
-  });
-} else if (errorTemporada) {
+if (errorTemporada || !temporadaData) {
   console.error("Error fetching temporada:", errorTemporada);
-  Swal.fire("Error", "Error al cargar la temporada", "error").then((result) => {
-    if (result.isConfirmed) {
-      Astro.redirect(privateRoutesMap.VER_TEMPORADAS);
-    }
-  });
-}
-
-if (!torneosData || !temporadaData) {
-  console.error("No data received for torneos");
-  Swal.fire(
-    "Error",
-    "No se pudo recuperar los datos del servidor.",
-    "error",
-  ).then(() => {
+  Swal.fire("Error", "Error al cargar la temporada", "error").then(() => {
     Astro.redirect(privateRoutesMap.VER_TEMPORADAS);
   });
 }
 
-const temporada: Temporada = temporadaData!.data;
-const torneos: Torneo[] = torneosData?.data ?? [];
+const temporada = temporadaData!.data;
 ---
 
 <FormLayout
@@ -62,70 +34,89 @@ const torneos: Torneo[] = torneosData?.data ?? [];
 >
   <form id="form-temporada" class="flex flex-col w-full max-w-md">
     <input
-      type="number"
-      hidden
-      value={temporada?.idtemporada ?? ""}
+      type="hidden"
       name="idtemporada"
-      id="idtemporada"
-      class="hidden"
+      value={temporada?.idtemporada ?? ""}
     />
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="nombretemporada" class="text-base font-medium"
-        >Nombre de la Temporada</label
-      >
+
+    <!-- Nombre -->
+    <div class="flex flex-col gap-2 mb-4">
+      <label for="nombretemporada" class="text-base font-medium">Nombre de la Temporada</label>
       <input
         id="nombretemporada"
         name="nombretemporada"
+        type="text"
         maxlength="100"
         value={temporada?.nombretemporada ?? ""}
-        type="text"
         class={inputClass}
-        required
       />
     </div>
 
+        <!-- Temporada activa -->
     <div class="flex gap-2 flex-col mb-4">
-      <label for="tipotemporada" class="text-base font-medium"
-        >Tipo de Temporada</label
-      >
-      <select name="tipotemporada" class={inputClass} id="tipotemporada">
-        <option value="oficial" selected={temporada?.tipotemporada === true}
-          >Oficial</option
-        >
-        <option value="amistoso" selected={temporada?.tipotemporada === false}
-          >Amistoso</option
-        >
+      <label for="temporadaactiva" class="text-base font-medium">
+        Temporada Activa
+      </label>
+      <select name="temporadaactiva" class={inputClass} id="temporadaactiva">
+        <option value="true" selected={temporada?.temporadaactiva}>Sí</option>
+        <option value="false" selected={!temporada?.temporadaactiva}>No</option>
       </select>
     </div>
 
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="idtorneo" class="text-base font-medium">Torneo</label>
-      <select name="idtorneo" class={inputClass} id="idtorneo">
-        <option value="" disabled selected>Selecciona un torneo</option>
-        {
-          torneos.map((torneo: Torneo) => (
-            <option
-              value={torneo.idtorneo}
-              id={`torneo-${torneo.idtorneo}`}
-              selected={torneo.idtorneo === temporada?.idtorneo}
-            >
-              {torneo.nombretorneo}
-            </option>
-          ))
-        }
+    <!-- Tipo -->
+    <div class="flex flex-col gap-2 mb-4">
+      <label for="tipotemporada" class="text-base font-medium">Tipo de Temporada</label>
+      <select name="tipotemporada" id="tipotemporada" class={inputClass}>
+        <option value="" disabled>Selecciona un tipo</option>
+        <option value="Oficial" selected={temporada?.tipotemporada === "Oficial"}>Oficial</option>
+        <option value="Amistosa" selected={temporada?.tipotemporada === "Amistosa"}>Amistosa</option>
       </select>
+    </div>
+
+    <!-- Fechas -->
+    <div class="flex flex-col gap-2 mb-4">
+      <label for="fechainiciotemporada" class="text-base font-medium">Fecha de Inicio</label>
+      <input
+        id="fechainiciotemporada"
+        name="fechainiciotemporada"
+        type="date"
+        value={temporada?.fechainiciotemporada?.split("T")[0] ?? ""}
+        class={inputClass}
+      />
+    </div>
+
+    <div class="flex flex-col gap-2 mb-4">
+      <label for="fechafintemporada" class="text-base font-medium">Fecha de Fin</label>
+      <input
+        id="fechafintemporada"
+        name="fechafintemporada"
+        type="date"
+        value={temporada?.fechafintemporada?.split("T")[0] ?? ""}
+        class={inputClass}
+      />
+    </div>
+
+    <!-- Descripción -->
+    <div class="flex flex-col gap-2 mb-4">
+      <label for="descripciontemporada" class="text-base font-medium">Descripción</label>
+      <textarea
+        id="descripciontemporada"
+        name="descripciontemporada"
+        maxlength="250"
+        rows="3"
+        class={`${inputClass} resize-none`}
+      >{temporada?.descripciontemporada ?? ""}</textarea>
+    </div>
+
+    <!-- Botones -->
+    <div class="flex justify-center text-center mt-5 mx-5 pt-2 gap-5">
+      <button class={buttonClass} type="button" id="btn-cancel">Cancelar</button>
+      <button class={buttonClass} type="button" id="btn-submit">
+        Actualizar Temporada
+        <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
+      </button>
     </div>
   </form>
-
-  <div class="flex justify-center text-center mt-5 mx-5 pt-2 gap-5">
-    <button class={buttonClass} type="button" id="btn-cancel">
-      Cancelar
-    </button>
-    <button class={buttonClass} type="submit">
-      Actualizar Temporada
-      <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
-    </button>
-  </div>
 </FormLayout>
 
 <script>
@@ -133,19 +124,14 @@ const torneos: Torneo[] = torneosData?.data ?? [];
   import { actions } from "astro:actions";
   import { navigate } from "astro:transitions/client";
   import { privateRoutesMap } from "@consts/routes";
-import validateTemporadas from "@utils/validation/admin/temporadas-validation";
+  import { isTemporadaUpdated, validateTemporadas } from "@utils/validation/admin/temporadas-validation";
+import type { Temporada } from "@interfaces/torneos.interface";
 
-  const form = document.querySelector("#form-temporada") as HTMLFormElement;
-  const btnSubmit = document.querySelector(
-    'button[type="submit"]',
-  ) as HTMLButtonElement;
+  const form = document.getElementById("form-temporada") as HTMLFormElement;
+  const btnSubmit = document.getElementById("btn-submit") as HTMLButtonElement;
+  const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
 
-  const btnCancel = document.getElementById(
-    "btn-cancel"
-  ) as HTMLButtonElement;
-
-  btnCancel.addEventListener("click", (e) => {
-    e.preventDefault();
+  btnCancel.addEventListener("click", () => {
     navigate(privateRoutesMap.VER_TEMPORADAS);
   });
 
@@ -155,40 +141,60 @@ import validateTemporadas from "@utils/validation/admin/temporadas-validation";
 
     const formData = new FormData(form);
     const errorMessage = validateTemporadas(formData);
+    const data = await actions.getTemporadaById.orThrow({
+      id: Number.parseInt(formData.get("idtemporada")?.toString() ?? "0")
+    });
+    const temporadaActual = data.data as Temporada;
+    const cambiosDetectados = isTemporadaUpdated(temporadaActual, formData);
 
-    if (errorMessage.length > 0) {
-      Swal.fire("Error", errorMessage, "error").then(
-        (result) => {
-          if (result.isConfirmed) {
-            btnSubmit.disabled = false;
-            btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-          }
-        }
-      );
+    if(!cambiosDetectados) {
+      Swal.fire("Información", "No se han detectado cambios en la temporada.", "info").then(() => {
+        btnSubmit.disabled = false;
+        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+      });
       return;
     }
+
+    if (errorMessage) {
+      Swal.fire("Error", errorMessage, "error").then(() => {
+        btnSubmit.disabled = false;
+        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+      });
+      return;
+    }
+
+    // 🧠 Normalización de datos (solo ajuste de formato)
+    const tipo = formData.get("tipotemporada")?.toString().trim() ?? "";
+    const fechaInicio = formData.get("fechainiciotemporada")?.toString();
+    const fechaFin = formData.get("fechafintemporada")?.toString();
+
+    const fechaInicioISO = fechaInicio ? new Date(fechaInicio).toISOString() : "";
+    const fechaFinISO = fechaFin ? new Date(fechaFin).toISOString() : "";
+
+    formData.set("idtemporada", formData.get("idtemporada")?.toString() ?? "");
+    formData.set("nombretemporada", formData.get("nombretemporada")?.toString().trim() ?? "");
+    formData.set("descripciontemporada", formData.get("descripciontemporada")?.toString().trim() ?? "");
+    formData.set("tipotemporada", tipo);
+    formData.set("fechainiciotemporada", fechaInicioISO);
+    formData.set("fechafintemporada", fechaFinISO);
+    formData.set("temporadaactiva", formData.get("temporadaactiva")?.toString() ?? "");
 
     try {
       const { data, error } = await actions.updateTemporada(formData);
 
       if (error) {
         Swal.fire("Error", error.message, "error");
-        btnSubmit.disabled = false;
-        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-        return;
-      }
-      Swal.fire("Éxito", "Temporada actualizada", "success").then((result) => {
-        if (result.isConfirmed) {
+      } else {
+        Swal.fire("Éxito", "Temporada actualizada correctamente", "success").then(() => {
           navigate(privateRoutesMap.VER_TEMPORADAS);
-        }
-      });
-      form.reset();
+        });
+      }
+    } catch (err) {
+      console.error("Error al actualizar:", err);
+      Swal.fire("Error", "Ocurrió un problema al actualizar la temporada", "error");
+    } finally {
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-    } catch (err) {
-      console.error(err as Error);
-      Swal.fire("Error", "Error al actualizar la temporada", "error");
     }
   });
-
 </script>

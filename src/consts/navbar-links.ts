@@ -5,10 +5,10 @@ import type { LoggedUser } from "@interfaces/user.interface";
 import type { Partido } from "@interfaces/partido.interface";
 
 export const matchSidebarLinks: Link[] = [
-  { name: "Torneos", href: "/admin/torneos/?page=1" },
   { name: "Temporadas", href: "/admin/temporadas/?page=1" },
-  { name: "Partidos", href: "/admin/partidos/?page=1" },
+  { name: "Torneos", href: "/admin/torneos/?page=1" },
   { name: "Equipos", href: "/admin/equipos/?page=1" },
+  { name: "Partidos", href: "/admin/partidos/?page=1" },
 ];
 
 export const getNavbarLinks = (user?: LoggedUser) => {

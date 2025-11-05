@@ -25,21 +25,17 @@ const user: LoggedUser | null = Astro.cookies.get("user")
 const searchParams = Astro.url.searchParams;
 const pageParam = Number(searchParams.get("page") ?? 1);
 
-const { data, error } = await Astro.callAction(actions.getEquipos, {});
+const { data, error } = await Astro.callAction(actions.getEquipos, {
+  page: pageParam,
+});
 
 if (error) {
   console.error("Error fetching torneos data:", error);
-  return Astro.redirect("/");
+  throw new Error(error.message);
+  // return Astro.redirect("/");
 }
 
-const equipos: Equipo[] = data?.data ?? [];
-
-const offset = 10;
-const totalPages = Math.ceil(equipos.length / offset);
-const paginatedEquipos = equipos.slice(
-  (pageParam - 1) * offset,
-  pageParam * offset
-);
+const pages = data.pages ?? 1;
 
 const sidebarLinks: Link[] = matchSidebarLinks;
 
@@ -72,8 +68,8 @@ const sortOptions: SortOptions[] = [
               <PartidosProfesorTable filter={matchOptions.equipos} />
             </div>
           </div>
-          <div class={`${totalPages <= 1 ? "hidden" : "block"} w-full`}>
-            <Pagination totalPages={totalPages} />
+          <div class={`${pages <= 1 ? "hidden" : "block"} w-full`}>
+            <Pagination totalPages={pages} />
           </div>
         </div>
       ) : (

@@ -3,19 +3,31 @@ import "@styles/global.css";
 import FormLayout from "@layouts/FormLayout.astro";
 import arrowNext from "@assets/arrow_next.svg";
 import { actions } from "astro:actions";
-import type { Equipo, Partido } from "@interfaces/torneos.interface";
-import Swal from "sweetalert2";
-import { privateRoutesMap, buttonClass, inputClass } from "@consts/index";
+import {  buttonClass, inputClass } from "@consts/index";
 
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
+
+const { data: institucionesData, error: institucionesError } = await Astro.callAction(
+  actions.getInstituciones,
+  { pageSize: 1000 }
+);
+
+if (institucionesError || !institucionesData) {
+  console.error("Error fetching instituciones:", institucionesError);
+  throw new Error("No se pudo obtener la lista de instituciones.");
+}
+
+const instituciones = institucionesData.data;
+
 ---
 
 <FormLayout formTitle="Agregar Equipo" pageTitle="Agregar Equipo" user={user}>
   <form id="form-equipo" class="flex flex-col w-full max-w-md">
+    <!-- Nombre del equipo -->
     <div class="flex gap-2 flex-col mb-4">
-      <label for="nombreequipo" class="text-base font-medium">Nombre</label>
+      <label for="nombreequipo" class="text-base font-medium">Nombre del Equipo</label>
       <input
         id="nombreequipo"
         name="nombreequipo"
@@ -26,16 +38,40 @@ const user = Astro.cookies.get("user")
       />
     </div>
 
-    <div class="flex gap-2 flex-col mb-4" hidden>
-      <label for="logoequipo" class="text-base font-medium">Logo</label>
-      <input id="logoequipo" name="logoequipo" type="file" class={inputClass} />
+    <!-- Institución -->
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="idinstitucion" class="text-base font-medium">Institución</label>
+      <select id="idinstitucion" name="idinstitucion" class={inputClass}>
+        <option value="" disabled selected>Selecciona una institución</option>
+        {
+          instituciones.map((inst) => (
+            <option value={inst.idinstitucion}>{inst.nombreinstitucion}</option>
+          ))
+        }
+      </select>
     </div>
 
+    <!-- Logo del equipo -->
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="logoequipo" class="text-base font-medium">Logo (opcional)</label>
+      <input id="logoequipo" name="logoequipo" type="file" class={inputClass} accept="image/*" />
+    </div>
+
+    <!-- Estado activo -->
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="equipoactivo" class="text-base font-medium">Activo</label>
+      <select id="equipoactivo" name="equipoactivo" class={inputClass}>
+        <option value="true" selected>Sí</option>
+        <option value="false">No</option>
+      </select>
+    </div>
+
+    <!-- Botones -->
     <div class="flex justify-center text-center mt-5 mx-5 pt-2 gap-5">
       <button class={buttonClass} type="button" id="btn-cancel">
         Cancelar
       </button>
-      <button class={buttonClass} type="submit">
+      <button class={buttonClass} type="submit" id="btn-submit">
         Agregar Equipo
         <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
       </button>
@@ -48,64 +84,55 @@ const user = Astro.cookies.get("user")
   import { actions } from "astro:actions";
   import { privateRoutesMap } from "@consts/routes";
   import { navigate } from "astro:transitions/client";
-import validateEquipos from "@utils/validation/admin/equipos-validation";
+  import { validateEquipos } from "@utils/validation/admin/equipos-validation";
 
   const form = document.querySelector("#form-equipo") as HTMLFormElement;
-  const btnSubmit = document.querySelector(
-    'button[type="submit"]'
-  ) as HTMLButtonElement;
-  const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
+  const btnSubmit = document.querySelector("#btn-submit") as HTMLButtonElement;
+  const btnCancel = document.querySelector("#btn-cancel") as HTMLButtonElement;
 
-  btnCancel.addEventListener("click", () => {
-    navigate(privateRoutesMap.VER_EQUIPOS);
-  });
+  btnCancel.addEventListener("click", () => navigate(privateRoutesMap.VER_EQUIPOS));
 
   btnSubmit.addEventListener("click", async (e) => {
+    e.preventDefault();
     btnSubmit.disabled = true;
     btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
+
     const formData = new FormData(form);
     const errorMessage = validateEquipos(formData);
-    if ( errorMessage.length > 0 ) {
-      Swal.fire({
-          icon: "error",
-          title: "Error",
-          html: errorMessage,
-        }).then((result) => {
-          if (result.isConfirmed) {
-            btnSubmit.disabled = false;
-            btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-          }
-        });
-        return;
-      }
 
-    const logo: File = formData.get("logoequipo") as File;
-    if (logo && logo.size > 0) {
-      formData.set("logoequipo", logo);
-    } else {
-      formData.delete("logoequipo");
-    }
-
-    try {
-      const { data, error } = await actions.createEquipo(formData);
-
-      if (error) {
-        Swal.fire("Error", "Error al crear el equipo", "error");
-        btnSubmit.disabled = false;
-        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-        return;
-      }
-      form.reset();
-      Swal.fire("Éxito", "Equipo creado", "success").then((result) => {
-        if (result.isConfirmed) {
-          navigate(privateRoutesMap.VER_EQUIPOS);
-        }
+    if (errorMessage.length > 0) {
+      await Swal.fire({
+        icon: "error",
+        title: "Error",
+        html: errorMessage,
       });
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+      return;
+    }
+
+    // Normalizar datos
+    const activo = formData.get("equipoactivo") === "true";
+    formData.set("equipoactivo", activo.toString());
+
+    const logo = formData.get("logoequipo");
+    if (!(logo instanceof File) || logo.size === 0) formData.delete("logoequipo");
+
+    try {
+      const { data, error } = await actions.createEquipo(formData);
+      if (error) {
+        await Swal.fire("Error", error.message, "error");
+      } else {
+        await Swal.fire("Éxito", "Equipo creado correctamente", "success");
+        navigate(privateRoutesMap.VER_EQUIPOS);
+        form.reset();
+      }
     } catch (err) {
-      console.error(err as Error);
-      Swal.fire("Error", "Error al crear el equipo", "error");
+      console.error("Error al crear equipo:", err);
+      Swal.fire("Error", "No se pudo crear el equipo", "error");
+    } finally {
+      btnSubmit.disabled = false;
+      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
     }
   });
 </script>

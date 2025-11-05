@@ -6,21 +6,20 @@ import { matchOptions } from "@utils/handle-partidos-table";
 import { actions } from "astro:actions";
 import Swal from "sweetalert2";
 
-
 interface Props {
   filter: matchOptions;
-  page?: number;
 }
 
-const { filter, page = 1 }: Props = Astro.props;
+const { filter }: Props = Astro.props;
 
 const searchParams = Astro.url.searchParams;
+const currentPage = Number(searchParams.get("page") ?? 1);
 const sortParam = searchParams.get("sortBy") ?? "";
 const orderParam = searchParams.get("orderBy") ?? "asc";
 
 const { data: dataMatch, error: errorMatch } = await Astro.callAction(
   actions.getDataByFilter,
-  { filter }
+  { filter: filter, page: currentPage }
 );
 
 if (errorMatch) {
@@ -43,67 +42,54 @@ if (!dataMatch) {
 // Mapeo para pasar los arrays a getRows sin condicionales repetitivos
 const dataMap: Record<string, any[]> = {
   [matchOptions.torneos]:
-    (dataMatch?.torneos as Torneo[]).sort((a, b) => {
-      if(sortParam && orderParam) {
+    (dataMatch?.torneos as Torneo[] ?? []).sort((a, b) => {
+      if (sortParam && orderParam) {
         const fieldA = (a as any)[sortParam];
         const fieldB = (b as any)[sortParam];
-        if(fieldA < fieldB) return orderParam === "asc" ? -1 : 1;
-        if(fieldA > fieldB) return orderParam === "asc" ? 1 : -1;
+        if (fieldA < fieldB) return orderParam === "asc" ? -1 : 1;
+        if (fieldA > fieldB) return orderParam === "asc" ? 1 : -1;
       }
       return orderParam === "asc"
         ? a.idtorneo - b.idtorneo
         : b.idtorneo - a.idtorneo;
-    }) ??
-    [],
+    }),
   [matchOptions.partidos]:
-    (dataMatch?.partidos as Partido[]).sort(
-      (a, b) => {
-        if(sortParam && orderParam) {
-          const fieldA = (a as any)[sortParam];
-          const fieldB = (b as any)[sortParam];
-          if(fieldA < fieldB) return orderParam === "asc" ? -1 : 1;
-          if(fieldA > fieldB) return orderParam === "asc" ? 1 : -1;
-        }
-        return orderParam === "asc"
-          ? a.idpartido - b.idpartido
-          : b.idpartido - a.idpartido;
-      }
-    ) ?? [],
-  [matchOptions.temporadas]:
-    (dataMatch?.temporadas as Temporada[]).sort(
-      (a, b) => {
-        if(sortParam && orderParam) {
-          const fieldA = (a as any)[sortParam];
-          const fieldB = (b as any)[sortParam];
-          if(fieldA < fieldB) return orderParam === "asc" ? -1 : 1;
-          if(fieldA > fieldB) return orderParam === "asc" ? 1 : -1;
-        }
-        return orderParam === "asc"
-          ? a.idtemporada - b.idtemporada
-          : b.idtemporada - a.idtemporada;
-      }
-    ) ?? [],
-  [matchOptions.equipos]:
-    (dataMatch?.equipos as Equipo[]).sort((a, b) => {
-      if(sortParam && orderParam) {
+    (dataMatch?.partidos as Partido[] ?? []).sort((a, b) => {
+      if (sortParam && orderParam) {
         const fieldA = (a as any)[sortParam];
         const fieldB = (b as any)[sortParam];
-        if(fieldA < fieldB) return orderParam === "asc" ? -1 : 1;
-        if(fieldA > fieldB) return orderParam === "asc" ? 1 : -1;
+        if (fieldA < fieldB) return orderParam === "asc" ? -1 : 1;
+        if (fieldA > fieldB) return orderParam === "asc" ? 1 : -1;
+      }
+      return orderParam === "asc"
+        ? a.idpartido - b.idpartido
+        : b.idpartido - a.idpartido;
+    }),
+  [matchOptions.temporadas]:
+    (dataMatch?.temporadas as Temporada[] ?? []).sort((a, b) => {
+      if (sortParam && orderParam) {
+        const fieldA = (a as any)[sortParam];
+        const fieldB = (b as any)[sortParam];
+        if (fieldA < fieldB) return orderParam === "asc" ? -1 : 1;
+        if (fieldA > fieldB) return orderParam === "asc" ? 1 : -1;
+      }
+      return orderParam === "asc"
+        ? a.idtemporada - b.idtemporada
+        : b.idtemporada - a.idtemporada;
+    }),
+  [matchOptions.equipos]:
+    (dataMatch?.equipos as Equipo[] ?? []).sort((a, b) => {
+      if (sortParam && orderParam) {
+        const fieldA = (a as any)[sortParam];
+        const fieldB = (b as any)[sortParam];
+        if (fieldA < fieldB) return orderParam === "asc" ? -1 : 1;
+        if (fieldA > fieldB) return orderParam === "asc" ? 1 : -1;
       }
       return orderParam === "asc"
         ? a.idequipo - b.idequipo
         : b.idequipo - a.idequipo;
-    }) ?? [],
+    }),
 };
-
-for (const key in dataMap) {
-  const data = dataMap[key];
-  if (!data || data.length === 0) continue;
-  const offset = 10;
-  const paginatedData = data.slice((page - 1) * offset, page * offset);
-  dataMap[key] = paginatedData;
-}
 
 // Helper para llamar getRows siempre con los 4 argumentos (pueden ser [])
 const buildRows = (option: matchOptions) =>
@@ -127,54 +113,53 @@ const rows = buildRows(filter);
       rows.length > 0 ? (
         <div class="flex rounded-md w-full h-fit self-center overflow-x-auto">
           <Table headers={headers}>
-            {rows.map((row) => (
+            {rows.map((row, rowIndex) => (
               <tr
                 class="border-b odd:bg-gray-50 hover:bg-gray-100 transition-colors"
-                id={`match-${filter.toLowerCase()}-${row[0]}`}
+                id={`match-${filter.toLowerCase()}-${row[0]?.data ?? rowIndex}`}
               >
-                {row.map((cell) => (
-                  <td class="px-6 py-4">{cell}</td>
-                ))}
+                {row.map((cell, _) =>
+                  cell.isVisible === false ? null : (
+                    <td class="px-6 py-4">{cell.data}</td>
+                  )
+                )}
 
-                {
-                  // Mantengo exactamente la generación de acciones por fila tal como tenías
-                  handlePartidos
-                    .getActions(filter, (id: number) =>
-                      console.log(`${filter} con id ${id} eliminado`)
+                {handlePartidos
+                  .getActions(filter, (id: number) =>
+                    console.log(`${filter} con id ${id} eliminado`)
+                  )
+                  .map((action, actionIndex) =>
+                    action.type === "link" ? (
+                      <td class="px-6 py-4 text-start">
+                        <a
+                          class="cursor-pointer"
+                          href={`${action.href ?? ""}${row[0]?.data ?? ""}`}
+                          title={action.alt}
+                        >
+                          <img
+                            class="size-6"
+                            src={action.icon}
+                            alt={action.alt}
+                          />
+                        </a>
+                      </td>
+                    ) : (
+                      <td class="px-6 py-4 text-start">
+                        <button
+                          type="button"
+                          data-id={row[0]?.data ?? ""}
+                          class="cursor-pointer"
+                          title={action.alt}
+                        >
+                          <img
+                            class="size-6"
+                            src={action.icon}
+                            alt={action.alt}
+                          />
+                        </button>
+                      </td>
                     )
-                    .map((action) =>
-                      action.type === "link" ? (
-                        <td class="px-6 py-4 text-start">
-                          <a
-                            class="cursor-pointer"
-                            href={(action.href ?? "") + row[0]}
-                            title={action.alt}
-                          >
-                            <img
-                              class="size-6"
-                              src={action.icon}
-                              alt={action.alt}
-                            />
-                          </a>
-                        </td>
-                      ) : (
-                        <td class="px-6 py-4 text-start">
-                          <button
-                            type="button"
-                            data-id={row[0]}
-                            class="cursor-pointer"
-                            title={action.alt}
-                          >
-                            <img
-                              class="size-6"
-                              src={action.icon}
-                              alt={action.alt}
-                            />
-                          </button>
-                        </td>
-                      )
-                    )
-                }
+                  )}
               </tr>
             ))}
           </Table>
@@ -199,7 +184,7 @@ const rows = buildRows(filter);
 
     switch (selectedFilter) {
       case matchOptions.torneos:
-        const { data, error } = await actions.deleteTorneo(id);
+        const { data, error } = await actions.deleteTorneo({ idtorneo: id });
         if (error) {
           console.error("Error deleting torneo:", error);
           Swal.fire("Error", error.message, "error");
@@ -216,7 +201,7 @@ const rows = buildRows(filter);
       case matchOptions.partidos:
         console.log(`Partido con id ${id} eliminado`);
         const { data: partidoData, error: partidoError } =
-          await actions.deletePartido(id);
+          await actions.deletePartido({ idpartido: id });
         if (partidoError) {
           console.error("Error deleting partido:", partidoError);
           Swal.fire("Error", partidoError?.message, "error");

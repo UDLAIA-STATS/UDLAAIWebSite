@@ -5,18 +5,14 @@ import PartidosSideBar from "@components/partidosProfesor/PartidosSideBar.astro"
 import * as handlePartidos from "@utils/handle-partidos-table";
 import { MatchOptionClient } from "@utils/index";
 import type { Link } from "@interfaces/index";
+import { matchSidebarLinks } from "@consts/navbar-links";
 
 const user: LoggedUser | null = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
 
 const filter: handlePartidos.matchOptions = await MatchOptionClient.getFilter();
-const sidebarLinks: Link[] = [
-  { name: "Torneos", href: "/admin/torneos/?page=1" },
-  { name: "Partidos", href: "/admin/partidos/?page=1" },
-  { name: "Temporadas", href: "/admin/temporadas/?page=1" },
-  { name: "Equipos", href: "/admin/equipos/?page=1" },
-];
+const sidebarLinks: Link[] = matchSidebarLinks;
 ---
 
 <AdminPanelLayout title="Gestión de Torneos y Partidos">

@@ -2,30 +2,12 @@
 import "@styles/global.css";
 import FormLayout from "@layouts/FormLayout.astro";
 import arrowNext from "@assets/arrow_next.svg";
-import NotAuthorized from "@components/shared/NotAuthorized.astro";
-import { actions } from "astro:actions";
-import { roles } from "@consts/roles";
-import type { Torneo } from "@interfaces/torneos.interface";
-import Swal from "sweetalert2";
 import { buttonClass, inputClass } from "@consts/index";
 
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
 
-const { data, error } = await Astro.callAction(actions.getTorneos, {});
-
-if (error) {
-  console.error("Error fetching torneos:", error);
-  Swal.fire("Error", "Error al cargar los torneos", "error");
-}
-
-if (!data) {
-  console.error("No data received for torneos");
-  Swal.fire("Warning", "No se recibieron datos de los torneos.", "warning");
-}
-
-const torneos: Torneo[] = data?.data ?? [];
 ---
 
 <FormLayout
@@ -34,10 +16,11 @@ const torneos: Torneo[] = data?.data ?? [];
   user={user}
 >
   <form id="form-temporada" class="flex flex-col w-full max-w-md">
+    <!-- Nombre de temporada -->
     <div class="flex gap-2 flex-col mb-4">
-      <label for="nombretemporada" class="text-base font-medium"
-        >Nombre de la Temporada</label
-      >
+      <label for="nombretemporada" class="text-base font-medium">
+        Nombre de la Temporada
+      </label>
       <input
         id="nombretemporada"
         name="nombretemporada"
@@ -47,34 +30,75 @@ const torneos: Torneo[] = data?.data ?? [];
       />
     </div>
 
+    <!-- Temporada activa -->
     <div class="flex gap-2 flex-col mb-4">
-      <label for="tipotemporada" class="text-base font-medium"
-        >Tipo de Temporada</label
-      >
-      <select name="tipotemporada" class={inputClass} id="tipotemporada">
-        <option value="oficial">Oficial</option>
-        <option value="amistoso">Amistoso</option>
+      <label for="temporadaactiva" class="text-base font-medium">
+        Temporada Activa
+      </label>
+      <select name="temporadaactiva" class={inputClass} id="temporadaactiva">
+        <option value="true" selected>Sí</option>
+        <option value="false">No</option>
       </select>
     </div>
 
+    <!-- Tipo de temporada -->
     <div class="flex gap-2 flex-col mb-4">
-      <label for="idtorneo" class="text-base font-medium">Torneo</label>
-      <select name="idtorneo" class={inputClass} id="idtorneo">
-        <option value="" disabled selected>Selecciona un torneo</option>
-        {
-          torneos.map((torneo: Torneo) => (
-            <option value={torneo.idtorneo} id={`torneo-${torneo.idtorneo}`}>
-              {torneo.nombretorneo}
-            </option>
-          ))
-        }
+      <label for="tipotemporada" class="text-base font-medium">
+        Tipo de Temporada
+      </label>
+      <select name="tipotemporada" class={inputClass} id="tipotemporada">
+        <option value="" disabled selected>Selecciona un tipo</option>
+        <option value="Oficial">Oficial</option>
+        <option value="Amistosa">Amistosa</option>
       </select>
     </div>
+
+    <!-- Fecha de inicio -->
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="fechainiciotemporada" class="text-base font-medium">
+        Fecha de Inicio
+      </label>
+      <input
+        id="fechainiciotemporada"
+        name="fechainiciotemporada"
+        type="date"
+        class={inputClass}
+      />
+    </div>
+
+    <!-- Fecha de fin -->
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="fechafintemporada" class="text-base font-medium">
+        Fecha de Fin
+      </label>
+      <input
+        id="fechafintemporada"
+        name="fechafintemporada"
+        type="date"
+        class={inputClass}
+      />
+    </div>
+
+    <!-- Descripción de temporada -->
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="descripciontemporada" class="text-base font-medium">
+        Descripción de la Temporada
+      </label>
+      <textarea
+        id="descripciontemporada"
+        name="descripciontemporada"
+        maxlength="250"
+        rows="3"
+        class={`${inputClass} resize-none`}
+      ></textarea>
+    </div>
+
+    <!-- Botones -->
     <div class="flex justify-center text-center mt-5 mx-5 pt-2 gap-5">
       <button class={buttonClass} type="button" id="btn-cancel">
         Cancelar
       </button>
-      <button class={buttonClass} type="submit">
+      <button class={buttonClass} type="button" id="btn-submit">
         Agregar Temporada
         <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
       </button>
@@ -87,39 +111,48 @@ const torneos: Torneo[] = data?.data ?? [];
   import { actions } from "astro:actions";
   import { navigate } from "astro:transitions/client";
   import { privateRoutesMap } from "@consts/routes";
-import validateTemporadas from "@utils/validation/admin/temporadas-validation";
+  import { validateTemporadas } from "@utils/validation/admin/temporadas-validation";
 
-  const form = document.querySelector("#form-temporada") as HTMLFormElement;
-  const btnSubmit = document.querySelector(
-    'button[type="submit"]'
-  ) as HTMLButtonElement;
+  const btnSubmit = document.getElementById("btn-submit") as HTMLButtonElement;
   const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
+  const form = document.getElementById("form-temporada") as HTMLFormElement;
 
   btnCancel.addEventListener("click", () => {
     navigate(privateRoutesMap.VER_TEMPORADAS);
   });
 
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-  });
-
   btnSubmit.addEventListener("click", async () => {
     btnSubmit.disabled = true;
     btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
+
     const formData = new FormData(form);
     const errorMessage = validateTemporadas(formData);
 
-    if (errorMessage.length > 0) {
-      Swal.fire("Error", errorMessage, "error").then(
-        (result) => {
-          if (result.isConfirmed) {
-            btnSubmit.disabled = false;
-            btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-          }
-        }
-      );
+    if (errorMessage) {
+      Swal.fire("Error", errorMessage, "error").then(() => {
+        btnSubmit.disabled = false;
+        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+      });
       return;
     }
+
+    // 🧠 Normalización de datos antes de enviar
+    const tipo = (formData.get("tipotemporada")?.toString() ?? "");
+    const fechaInicio = formData.get("fechainiciotemporada")?.toString();
+    const fechaFin = formData.get("fechafintemporada")?.toString();
+
+    // Convertimos fechas a formato ISO si existen
+    const fechaInicioISO = fechaInicio ? new Date(fechaInicio).toISOString() : "";
+    const fechaFinISO = fechaFin ? new Date(fechaFin).toISOString() : "";
+
+    // Creamos un nuevo FormData limpio con los tipos correctos
+    formData.set("nombretemporada", formData.get("nombretemporada")?.toString().trim() ?? "");
+    formData.set("descripciontemporada", formData.get("descripciontemporada")?.toString().trim() ?? "");
+    formData.set("tipotemporada", tipo);
+    formData.set("fechainiciotemporada", fechaInicioISO);
+    formData.set("fechafintemporada", fechaFinISO);
+    formData.set("temporadaactiva", formData.get("temporadaactiva")?.toString() ?? "");
+
 
     try {
       const { data, error } = await actions.createTemporada(formData);
@@ -130,15 +163,18 @@ import validateTemporadas from "@utils/validation/admin/temporadas-validation";
         btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
         return;
       }
-      Swal.fire("Éxito", "Temporada creada", "success").then((result) => {
-        if (result.isConfirmed) {
-          navigate(privateRoutesMap.VER_TEMPORADAS);
-        }
+
+      Swal.fire("Éxito", "Temporada creada exitosamente", "success").then(() => {
+        navigate(privateRoutesMap.VER_TEMPORADAS);
       });
+
       form.reset();
     } catch (err) {
-      console.error(err as Error);
-      Swal.fire("Error", "Error al crear el partido", "error");
+      console.error("Error al crear temporada:", err);
+      Swal.fire("Error", "Ocurrió un problema al crear la temporada", "error");
+    } finally {
+      btnSubmit.disabled = false;
+      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
     }
   });
 </script>

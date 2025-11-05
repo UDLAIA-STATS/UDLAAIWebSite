@@ -1,46 +1,45 @@
-import { matchOptions } from "@utils/handle-partidos-table";
-import { match } from "assert";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import debug from "debug";
 
 export const getDataByFilter = defineAction({
   accept: "json",
   input: z.object({
     filter: z.string(), // 'torneos' | 'partidos' | 'temporadas' | 'equipos'
+    page: z.number().int().positive().optional().default(1),
+    pageSize: z.number().int().positive().optional().default(10),
   }),
-  handler: async ({ filter }) => {
+  handler: async ({ filter, page, pageSize }) => {
     const filterOption = filter.toLowerCase();
+    const validFilters = ["torneos", "partidos", "temporadas", "equipos"];
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
 
+    if (!baseUrl) throw new Error("Variable de entorno TEAMSERVICE_URL no configurada");
+    if (!validFilters.includes(filterOption)) throw new Error(`Filtro inválido: ${filterOption}`);
+
+    const endpoint = `${baseUrl}/${encodeURIComponent(filterOption)}/all/?page=${page}&offset=${pageSize}`;
+
     try {
-      let responses: Record<string, any[]> = {};
+      const response = await fetch(endpoint);
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
 
-        const endpoint = `${baseUrl}/${filterOption}/all/`;
-        if (!endpoint) throw new Error(`Filtro inválido: ${filterOption}`);
-        const response = await fetch(endpoint);
-        if (!response.ok) {
-          throw new Error(`Error ${response.status}: ${response.statusText}`);
-        }
-    
-        const data = await response.json();
-        responses[filter] = data;
-          
+      const data = await response.json();
 
-        console.log(responses);
-        
-        return { 
-        torneos: responses[matchOptions.torneos] ?? [],
-        partidos: responses[matchOptions.partidos] ?? [],
-        temporadas: responses[matchOptions.temporadas] ?? [],
-        equipos: responses[matchOptions.equipos] ?? [],
-       };
+      return {
+        [filterOption]: data.results,
+        count: data.count,
+        page: data.page,
+        offset: data.offset,
+        pages: data.pages
+      };
     } catch (err) {
       console.error(`Error al obtener datos (${filterOption}):`, err);
       throw new Error("No se pudo obtener la información solicitada");
     }
   },
 });
+
 
 
 // import { defineAction } from "astro:actions";

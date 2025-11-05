@@ -1,34 +1,53 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import type { Equipo, Partido } from "@interfaces/torneos.interface";
-import { tomorrowDate } from "@utils/dates";
+import type { Partido } from "@interfaces/torneos.interface";
+import debug from "debug";
 
-
+// === Esquemas de validación ===
 const partidoSchema = z.object({
-  fechapartido: z.string(),
-  tipopartido: z.boolean(),
+  fechapartido: z.string(), // ISO date
   idequipolocal: z.number().int().positive(),
   idequipovisitante: z.number().int().positive(),
-  marcadorequipolocal: z.number().int().nonnegative().optional(),
-  marcadorequipovisitante: z.number().int().nonnegative().optional(),
+  idtorneo: z.number().int().positive(),
+  idtemporada: z.number().int().positive(),
+  marcadorequipolocal: z.number().int().nonnegative().optional().nullable(),
+  marcadorequipovisitante: z.number().int().nonnegative().optional().nullable(),
 });
 
 const partidoUpdateSchema = partidoSchema.extend({
   idpartido: z.number().int().positive(),
 });
 
+// === Actions ===
+
 // Obtener todos los partidos
 export const getPartidos = defineAction({
   accept: "json",
-  handler: async () => {
+  input: z.object({
+    page: z.number().int().positive().optional().default(1),
+    pageSize: z.number().int().positive().optional().default(10),
+  }),
+  handler: async ({ page, pageSize }) => {
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
-      const res = await fetch(`${baseUrl}/partidos/all/`);
-      if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
-      return { data: (await res.json()) as Partido[] };
+      const res = await fetch(`${baseUrl}/partidos/all/?page=${page}&offset=${pageSize}`);
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `Error ${res.status}: ${res.statusText}`);
+      };
+      const data = await res.json();
+      console.log('Datos obtenidos de partido' + data)
+      debug.log('Datos obtenidos de partido' + data)
+      return { 
+        count: data.count,
+        page: data.page,
+        offset: data.offset,
+        pages: data.pages,
+        data: data.results as Partido[]
+       };
     } catch (err) {
       console.error("Error al obtener partidos:", err);
-      throw new Error("No se pudo obtener la lista de partidos");
+      throw new Error(err instanceof Error ? err.message : "No se pudo obtener la lista de partidos");
     }
   },
 });
@@ -40,9 +59,10 @@ export const getPartidoById = defineAction({
   handler: async ({ id }) => {
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
-      const res = await fetch(`${baseUrl}/partidos/${id}`);
+      const res = await fetch(`${baseUrl}/partidos/${id}/`);
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
-      return { data: (await res.json()) as Partido };
+      const data = await res.json();
+      return { data: data as Partido };
     } catch (err) {
       console.error(`Error al obtener partido ID ${id}:`, err);
       throw new Error("No se pudo obtener el partido");
@@ -54,20 +74,33 @@ export const getPartidoById = defineAction({
 export const createPartido = defineAction({
   accept: "form",
   input: partidoSchema,
-  handler: async (payload) => {
+  handler: async ({ fechapartido, idequipolocal, idequipovisitante, idtorneo, idtemporada, marcadorequipolocal, marcadorequipovisitante }) => {
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
       const res = await fetch(`${baseUrl}/partidos/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          fechapartido: fechapartido,
+          idequipolocal: idequipolocal,
+          idequipovisitante: idequipovisitante,
+          idtorneo: idtorneo,
+          idtemporada: idtemporada,
+          marcadorequipolocal: marcadorequipolocal ?? null,
+          marcadorequipovisitante: marcadorequipovisitante ?? null,
+        }),
       });
-      if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.detail || `Error ${res.status}: ${res.statusText}`);
+      }
+
       const data = await res.json();
-      return { data: data.partido as Partido };
+      return { data: data as Partido };
     } catch (err) {
       console.error("Error al crear partido:", err);
-      throw new Error("No se pudo crear el partido");
+      throw new Error(err instanceof Error ? err.message : "No se pudo crear el partido");
     }
   },
 });
@@ -84,10 +117,14 @@ export const updatePartido = defineAction({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.detail || `Error ${res.status}: ${res.statusText}`);
+      }
+
       const data = await res.json();
-      console.log("Partido update response data:", data);
-      return { data: data.partido as Partido };
+      return { data: data as Partido };
     } catch (err) {
       console.error(`Error al actualizar partido ${payload.idpartido}:`, err);
       throw new Error("No se pudo actualizar el partido");
@@ -95,22 +132,25 @@ export const updatePartido = defineAction({
   },
 });
 
+// Eliminar partido
 export const deletePartido = defineAction({
-  input: z.number().int().positive(),
-  handler: async ( input ) => {
+  input: z.object({ idpartido: z.number().int().positive() }),
+  handler: async ({ idpartido }) => {
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
-      const response = await fetch(`${baseUrl}/partidos/${input}/delete/`, {
+      const res = await fetch(`${baseUrl}/partidos/${idpartido}/delete/`, {
         method: "DELETE",
       });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `Error ${res.status}: ${res.statusText}`);
       }
-      return { data: (await response.json()) as Partido };
+
+      return { success: true };
     } catch (error) {
-      console.error("Error al eliminar partido:", error);
-      throw new Error("No se pudo eliminar el partido, posiblemente está asociado a uno o más torneos");
+      console.error(`Error al eliminar partido ID ${idpartido}:`, error);
+      throw new Error("No se pudo eliminar el partido (posiblemente asociado a torneos)");
     }
   },
 });

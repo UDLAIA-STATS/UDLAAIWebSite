@@ -17,14 +17,17 @@ const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
 
-const { data, error } = await Astro.callAction(actions.getEquipos, {});
+// === Fetch de datos base ===
+const { data, error } = await Astro.callAction(actions.getEquipos, {
+  pageSize: 1000,
+});
 const { data: torneoData, error: torneoError } = await Astro.callAction(
   actions.getTorneos,
-  {}
+  { pageSize: 1000 }
 );
 const { data: temporadaData, error: temporadaError } = await Astro.callAction(
   actions.getTemporadas,
-  {}
+  { pageSize: 1000 }
 );
 
 if (error || torneoError || temporadaError) {
@@ -34,11 +37,6 @@ if (error || torneoError || temporadaError) {
   throw new Error("Error al recuperar datos necesarios para crear el partido.");
 }
 
-if (!data || !torneoData || !temporadaData) {
-  console.error("No data received for equipos");
-  throw new Error("No se recibieron datos necesarios para crear el partido.");
-}
-
 const equipos: Equipo[] = data?.data ?? [];
 const torneos: Torneo[] = torneoData?.data ?? [];
 const temporadas: Temporada[] = temporadaData?.data ?? [];
@@ -46,19 +44,24 @@ const temporadas: Temporada[] = temporadaData?.data ?? [];
 
 <FormLayout formTitle="Agregar Partido" pageTitle="Agregar Partido" user={user}>
   <form id="form-partido" class="flex flex-col w-full max-w-md">
+    <!-- Fecha del partido -->
     <div class="flex gap-2 flex-col mb-4">
-      <label for="tipopartido" class="text-base font-medium"
-        >Tipo de partido</label
+      <label for="fechapartido" class="text-base font-medium"
+        >Fecha del Partido</label
       >
-      <select name="tipopartido" class={inputClass} id="tipopartido">
-        <option value="oficial">Oficial</option>
-        <option value="amistoso">Amistoso</option>
-      </select>
+      <input
+        id="fechapartido"
+        name="fechapartido"
+        type="date"
+        class={inputClass}
+        required
+      />
     </div>
 
+    <!-- Temporada -->
     <div class="flex gap-2 flex-col mb-4">
       <label for="idtemporada" class="text-base font-medium">Temporada</label>
-      <select name="idtemporada" class={inputClass} id="idtemporada">
+      <select name="idtemporada" class={inputClass} id="idtemporada" required>
         <option value="" disabled selected>Selecciona una temporada</option>
         {
           temporadas.map((temporada: Temporada) => (
@@ -73,10 +76,18 @@ const temporadas: Temporada[] = temporadaData?.data ?? [];
       </select>
     </div>
 
+    <!-- Torneo -->
     <div class="flex gap-2 flex-col mb-4">
       <label for="idtorneo" class="text-base font-medium">Torneo</label>
-      <select name="idtorneo" class={inputClass} id="idtorneo">
+      <select name="idtorneo" class={inputClass} id="idtorneo" required>
         <option value="" disabled selected>Selecciona un torneo</option>
+        {
+          torneos.length === 0 ? (
+            <option value="" disabled>
+              No hay torneos disponibles
+            </option>
+          ) : null
+        }
         {
           torneos.map((torneo: Torneo) => (
             <option value={torneo.idtorneo} id={`torneo-${torneo.idtorneo}`}>
@@ -87,32 +98,21 @@ const temporadas: Temporada[] = temporadaData?.data ?? [];
       </select>
     </div>
 
-    <!-- <div class="flex gap-2 flex-col mb-4">
-      <label for="idtorneo" class="text-base font-medium">Torneo</label>
-      <select name="idtorneo" class={inputClass} id="idtorneo">
-        <option value="" disabled selected>Selecciona un torneo</option>
-        {
-          torneos.map((torneo: Torneo) => (
-            <option value={torneo.idtorneo} id={`torneo-${torneo.idtorneo}`}>
-              {torneo.nombretorneo}
-            </option>
-          ))
-        }
-      </select>
-    </div> -->
-
+    <!-- Equipos -->
     <div class="flex gap-2 flex-col mb-4">
       <label for="idequipolocal" class="text-base font-medium"
         >Equipo Local</label
       >
-      <select name="idequipolocal" class={inputClass} id="idequipolocal">
+      <select
+        name="idequipolocal"
+        class={inputClass}
+        id="idequipolocal"
+        required
+      >
         <option value="" disabled selected>Selecciona un equipo</option>
         {
           equipos.map((equipo: Equipo) => (
-            <option
-              value={equipo.nombreequipo}
-              id={`equipo-${equipo.idequipo}`}
-            >
+            <option value={equipo.idequipo} id={`equipo-${equipo.idequipo}`}>
               {equipo.nombreequipo}
             </option>
           ))
@@ -128,14 +128,12 @@ const temporadas: Temporada[] = temporadaData?.data ?? [];
         name="idequipovisitante"
         class={inputClass}
         id="idequipovisitante"
+        required
       >
         <option value="" disabled selected>Selecciona un equipo</option>
         {
           equipos.map((equipo: Equipo) => (
-            <option
-              value={equipo.nombreequipo}
-              id={`equipo-${equipo.idequipo}`}
-            >
+            <option value={equipo.idequipo} id={`equipo-${equipo.idequipo}`}>
               {equipo.nombreequipo}
             </option>
           ))
@@ -143,6 +141,7 @@ const temporadas: Temporada[] = temporadaData?.data ?? [];
       </select>
     </div>
 
+    <!-- Marcadores -->
     <div class="flex gap-2 flex-col mb-4">
       <label for="marcadorequipolocal" class="text-base font-medium"
         >Marcador Equipo Local</label
@@ -171,25 +170,16 @@ const temporadas: Temporada[] = temporadaData?.data ?? [];
       />
     </div>
 
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="fechapartido" class="text-base font-medium"
-        >Fecha del Partido</label
-      >
-      <input
-        id="fechapartido"
-        name="fechapartido"
-        type="date"
-        class={inputClass}
-      />
-    </div>
     <div class="flex justify-center text-center mt-5 mx-5 pt-2 gap-5">
-      <button class={buttonClass} type="button" id="btn-cancel">
-        Cancelar
-      </button>
-      <button class={buttonClass} type="submit">
-        Agregar Partido
-        <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
-      </button>
+      <button class={buttonClass} type="button" id="btn-cancel">Cancelar</button
+      >
+      <button class={buttonClass} type="submit"
+        >Agregar Partido <img
+          src={arrowNext.src}
+          class="size-7 rotate-180"
+          alt=""
+        /></button
+      >
     </div>
   </form>
 </FormLayout>
@@ -199,141 +189,107 @@ const temporadas: Temporada[] = temporadaData?.data ?? [];
   import { actions } from "astro:actions";
   import { navigate } from "astro:transitions/client";
   import { privateRoutesMap } from "@consts/index";
-  import type { Temporada, Torneo } from "@interfaces/index";
-  import validatePartidos from "@utils/validation/admin/partidos-validation";
+  import { validatePartidos } from "@utils/validation/admin/partidos-validation";
+  import type { Torneo } from "@interfaces/torneos.interface";
 
   const form = document.querySelector("#form-partido") as HTMLFormElement;
-  const btnSubmit = document.querySelector(
+  const btnSubmit = form.querySelector(
     'button[type="submit"]'
   ) as HTMLButtonElement;
-  const temporadaSelect = document.getElementById(
-    "idtemporada"
-  ) as HTMLSelectElement;
-
   const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
 
-  btnCancel.addEventListener("click", () => {
-    navigate(privateRoutesMap.VER_PARTIDOS);
-  });
+  const data = await actions.getTorneos.orThrow({ pageSize: 1000 });
+  const torneos: Torneo[] = data.data ?? [];
 
-  temporadaSelect.addEventListener("change", async () => {
-    const selectedTemporadaId = temporadaSelect.value;
-    if (!selectedTemporadaId) return;
+  const selectTemporada = document.getElementById(
+    "idtemporada"
+  ) as HTMLSelectElement;
+  const selectTorneo = document.getElementById("idtorneo") as HTMLSelectElement;
 
-    const dataTemporada = await actions.getTemporadaById.orThrow({
-      id: Number(selectedTemporadaId),
-    });
+  // === Evento: Filtrar torneos al cambiar la temporada ===
+  selectTemporada.addEventListener("change", (e) => {
+    const temporadaSeleccionada = (e.target as HTMLSelectElement).value;
 
-    const selectedTemporada: Temporada = dataTemporada.data;
+    // Limpiar torneos actuales
+    selectTorneo.innerHTML =
+      '<option value="" disabled selected>Selecciona un torneo</option>';
 
-    if (selectedTemporada) {
-      const torneoSelect = document.getElementById(
-        `idtorneo`
-      ) as HTMLSelectElement;
+    if (!temporadaSeleccionada) return;
 
-      torneoSelect.innerHTML = "";
+    // Filtrar torneos según la temporada
+    const torneosFiltrados = torneos.filter(
+      (torneo) => torneo.idtemporada === Number(temporadaSeleccionada)
+    );
 
-      const placeholder = new Option("Selecciona un torneo", "");
-      placeholder.disabled = true;
-      placeholder.selected = true;
-      torneoSelect.add(placeholder);
-
-      // Filtrar torneos únicos si tienes varias temporadas con el mismo torneo
-      const torneosUnicosMap = new Map<number, string>();
-      torneosUnicosMap.set(
-        selectedTemporada.idtorneo,
-        selectedTemporada.torneo_nombre
-      );
-
-      // Agregar las opciones al select
-      torneosUnicosMap.forEach((nombre, id) => {
-        torneoSelect.add(new Option(nombre, id.toString()));
-      });
+    if (torneosFiltrados.length === 0) {
+      selectTorneo.innerHTML = "";
+      const option = document.createElement("option");
+      option.value = "";
+      option.textContent = "No hay torneos disponibles";
+      option.disabled = true;
+      option.selected = true;
+      selectTorneo.appendChild(option);
+      return;
     }
+
+    // Agregar opciones filtradas
+    torneosFiltrados.forEach((torneo) => {
+      const option = document.createElement("option");
+      option.value = String(torneo.idtorneo);
+      option.textContent = torneo.nombretorneo;
+      selectTorneo.appendChild(option);
+    });
   });
 
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-  });
+  form.addEventListener("submit", (e) => e.preventDefault());
+
+  // === Botones y envío del formulario ===
+  btnCancel.addEventListener("click", () =>
+    navigate(privateRoutesMap.VER_PARTIDOS)
+  );
 
   btnSubmit.addEventListener("click", async () => {
-    btnSubmit.disabled = true;
-    btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
-
     const formData = new FormData(form);
-    const nombreLocal = formData.get("idequipolocal")?.toString().trim() ?? "";
-    const nombreVisitante =
-      formData.get("idequipovisitante")?.toString().trim() ?? "";
-    const date = formData.get("fechapartido")?.toString().trim() ?? "";
     const errorMessage = validatePartidos(formData);
 
-    if (errorMessage.length > 0) {
+    if (errorMessage) {
       Swal.fire("Error", errorMessage, "error");
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
       return;
     }
 
-    formData.set("fechapartido", new Date(date).toISOString());
-
-    const { data: equipoLocal, error: equipoError } =
-      await actions.getEquipoByName({ nombre: nombreLocal as string });
-    const { data: equipoVisitante, error: visitanteError } =
-      await actions.getEquipoByName({ nombre: nombreVisitante as string });
-
-    if (equipoError || visitanteError) {
-      console.error("Error fetching equipos:", equipoError || visitanteError);
-      Swal.fire("Error", "Error al obtener los equipos seleccionados", "error");
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-      return;
-    }
-
-    formData.set("idequipolocal", String(equipoLocal?.data.idequipo));
-    formData.set("idequipovisitante", String(equipoVisitante?.data.idequipo));
+    formData.set(
+      "fechapartido",
+      new Date(formData.get("fechapartido") as string).toISOString()
+    );
 
     try {
       const { data, error } = await actions.createPartido(formData);
-      const { data: torneoData, error: torneoError } =
-        await actions.getTorneos();
 
-      if (!data) {
-        console.error("No data received for partido creation");
-        Swal.fire("Error", "Error al crear el partido", "error");
-        btnSubmit.disabled = false;
-        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+      if (error || !data) {
+        Swal.fire("Error", error.message, "error");
         return;
       }
 
-      if (torneoError || error) {
-        console.error("Error fetching torneos:", torneoError);
-        Swal.fire("Error", "Error al crear el partido", "error");
-        btnSubmit.disabled = false;
-        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-        return;
-      }
-
-      const torneo: Torneo = torneoData?.data.find(
-        (torneo: Torneo) => torneo.idtorneo === Number(formData.get("idtorneo"))
-      ) as Torneo;
-
-      const { data: torneoPartido, error: torneoPartidoError } =
-        await actions.createTorneoPartido({
-          idpartido: data?.data.idpartido,
-          idtorneo: torneo.idtorneo,
-        });
-
-      Swal.fire("Éxito", "Partido creado", "success").then((result) => {
-        if (result.isConfirmed) {
-          navigate(privateRoutesMap.VER_PARTIDOS);
+      Swal.fire("Éxito", "Partido creado correctamente", "success").then(
+        (result) => {
+          if (result.isConfirmed) {
+            navigate(privateRoutesMap.VER_PARTIDOS);
+            form.reset();
+          }
         }
-      });
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-      form.reset();
+      );
     } catch (err) {
       console.error(err);
-      Swal.fire("Error", "Error al crear el partido", "error");
+      Swal.fire(
+        "Error",
+        err instanceof Error
+          ? err.message
+          : "Error inesperado al crear el partido",
+        "error"
+      );
+    } finally {
+      btnSubmit.disabled = false;
+      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
     }
   });
 </script>

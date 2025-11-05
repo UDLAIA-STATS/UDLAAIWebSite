@@ -4,6 +4,7 @@ import { Table } from "@components/tables/Table";
 import type {
   SortOptions,
   TableActions,
+  TableContent,
 } from "@interfaces/table-actions.interface";
 import type { User } from "@interfaces/user.interface";
 import EditIcon from "@assets/edit_icon_black.svg";
@@ -17,13 +18,11 @@ import type { Player } from "@interfaces/index";
 
 const { REGISTER_PLAYER, EDIT_PLAYER } = privateRoutesMap;
 
-const headers = [
-  "Nombre",
-  "Apellido",
-  "Posición",
-  "Número de camiseta",
-  "Editar",
-  "Eliminar",
+const headers: TableContent[] = [
+  { data: "Nombre" },
+  { data: "Apellido" },
+  { data: "Posición" },
+  { data: "Número de camiseta" },
 ];
 
 const sortOptions: SortOptions[] = [
@@ -57,8 +56,11 @@ const rows = players.map((u) => [
 ]).sort((a, b) => {
   if (sortOptions.length > 0) {
     const index = headers.indexOf(
-      sortOptions.find((option) => option.searchParam === "name")
-        ?.displayName ?? ""
+      sortOptions[0]
+        ? headers.find(
+            (header) => header.data.toLowerCase() === sortOptions[0].displayName.toLowerCase()
+          )!
+        : headers[0]
     );
     if (index !== -1) {
       const valueA = a[index] as string;

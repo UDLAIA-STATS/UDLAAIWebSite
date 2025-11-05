@@ -1,7 +1,8 @@
+import type { TableContent } from "@interfaces/table-actions.interface";
 import { For, type Component, type JSX } from "solid-js";
 
 interface Props {
-  headers: string[];
+  headers: TableContent[];
   children?: JSX.Element;
 }
 
@@ -12,11 +13,13 @@ export const Table: Component<Props> = ({ headers, children }: Props) => {
         <thead class="text-xs uppercase">
           <tr>
             <For each={headers}>
-              {(header) => (
-                <th scope="col" class="px-6 py-3">
-                  {header}
-                </th>
-              )}
+              {(header) =>
+                header.isVisible === false ? null : (
+                  <th scope="col" class="px-6 py-3">
+                    {header.data}
+                  </th>
+                )
+              }
             </For>
           </tr>
         </thead>

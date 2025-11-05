@@ -6,15 +6,9 @@ export interface TableActions {
     action?: (args: any) => void;
  }
 
- export interface TableRow {
-    data: string[] | number[];
-    allowSorting: boolean;
-    isVisible?: boolean;
- }
-
- export interface TableHeaders {
-    headers: string[];
-    allowSorting: boolean;
+ // Can be rows or headers
+ export interface TableContent {
+    data: string;
     isVisible?: boolean;
  }
 
