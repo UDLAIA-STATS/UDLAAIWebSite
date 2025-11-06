@@ -27,6 +27,7 @@ export interface Institucion {
 export interface Equipo {
     idequipo: number;
     idinstitucion: number;
+    institucion_nombre: string;
     nombreequipo: string;
     imagenequipo?: string | null;
     equipoactivo: boolean;
@@ -41,23 +42,14 @@ export interface Partido {
   // --- Equipos ---
   idequipolocal: number;
   idequipovisitante: number;
-  equipo_local?: string;
-  equipo_visitante?: string;
+  equipo_local_nombre?: string;
+  equipo_visitante_nombre?: string;
 
   // --- Torneo ---
   idtorneo: number;
   torneo_nombre?: string;
-  torneo_descripcion?: string;
-  torneo_fechainicio?: string;
-  torneo_fechafin?: string;
-  torneo_activo?: boolean;
 
   // --- Temporada ---
   idtemporada: number;
   temporada_nombre?: string;
-  temporada_descripcion?: string;
-  temporada_tipo?: "Amistosa" | "Oficial";
-  temporada_fechainicio?: string;
-  temporada_fechafin?: string;
-  temporada_activa?: boolean;
 }

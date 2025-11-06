@@ -1,6 +1,7 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import type { Temporada } from "@interfaces/torneos.interface";
+import { error } from "console";
 
 const temporadaSchema = z.object({
   nombretemporada: z.string().min(2).max(250),
@@ -137,12 +138,11 @@ export const deleteTemporada = defineAction({
           errorData.error || `Error ${res.status}: ${res.statusText}`
         );
       }
-      return { data: (await res.json()) as Temporada };
+      const response = await res.json();
+      return { data: response.mensaje };
     } catch (err) {
       console.error(`Error al eliminar temporada ${idtemporada}:`, err);
-      throw new Error(
-        "No se pudo eliminar la temporada, posiblemente tiene torneos asociados."
-      );
+      throw err;
     }
   },
 });

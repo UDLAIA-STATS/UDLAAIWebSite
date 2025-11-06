@@ -106,12 +106,10 @@ const rows = buildRows(filter);
 ---
 
 <div id="tables-container" class="w-full space-y-10">
-  <section id={`table-${filter}`} class={`w-full`}>
     <h2 class="text-xl font-semibold mb-2">{filter}</h2>
-
     {
       rows.length > 0 ? (
-        <div class="flex rounded-md w-full h-fit self-center overflow-x-auto">
+        <div class="flex rounded-md min-w-7xl max-w-full h-fit self-center overflow-x-auto">
           <Table headers={headers}>
             {rows.map((row, rowIndex) => (
               <tr
@@ -170,7 +168,6 @@ const rows = buildRows(filter);
         </p>
       )
     }
-  </section>
 </div>
 <script>
   import { privateRoutesMap } from "@consts/routes";
@@ -180,7 +177,10 @@ const rows = buildRows(filter);
   import Swal from "sweetalert2";
 
   const handleDelete = async (id: number) => {
-    const selectedFilter = await MatchOptionClient.getFilter();
+    const pathFilter = window.location.pathname.split("/")[2];
+    const selectedFilter = Object.values(matchOptions).find(
+      (option) => option.toLowerCase() === pathFilter
+    ) as MatchOptionClient;
 
     switch (selectedFilter) {
       case matchOptions.torneos:
@@ -192,7 +192,7 @@ const rows = buildRows(filter);
           Swal.fire("Éxito", "Torneo eliminado", "success").then(
             async (result) => {
               if (result.isConfirmed) {
-                await navigate(privateRoutesMap.ADMIN_PARTIDOS);
+                await navigate(privateRoutesMap.VER_TORNEOS);
               }
             }
           );
@@ -209,7 +209,7 @@ const rows = buildRows(filter);
           Swal.fire("Éxito", "Partido eliminado", "success").then(
             async (result) => {
               if (result.isConfirmed) {
-                await navigate(privateRoutesMap.ADMIN_PARTIDOS);
+                await navigate(privateRoutesMap.VER_PARTIDOS);
               }
             }
           );
@@ -223,10 +223,10 @@ const rows = buildRows(filter);
           console.error("Error deleting temporada:", temporadaError);
           Swal.fire("Error", temporadaError?.message, "error");
         } else {
-          Swal.fire("Éxito", "Temporada eliminada", "success").then(
+          Swal.fire("Éxito", temporadaData.data, "success").then(
             async (result) => {
               if (result.isConfirmed) {
-                await navigate(privateRoutesMap.ADMIN_PARTIDOS);
+                await navigate(privateRoutesMap.VER_TEMPORADAS);
               }
             }
           );
@@ -243,7 +243,7 @@ const rows = buildRows(filter);
           Swal.fire("Éxito", "Equipo eliminado", "success").then(
             async (result) => {
               if (result.isConfirmed) {
-                await navigate(privateRoutesMap.ADMIN_PARTIDOS);
+                await navigate(privateRoutesMap.VER_EQUIPOS);
               }
             }
           );
@@ -254,9 +254,6 @@ const rows = buildRows(filter);
     }
   };
 
-  // Se ejecuta cuando la página ya cargó
-  document.addEventListener("astro:page-load", async () => {
-    console.log("Astro page loaded: listening for filter changes...");
     const deleteButtons = document.querySelectorAll("button[data-id]");
     deleteButtons.forEach((button) => {
       button.addEventListener("click", async () => {
@@ -266,22 +263,4 @@ const rows = buildRows(filter);
         await handleDelete(Number(id));
       });
     });
-
-    window.addEventListener("partidos:filter-changed", async () => {
-      console.log("Filter changed event detected in PartidosProfesorTable");
-
-      const tablesContainer = document.getElementById("tables-container");
-      if (!tablesContainer) return;
-
-      const selectedFilter = await MatchOptionClient.getFilter();
-
-      for (const section of tablesContainer.children) {
-        if (section.id === `table-${selectedFilter}`) {
-          section.classList.remove("hidden");
-        } else {
-          section.classList.add("hidden");
-        }
-      }
-    });
-  });
 </script>

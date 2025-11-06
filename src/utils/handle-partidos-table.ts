@@ -23,7 +23,9 @@ export const getHeaders = (filter: matchOptions): TableContent[] => {
       return [
         { data: "ID", isVisible: false },
         { data: "Nombre" },
-        { data: "Descripción" },
+        { data: "Fecha Inicio" },
+        { data: "Fecha Fin" },
+        { data: "Activo" },
         { data: "Editar" },
         { data: "Eliminar" },
       ];
@@ -35,7 +37,8 @@ export const getHeaders = (filter: matchOptions): TableContent[] => {
         { data: "Local" },
         { data: "Visitante" },
         { data: "Marcador" },
-        { data: "Tipo" },
+        { data: "Torneo" },
+        { data: "Temporada" },
         { data: "Editar" },
         { data: "Eliminar" },
       ];
@@ -45,6 +48,9 @@ export const getHeaders = (filter: matchOptions): TableContent[] => {
         { data: "ID", isVisible: false },
         { data: "Nombre" },
         { data: "Tipo" },
+        { data: "Fecha Inicio" },
+        { data: "Fecha Fin" },
+        { data: "Activo" },
         { data: "Editar" },
         { data: "Eliminar" },
       ];
@@ -53,6 +59,8 @@ export const getHeaders = (filter: matchOptions): TableContent[] => {
       return [
         { data: "ID", isVisible: false },
         { data: "Nombre" },
+        { data: "Institución" },
+        { data: "Activo" },
         { data: "Editar" },
         { data: "Eliminar" },
       ];
@@ -81,7 +89,9 @@ export const getRows = (
       return torneos.map((t) => [
         { data: String(t.idtorneo ?? "-"), isVisible: false },
         { data: t.nombretorneo ?? "-" },
-        { data: t.descripciontorneo ?? "-" },
+        { data: t.fechainiciotorneo.split("T")[0] ?? "-" },
+        { data: t.fechafintorneo.split("T")[0] ?? "-" },
+        { data: capitalize(t.torneoactivo ? "Sí" : "No") },
       ]);
 
     case matchOptions.partidos:
@@ -89,16 +99,16 @@ export const getRows = (
       return partidos.map((p) => [
         { data: String(p.idpartido ?? "-"), isVisible: false },
         {
-          data: p.fechapartido
-            ? new Date(p.fechapartido).toLocaleDateString()
-            : "-",
+          data: p.fechapartido.split("T")[0] ??
+             "-",
         },
-        { data: p.equipo_local ?? "-" },
-        { data: p.equipo_visitante ?? "-" },
+        { data: p.equipo_local_nombre ?? "-" },
+        { data: p.equipo_visitante_nombre ?? "-" },
         {
           data: `${p.marcadorequipolocal ?? 0} - ${p.marcadorequipovisitante ?? 0}`,
         },
-        { data: capitalize(p.temporada_tipo) },
+        { data: p.torneo_nombre ?? "-" },
+        { data: p.temporada_nombre ?? "-" },
       ]);
 
     case matchOptions.temporadas:
@@ -107,6 +117,9 @@ export const getRows = (
         { data: String(t.idtemporada ?? "-"), isVisible: false },
         { data: t.nombretemporada ?? "-" },
         { data: capitalize(t.tipotemporada) },
+        { data: t.fechainiciotemporada.split("T")[0] ?? "-" },
+        { data: t.fechafintemporada.split("T")[0] ?? "-" },
+        { data: capitalize(t.temporadaactiva ? "Sí" : "No") },
       ]);
 
     case matchOptions.equipos:
@@ -114,6 +127,8 @@ export const getRows = (
       return equipos.map((e) => [
         { data: String(e.idequipo ?? "-"), isVisible: false },
         { data: e.nombreequipo ?? "-" },
+        { data: e.institucion_nombre ?? "-" },
+        { data: capitalize(e.equipoactivo ? "Sí" : "No") },
       ]);
 
     default:

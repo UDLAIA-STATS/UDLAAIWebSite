@@ -8,8 +8,8 @@ interface Props {
 
 export const Table: Component<Props> = ({ headers, children }: Props) => {
   return (
-    <div class="relative overflow-x-auto w-svw mt-5 flex justify-center">
-      <table class="table-auto border-collapse w-7xl text-sm text-left rtl:text-right">
+    <div class="relative overflow-x-auto min-w-7xl max-w-full mt-5 flex justify-center">
+      <table class="table-auto border-collapse min-w-7xl max-w-full text-sm text-left rtl:text-right">
         <thead class="text-xs uppercase">
           <tr>
             <For each={headers}>

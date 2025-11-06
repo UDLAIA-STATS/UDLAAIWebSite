@@ -24,7 +24,7 @@ const instituciones = institucionesData.data;
 ---
 
 <FormLayout formTitle="Agregar Equipo" pageTitle="Agregar Equipo" user={user}>
-  <form id="form-equipo" class="flex flex-col w-full max-w-md">
+  <form id="form-equipo" class="flex flex-col w-full max-w-md"  enctype="multipart/form-data">
     <!-- Nombre del equipo -->
     <div class="flex gap-2 flex-col mb-4">
       <label for="nombreequipo" class="text-base font-medium">Nombre del Equipo</label>
@@ -52,7 +52,7 @@ const instituciones = institucionesData.data;
     </div>
 
     <!-- Logo del equipo -->
-    <div class="flex gap-2 flex-col mb-4">
+    <div class="flex gap-2 flex-col mb-4" hidden>
       <label for="logoequipo" class="text-base font-medium">Logo (opcional)</label>
       <input id="logoequipo" name="logoequipo" type="file" class={inputClass} accept="image/*" />
     </div>

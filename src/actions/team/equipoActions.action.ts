@@ -7,16 +7,16 @@ import type { Equipo } from "@interfaces/torneos.interface";
 const equipoSchema = z.object({
   idinstitucion: z.number().int().positive("Debe asociarse una institución"),
   nombreequipo: z.string().min(2, "El nombre es muy corto").max(250, "El nombre es muy largo"),
-  imagenequipo: z.string().optional().nullable(), // BinaryField → base64 string o null
-  equipoactivo: z.boolean().optional(),
+  imagenequipo: z.instanceof(File).optional().nullable(), // BinaryField → base64 string o null
+  equipoactivo: z.boolean(),
 });
 
 const equipoUpdateSchema = z.object({
   idequipo: z.number().int().positive("El ID debe ser positivo"),
   nombreequipo: z.string().min(2).max(250).optional(),
   idinstitucion: z.number().int().positive().optional(),
-  imagenequipo: z.string().optional().nullable(),
-  equipoactivo: z.boolean().optional(),
+  imagenequipo: z.instanceof(File).optional().nullable(),
+  equipoactivo: z.boolean(),
 });
 
 // === Actions ===
@@ -55,7 +55,7 @@ export const getEquipoById = defineAction({
   handler: async ({ id }) => {
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
-      const response = await fetch(`${baseUrl}/equipos/${id}/`);
+      const response = await fetch(`${baseUrl}/equipos/${id}/`, { method: "GET" });
       if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
       const data = await response.json();
       return { data: data as Equipo };
@@ -88,18 +88,21 @@ export const getEquipoByName = defineAction({
 export const createEquipo = defineAction({
   accept: "form",
   input: equipoSchema,
-  handler: async ({ idinstitucion, nombreequipo, imagenequipo, equipoactivo }) => {
+  handler: async ( { idinstitucion, nombreequipo, imagenequipo, equipoactivo } ) => {
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
+      const formData = new FormData();
+      formData.append("idinstitucion", idinstitucion.toString());
+      formData.append("nombreequipo", nombreequipo);
+      if( imagenequipo instanceof File ) {
+        formData.append("imagenequipo", imagenequipo);
+      }
+      formData.append("equipoactivo", equipoactivo.toString());
+
       const response = await fetch(`${baseUrl}/equipos/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          idinstitucion: idinstitucion,
-          nombreequipo: nombreequipo,
-          imagenequipo: imagenequipo ?? null,
-          equipoactivo: equipoactivo ?? true,
-        }),
+        body: formData,
+       
       });
 
       if (!response.ok) {
@@ -123,15 +126,17 @@ export const updateEquipo = defineAction({
   handler: async ({ idequipo, nombreequipo, idinstitucion, imagenequipo, equipoactivo }) => {
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
-      const response = await fetch(`${baseUrl}/api/equipos/${idequipo}/update/`, {
+      const formData = new FormData();
+      if (idinstitucion) formData.append("idinstitucion", idinstitucion.toString());
+      if (nombreequipo) formData.append("nombreequipo", nombreequipo);
+      if( imagenequipo instanceof File ) {
+        formData.append("imagenequipo", imagenequipo);
+      }
+      formData.append("equipoactivo", equipoactivo.toString());
+
+      const response = await fetch(`${baseUrl}/equipos/${idequipo}/update/`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nombreequipo,
-          idinstitucion,
-          imagenequipo,
-          equipoactivo,
-        }),
+        body: formData,
       });
 
       if (!response.ok) {
@@ -154,7 +159,7 @@ export const deleteEquipo = defineAction({
   handler: async ({ idequipo }) => {
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
-      const response = await fetch(`${baseUrl}/api/equipos/${idequipo}/delete/`, { method: "DELETE" });
+      const response = await fetch(`${baseUrl}/equipos/${idequipo}/delete/`, { method: "DELETE" });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);

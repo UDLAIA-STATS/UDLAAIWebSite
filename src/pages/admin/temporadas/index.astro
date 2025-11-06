@@ -47,7 +47,7 @@ const sortOptions: SortOptions[] = [
   <div id="GestionTorneosPartidos" class="my-5 h-svh w-full max-w-7xl">
     {
       user ? (
-        <div class="flex flex-col justify-center align-center gap-5 w-full">
+        <div class="flex flex-col justify-center align-center w-full">
           <div class="flex flex-row justify-between gap-10 w-full">
             <div class="w-fit">
               <PartidosSideBar
@@ -55,7 +55,7 @@ const sortOptions: SortOptions[] = [
                 selectedItem={matchOptions.temporadas}
               />
             </div>
-            <div class="flex flex-col items-start self-start justify-start w-3/4">
+            <div class="flex flex-col items-start self-start justify-start w-full">
               <PartidosProfesorActions
                 sortByOptions={sortOptions}
                 buttonLabel="Crear Temporada"
