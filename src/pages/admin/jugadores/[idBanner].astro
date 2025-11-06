@@ -2,6 +2,8 @@
 import "@styles/global.css";
 import arrowNext from "@assets/arrow_next.svg";
 import FormLayout from "@layouts/FormLayout.astro";
+import { actions } from "astro:actions";
+import type { Player } from "@interfaces/index";
 
 const buttonClass =
   "text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md flex items-center justify-center cursor-pointer transition";
@@ -11,10 +13,41 @@ const inputClass =
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
+
+const { idBanner } = Astro.params;
+const { data, error } = await Astro.callAction(actions.getJugadorByBanner, {
+  idJugador: idBanner ?? "",
+});
+
+if (error || !data) {
+  console.error("Error al obtener jugador:", error);
+  throw new Error("No se pudo cargar la información del jugador.");
+}
+
+const jugador = data.data as Player;
 ---
 
-<FormLayout user={user} formTitle="Crear Jugador" pageTitle="Agregar Jugador">
+<FormLayout
+  user={user}
+  formTitle="Editar Jugador"
+  pageTitle="Actualizar Jugador"
+>
   <form id="formJugador" class="flex flex-col w-full max-w-md">
+    <!-- ID Banner -->
+    <div class="flex gap-2 flex-col mb-4" hidden>
+      <label class="text-base font-medium" for="idjugador">ID Banner</label>
+      <input
+        type="text"
+        id="idjugador"
+        name="idjugador"
+        minlength="9"
+        maxlength="10"
+        class={inputClass}
+        value={jugador.idjugador}
+        required
+      />
+    </div>
+
     <div class="flex gap-2 flex-col mb-4">
       <label class="text-base font-medium" for="idbanner">ID Banner</label>
       <input
@@ -24,6 +57,7 @@ const user = Astro.cookies.get("user")
         minlength="9"
         maxlength="10"
         class={inputClass}
+        value={jugador.idbanner}
         required
       />
     </div>
@@ -37,6 +71,7 @@ const user = Astro.cookies.get("user")
         name="nombrejugador"
         maxlength="100"
         class={inputClass}
+        value={jugador.nombrejugador}
         required
       />
     </div>
@@ -52,6 +87,7 @@ const user = Astro.cookies.get("user")
         name="apellidojugador"
         maxlength="100"
         class={inputClass}
+        value={jugador.apellidojugador}
         required
       />
     </div>
@@ -68,6 +104,7 @@ const user = Astro.cookies.get("user")
         min="1"
         max="99"
         class={inputClass}
+        value={jugador.numerocamisetajugador}
         required
       />
     </div>
@@ -83,10 +120,21 @@ const user = Astro.cookies.get("user")
         required
       >
         <option value="">-- Selecciona --</option>
-        <option value="Portero">Portero</option>
-        <option value="Defensa">Defensa</option>
-        <option value="Mediocampista">Mediocampista</option>
-        <option value="Delantero">Delantero</option>
+        <option value="Portero" selected={jugador.posicionjugador === "Portero"}
+          >Portero</option
+        >
+        <option value="Defensa" selected={jugador.posicionjugador === "Defensa"}
+          >Defensa</option
+        >
+        <option
+          value="Mediocampista"
+          selected={jugador.posicionjugador === "Mediocampista"}
+          >Mediocampista</option
+        >
+        <option
+          value="Delantero"
+          selected={jugador.posicionjugador === "Delantero"}>Delantero</option
+        >
       </select>
     </div>
 
@@ -102,15 +150,19 @@ const user = Astro.cookies.get("user")
         required
       >
         <option value="">-- Selecciona --</option>
-        <option value="true">Activo</option>
-        <option value="false">Inactivo</option>
+        <option value="true" selected={jugador.jugadoractivo === true}
+          >Activo</option
+        >
+        <option value="false" selected={jugador.jugadoractivo === false}
+          >Inactivo</option
+        >
       </select>
     </div>
 
     <!-- Botón -->
     <div class="flex gap-2 justify-center pt-5">
       <button id="btnSubmit" class={buttonClass} type="button">
-        Guardar Jugador
+        Actualizar Jugador
         <img
           src={arrowNext.src}
           class="flex size-7 align-middle pr-1 rotate-180"
@@ -122,10 +174,15 @@ const user = Astro.cookies.get("user")
 </FormLayout>
 
 <script>
-  import { validateJugador } from "@utils/validation/player/player-validation";
+  import Swal from "sweetalert2";
   import { actions } from "astro:actions";
   import { navigate } from "astro:transitions/client";
-  import Swal from "sweetalert2";
+  import {
+    validateJugador,
+    isJugadorUpdated,
+  } from "@utils/validation/player/player-validation";
+  import type { Player } from "@interfaces/index";
+import { privateRoutesMap } from "@consts/routes";
 
   const btnSubmit = document.getElementById("btnSubmit") as HTMLButtonElement;
 
@@ -135,7 +192,7 @@ const user = Astro.cookies.get("user")
     const form = document.getElementById("formJugador") as HTMLFormElement;
     const formData = new FormData(form);
 
-    // Validar antes de enviar
+    // Validación
     const validationErrors = validateJugador(formData);
     if (validationErrors) {
       Swal.fire({
@@ -148,15 +205,33 @@ const user = Astro.cookies.get("user")
       return;
     }
 
+    const idJugador = Number(formData.get("idjugador"));
+
+    // Verificar cambios
+    const jugadorData = await actions.getJugadorById.orThrow({
+      idjugador: idJugador,
+    });
+    const jugador = jugadorData.data as Player;
+
+    if (!isJugadorUpdated(jugador, formData)) {
+      Swal.fire({
+        icon: "info",
+        title: "Sin cambios detectados",
+        text: "No se han modificado los datos del jugador.",
+      });
+      btnSubmit.disabled = false;
+      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+      return;
+    }
+
     try {
-      const { data, error } = await actions.createJugador(formData);
+      const { data, error } = await actions.updateJugador(formData);
 
       if (error) {
-        console.log(error);
         Swal.fire({
           icon: "error",
-          title: "Error al crear el jugador",
-          text: "Los datos son incorrectos o el jugador ya existe.",
+          title: "Error al actualizar",
+          text: error.message,
         });
         btnSubmit.disabled = false;
         btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
@@ -165,25 +240,26 @@ const user = Astro.cookies.get("user")
 
       Swal.fire({
         icon: "success",
-        title: "Jugador registrado",
-        text: "El jugador ha sido agregado exitosamente.",
+        title: "Jugador actualizado",
+        text: "Los datos del jugador se han actualizado correctamente.",
         confirmButtonText: "Aceptar",
       }).then((result) => {
         if (result.isConfirmed) {
-          navigate("/admin/jugadores");
+          navigate(privateRoutesMap.ADMIN_JUGADORES);
           btnSubmit.disabled = false;
           btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
         }
       });
-
-      form.reset();
     } catch (err) {
       console.error(err);
       Swal.fire({
         icon: "error",
         title: "Error inesperado",
-        text: err instanceof Error ? err.message : "Ocurrió un error inesperado.",
+        text:
+          err instanceof Error ? err.message : "Ocurrió un error inesperado.",
       });
+      btnSubmit.disabled = false;
+      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
     } finally {
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");

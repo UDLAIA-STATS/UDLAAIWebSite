@@ -1,10 +1,11 @@
 export interface Player {
-    id: number,
-    name: string,
-    lastname: string,
-    position: string,
-    shirtNumber: number,
-    playerImageUrl: string
+    idjugador: number,
+    idbanner: string,
+    nombrejugador: string,
+    apellidojugador: string,
+    posicionjugador: 'Delantero' | 'Mediocampista' | 'Defensa' | 'Portero',
+    numerocamisetajugador: number,
+    jugadoractivo: boolean,
 }
 
 

@@ -6,7 +6,6 @@ import type {
   TableActions,
   TableContent,
 } from "@interfaces/table-actions.interface";
-import type { User } from "@interfaces/user.interface";
 import EditIcon from "@assets/edit_icon_black.svg";
 import DeleteIcon from "@assets/delete_icon_black.svg";
 import NotAuthorized from "@components/shared/NotAuthorized.astro";
@@ -15,21 +14,7 @@ import TableActionsComponent from "@components/partidosProfesor/TableActions.ast
 import Pagination from "@components/shared/Pagination.astro";
 import { PlayerService } from "@services/playerService";
 import type { Player } from "@interfaces/index";
-
-const { REGISTER_PLAYER, EDIT_PLAYER } = privateRoutesMap;
-
-const headers: TableContent[] = [
-  { data: "Nombre" },
-  { data: "Apellido" },
-  { data: "Posición" },
-  { data: "Número de camiseta" },
-];
-
-const sortOptions: SortOptions[] = [
-  { searchParam: "name", displayName: "Nombre" },
-  { searchParam: "lastname", displayName: "Apellido" },
-  { searchParam: "shirtNumber", displayName: "Número de camiseta" },
-];
+import { actions } from "astro:actions";
 
 const searchParams = Astro.url.searchParams;
 const pageParam = Number(searchParams.get("page") ?? 1);
@@ -38,48 +23,79 @@ const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
 
-const {
-  data: players,
-  total,
-  pages,
-}: {
-  data: Player[];
-  total: number;
-  pages: number;
-} = await PlayerService.getPaginated(pageParam);
-
-const rows = players.map((u) => [
-  u.name,
-  u.lastname,
-  u.position,
-  u.shirtNumber,
-]).sort((a, b) => {
-  if (sortOptions.length > 0) {
-    const index = headers.indexOf(
-      sortOptions[0]
-        ? headers.find(
-            (header) => header.data.toLowerCase() === sortOptions[0].displayName.toLowerCase()
-          )!
-        : headers[0]
-    );
-    if (index !== -1) {
-      const valueA = a[index] as string;
-      const valueB = b[index] as string;
-      return valueA.localeCompare(valueB);
-    }
+const { data: playerData, error: playerError } = await Astro.callAction(
+  actions.getJugadores,
+  {
+    page: pageParam,
+    pageSize: 10,
   }
-  return 0;
-});
+);
+
+if (playerError || !playerData) {
+  throw new Error("Error al obtener jugadores");
+}
+
+const players: Player[] = playerData.data;
+const pages = playerData.pages;
+
+const { REGISTER_PLAYER, EDIT_PLAYER } = privateRoutesMap;
+
+const headers: TableContent[] = [
+  { data: "Banner" },
+  { data: "Nombre" },
+  { data: "Apellido" },
+  { data: "Posición" },
+  { data: "Número de camiseta" },
+  { data: "Activo" },
+  { data: "Editar" },
+  { data: "Eliminar" },
+];
+
+const sortOptions: SortOptions[] = [
+  { searchParam: "idbanner", displayName: "Banner" },
+  { searchParam: "nombrejugador", displayName: "Nombre" },
+  { searchParam: "apellidojugador", displayName: "Apellido" },
+  { searchParam: "numerocamisetajugador", displayName: "Número de camiseta" },
+];
+
+const rows = players
+  .map((u) => [
+    u.idbanner,
+    u.nombrejugador,
+    u.apellidojugador,
+    u.posicionjugador,
+    u.numerocamisetajugador,
+    u.jugadoractivo ? "Sí" : "No",
+  ])
+  .sort((a, b) => {
+    if (sortOptions.length > 0) {
+      const index = headers.indexOf(
+        sortOptions[0]
+          ? headers.find(
+              (header) =>
+                header.data.toLowerCase() ===
+                sortOptions[0].displayName.toLowerCase()
+            )!
+          : headers[0]
+      );
+      if (index !== -1) {
+        const valueA = a[index] as string;
+        const valueB = b[index] as string;
+        return valueA.localeCompare(valueB);
+      }
+    }
+    return 0;
+  });
 
 function handleDelete(username: string) {
   console.log(`Usuario ${username} eliminado`);
 }
 
-const actions: TableActions[] = [];
+const tableActions: TableActions[] = [];
 
-actions.push(
+tableActions.push(
   {
-    href: `${EDIT_PLAYER}/`,
+    href: `${EDIT_PLAYER}`,
     icon: EditIcon.src,
     alt: "Editar jugador",
     type: "link",
@@ -101,13 +117,13 @@ actions.push(
       <div class="flex flex-col w-full h-full gap-5">
         <div class="flex flex-row gap-5 items-baseline justify-between w-full">
           <h1 class="font-bold text-2xl pr-5">Jugadores</h1>
-            <TableActionsComponent
-              canSort={true}
-              sortByOptions={sortOptions}
-              placeholderText="Buscar jugador..."
-              buttonLabel="Crear Jugador"
-              buttonHref={REGISTER_PLAYER}
-            />
+          <TableActionsComponent
+            canSort={true}
+            sortByOptions={sortOptions}
+            placeholderText="Buscar jugador..."
+            buttonLabel="Crear Jugador"
+            buttonHref={REGISTER_PLAYER}
+          />
         </div>
         <div class="relative overflow-x-auto w-svw mt-5 flex justify-center">
           <Table headers={headers}>
@@ -116,14 +132,14 @@ actions.push(
                 {row.map((cell) => (
                   <td class="px-6 py-4">{cell}</td>
                 ))}
-                {actions &&
-                  actions.length > 0 &&
-                  actions.map((action) =>
+                {tableActions &&
+                  tableActions.length > 0 &&
+                  tableActions.map((action) =>
                     action.type === "link" ? (
                       <td class="px-6 py-4">
                         <a
                           class="cursor-pointer no-underline"
-                          href={action.href?.toString() ?? "" + row[0]}
+                          href={`${action.href ?? ""}${row[0] ?? ""}`}
                         >
                           <img
                             class="size-8"
@@ -166,13 +182,42 @@ actions.push(
 </AdminPanelLayout>
 
 <script>
-  document.addEventListener("click", (event) => {
+  import { actions } from "astro:actions";
+  import Swal from "sweetalert2";
+
+  document.addEventListener("click", async (event) => {
     const target = event.target as HTMLElement;
     if (target.closest("[data-delete-user]")) {
       const button = target.closest("[data-delete-user]") as HTMLButtonElement;
-      const username = button.getAttribute("data-username");
-      if (username) {
-        console.log(`Jugador ${username} eliminado`);
+      const banner = button.value;
+      if (banner) {
+        console.log(`Jugador ${banner} eliminado`);
+        Swal.fire({
+          title: "¿Estás seguro?",
+          text: `Esta acción eliminará al jugador con banner ${banner}.`,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Sí, eliminar",
+          cancelButtonText: "Cancelar",
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            const { data, error } = await actions.deleteJugador({
+              idJugador: banner,
+            });
+            if (error) {
+              console.error("Error al eliminar el jugador:", error);
+              Swal.fire("Error", error.message, "error");
+            } else {
+              Swal.fire("Éxito", "Jugador eliminado", "success").then(
+                async (result) => {
+                  if (result.isConfirmed) {
+                    window.location.reload();
+                  }
+                }
+              );
+            }
+          }
+        });
       }
     }
   });

@@ -26,14 +26,14 @@ export class PlayerService {
   /** Crear un nuevo jugador */
   static async create(player: CreatePlayerDTO): Promise<Player> {
     const players = await this.getAll();
-    const newId: number = player.id ?? (players.length ? Math.max(...players.map(p => p.id)) + 1 : 1);
+    const newId: number = player.id ?? (players.length ? Math.max(...players.map(p => p.idJugador)) + 1 : 1);
 
     const newPlayer: Player = {
-      id: newId,
-      name: player.name,
-      lastname: player.lastname,
-      position: player.position,
-      shirtNumber: player.shirtNumber,
+      idJugador: newId,
+      nombreJugador: player.nombreJugador,
+      apellidoJugador: player.apellidoJugador,
+      posicionJugador: player.posicionJugador,
+      numeroCamisetaJugador: player.numeroCamisetaJugador,
       playerImageUrl: player.playerImageUrl,
     };
 
@@ -58,7 +58,7 @@ export class PlayerService {
   /** Actualizar parcialmente un jugador */
   static async patch(id: number, partial: UpdatePlayerDTO): Promise<Player | null> {
     const players = await this.getAll();
-    const index = players.findIndex(p => p.id === id);
+    const index = players.findIndex(p => p.idJugador === id);
     if (index === -1) return null;
 
     players[index] = { ...players[index], ...partial };
@@ -69,7 +69,7 @@ export class PlayerService {
   /** Eliminar un jugador */
   static async delete(id: number): Promise<boolean> {
     const players = await this.getAll();
-    const newPlayers = players.filter(p => p.id !== id);
+    const newPlayers = players.filter(p => p.idJugador !== id);
     if (newPlayers.length === players.length) return false;
 
     await this.saveAll(newPlayers);
