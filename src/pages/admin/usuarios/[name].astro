@@ -161,7 +161,7 @@ const { super: superRole } = roles;
   import { privateRoutesMap } from "@consts/routes";
   import { navigate } from "astro:transitions/client";
   import type { User } from "@interfaces/user.interface";
-  import validateUsers from "@utils/validation/admin/usuarios-validation";
+  import { validateUsers } from "@utils/validation/admin/usuarios-validation";
 
   const form = document.querySelector("#form-usuario") as HTMLFormElement;
   const userCredential = "123456789";
@@ -184,7 +184,7 @@ const { super: superRole } = roles;
     const email = formData.get("email")?.toString().trim();
     const password = formData.get("password")?.toString().trim() ?? "";
 
-    const errorMessage = validateUsers(formData);
+    const errorMessage = validateUsers(formData, true);
 
     if (errorMessage.length > 0) {
       Swal.fire("Error", errorMessage, "error");
