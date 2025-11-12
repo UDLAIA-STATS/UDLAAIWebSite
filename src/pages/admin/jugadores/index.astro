@@ -18,6 +18,8 @@ import { actions } from "astro:actions";
 
 const searchParams = Astro.url.searchParams;
 const pageParam = Number(searchParams.get("page") ?? 1);
+const sortParam = searchParams.get("sortBy") ?? "";
+const orderParam = searchParams.get("orderBy") ?? "asc";
 
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
@@ -68,20 +70,28 @@ const rows = players
     u.jugadoractivo ? "Sí" : "No",
   ])
   .sort((a, b) => {
-    if (sortOptions.length > 0) {
-      const index = headers.indexOf(
-        sortOptions[0]
-          ? headers.find(
-              (header) =>
-                header.data.toLowerCase() ===
-                sortOptions[0].displayName.toLowerCase()
-            )!
-          : headers[0]
+    if (sortParam) {
+      const index = headers.findIndex(
+        (header) =>
+          header.data.toLowerCase() ===
+          (sortParam === "idbanner"
+            ? "banner"
+            : sortParam === "nombrejugador"
+            ? "nombre"
+            : sortParam === "apellidojugador"
+            ? "apellido"
+            : sortParam === "numerocamisetajugador"
+            ? "número de camiseta"
+            : "")
       );
       if (index !== -1) {
-        const valueA = a[index] as string;
-        const valueB = b[index] as string;
-        return valueA.localeCompare(valueB);
+        const aValue = a[index] as string;
+        const bValue = b[index] as string;
+        if (orderParam === "asc") {
+          return aValue.localeCompare(bValue);
+        } else {
+          return bValue.localeCompare(aValue);
+        }
       }
     }
     return 0;
@@ -128,7 +138,7 @@ tableActions.push(
         <div class="relative overflow-x-auto w-svw mt-5 flex justify-center">
           <Table headers={headers}>
             {rows.map((row) => (
-              <tr class="border-b">
+              <tr class="border-b" id={`user-row-${row[0]}`}>
                 {row.map((cell) => (
                   <td class="px-6 py-4">{cell}</td>
                 ))}
@@ -184,6 +194,33 @@ tableActions.push(
 <script>
   import { actions } from "astro:actions";
   import Swal from "sweetalert2";
+
+  const searchBox = document.getElementById("search-box") as HTMLInputElement;
+
+  searchBox.addEventListener("input", (e) => {
+      const query = searchBox.value.trim();
+      const rows = document.querySelectorAll("tr[id^='user-row-']");
+      rows.forEach((row) => {
+        const banner = row.children[0];
+        const nombre = row.children[1];
+        const apellido = row.children[2];
+        if (banner && nombre && apellido) {
+          const bannerText = banner.textContent || "";
+          const nombreText = nombre.textContent || "";
+          const apellidoText = apellido.textContent || "";
+
+          if (
+            bannerText.toLowerCase().includes(query.toLowerCase()) ||
+            nombreText.toLowerCase().includes(query.toLowerCase()) ||
+            apellidoText.toLowerCase().includes(query.toLowerCase())
+          ) {
+            row.classList.remove("hidden");
+          } else {
+            row.classList.add("hidden");
+          }
+        }
+      });
+  });
 
   document.addEventListener("click", async (event) => {
     const target = event.target as HTMLElement;

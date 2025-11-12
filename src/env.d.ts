@@ -2,6 +2,8 @@ interface ImportMetaEnv {
   readonly AUTH_URL: string;
   readonly TEAMSERVICE_URL: string;
   readonly JUGADORES_API: string;
+  readonly KAFKA_SERVICE: string;
+
   readonly FIREBASE_PRIVATE_KEY_ID: string;
   readonly FIREBASE_STORAGE_BUCKET: string;
   readonly FIREBASE_MESSAGING_SENDER_ID: string;
