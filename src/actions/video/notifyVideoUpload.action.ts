@@ -9,8 +9,8 @@ export const notifyVideoUpload = defineAction({
     try {
       if (
         url.trim() === "" ||
-        !url.includes("http://") ||
-        !url.includes("https://")
+        !(url.startsWith("http://") ||
+        url.startsWith("https://"))
       ) {
         throw new Error(
           "La URL proporcionada es inválida, no se pudo notificar el envío del video."
@@ -23,7 +23,7 @@ export const notifyVideoUpload = defineAction({
 
       const healtStatus = await health.json();
 
-      if (!health.ok || healtStatus.status !== "OK") {
+      if (!health.ok || healtStatus.status !== "ok") {
         throw new Error(
           "El servicio de notificación no está disponible en este momento."
         );
@@ -31,6 +31,9 @@ export const notifyVideoUpload = defineAction({
 
       const response = await fetch(`${karkaServiceUrl}/publish`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           video_url: url,
           metadata: {
@@ -43,7 +46,8 @@ export const notifyVideoUpload = defineAction({
       const result = await response.json();
 
     if (!response.ok) {
-        throw new Error(result.error);
+      const error = JSON.stringify(result.detail) || "Error desconocido al notificar el video subido.";
+      throw new Error(error);
     }
 
     return {

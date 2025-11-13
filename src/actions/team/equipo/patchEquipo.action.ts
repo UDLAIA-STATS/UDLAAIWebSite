@@ -8,17 +8,22 @@ export const updateEquipo = defineAction({
   handler: async ({ idequipo, nombreequipo, idinstitucion, imagenequipo, equipoactivo }) => {
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
-      const formData = new FormData();
-      if (idinstitucion) formData.append("idinstitucion", idinstitucion.toString());
-      if (nombreequipo) formData.append("nombreequipo", nombreequipo);
-      if( imagenequipo instanceof File ) {
-        formData.append("imagenequipo", imagenequipo);
-      }
-      formData.append("equipoactivo", equipoactivo.toString());
+      // const formData = new FormData();
+      // if (idinstitucion) formData.append("idinstitucion", idinstitucion.toString());
+      // if (nombreequipo) formData.append("nombreequipo", nombreequipo);
+      // if( imagenequipo instanceof File ) {
+      //   formData.append("imagenequipo", imagenequipo);
+      // }
+      // formData.append("equipoactivo", equipoactivo.toString());
 
       const response = await fetch(`${baseUrl}/equipos/${idequipo}/update/`, {
         method: "PATCH",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          idinstitudcion: idinstitucion,
+          nombreequipo: nombreequipo,
+          equipoactivo: equipoactivo,        
+        })
       });
 
       if (!response.ok) {

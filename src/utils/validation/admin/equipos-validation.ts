@@ -4,7 +4,7 @@ export const validateEquipos = (formData: FormData): string => {
   const nombre = (formData.get("nombreequipo") as string)?.trim() ?? "";
   const idInstitucion = (formData.get("idinstitucion") as string)?.trim() ?? "";
   const equipoActivo = (formData.get("equipoactivo") as string)?.trim() ?? "";
-  const logo = formData.get("logoequipo") as File | null;
+  const logo = formData.get("imagenequipo") as File | null;
 
   const validations: Record<string, string> = {
     nombre:
@@ -43,7 +43,7 @@ export const isEquipoUpdated = (equipo: Equipo, formData: FormData): boolean => 
   const equipoActivo =
     (formData.get("equipoactivo") as string) === "true" ||
     (formData.get("equipoactivo") as string) === "on";
-  const logo = formData.get("logoequipo") as File | null;
+  const logo = formData.get("imagenequipo") as File | null;
 
   const cargoLogo = (logo && logo.size > 0) ?? false;
 

@@ -52,9 +52,9 @@ const instituciones = institucionesData.data;
     </div>
 
     <!-- Logo del equipo -->
-    <div class="flex gap-2 flex-col mb-4" hidden>
-      <label for="logoequipo" class="text-base font-medium">Logo (opcional)</label>
-      <input id="logoequipo" name="logoequipo" type="file" class={inputClass} accept="image/*" />
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="imagenequipo" class="text-base font-medium">Logo (opcional)</label>
+      <input id="imagenequipo" name="imagenequipo" type="file" class={inputClass} accept="image/*" />
     </div>
 
     <!-- Estado activo -->
@@ -85,6 +85,7 @@ const instituciones = institucionesData.data;
   import { privateRoutesMap } from "@consts/routes";
   import { navigate } from "astro:transitions/client";
   import { validateEquipos } from "@utils/validation/admin/equipos-validation";
+  import { fileToBase64 } from "@utils/index";
 
   const form = document.querySelector("#form-equipo") as HTMLFormElement;
   const btnSubmit = document.querySelector("#btn-submit") as HTMLButtonElement;
@@ -115,10 +116,14 @@ const instituciones = institucionesData.data;
     const activo = formData.get("equipoactivo") === "true";
     formData.set("equipoactivo", activo.toString());
 
-    const logo = formData.get("logoequipo");
-    if (!(logo instanceof File) || logo.size === 0) formData.delete("logoequipo");
+    const logo = formData.get("imagenequipo");
 
     try {
+      if (logo) {
+        const file = logo as File;
+        const base64 = await fileToBase64(file)
+        formData.set("imagenequipo", base64); 
+      }
       const { data, error } = await actions.createEquipo(formData);
       if (error) {
         await Swal.fire("Error", error.message, "error");

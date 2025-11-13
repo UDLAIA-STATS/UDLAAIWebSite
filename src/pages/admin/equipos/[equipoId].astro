@@ -36,11 +36,7 @@ if (equipoError || !equipoData) {
 const equipo = equipoData.data;
 
 // Convertir el logo binario a base64 si existe
-let logoEquipo = null;
-if (equipo.imagenequipo) {
-  const base64String = Buffer.from(equipo.imagenequipo).toString("base64");
-  logoEquipo = `data:image/jpeg;base64,${base64String}`;
-}
+const logoEquipo = equipo.imagenequipo ?? null;
 ---
 
 <FormLayout formTitle="Editar Equipo" pageTitle="Editar Equipo" user={user}>
@@ -97,33 +93,32 @@ if (equipo.imagenequipo) {
       </select>
     </div>
 
-    <!-- Logo actual -->
-    {
-      logoEquipo && (
-        <div class="flex flex-col items-center mb-4">
-          <label class="text-base font-medium mb-2">Logo actual</label>
-          <img
-            src={logoEquipo}
-            alt="Logo del equipo"
-            class="w-32 h-32 object-cover rounded-lg shadow-md border"
-          />
-        </div>
-      )
-    }
-
     <!-- Nuevo logo -->
-    <div class="flex gap-2 flex-col mb-4" hidden>
-      <label for="logoequipo" class="text-base font-medium"
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="imagenequipo" class="text-base font-medium"
         >Cambiar logo (opcional)</label
       >
       <input
-        id="logoequipo"
-        name="logoequipo"
+        id="imagenequipo"
+        name="imagenequipo"
         type="file"
         class={inputClass}
         accept="image/*"
       />
     </div>
+
+    {
+      logoEquipo && (
+        <div class="flex flex-col items-start mb-4">
+          <label class="text-base font-medium mb-2">Logo actual</label>
+          <img
+            src={logoEquipo}
+            alt="Logo del equipo"
+            class="w-fit h-fit object-cover rounded-lg shadow-md border"
+          />
+        </div>
+      )
+    }
 
     <!-- Estado activo -->
     <div class="flex gap-2 flex-col mb-4">
@@ -156,6 +151,7 @@ if (equipo.imagenequipo) {
     validateEquipos,
     isEquipoUpdated,
   } from "@utils/validation/admin/equipos-validation";
+import { fileToBase64 } from "@utils/index";
 
   const form = document.querySelector("#form-equipo") as HTMLFormElement;
   const btnSubmit = document.querySelector("#btn-submit") as HTMLButtonElement;
@@ -206,16 +202,15 @@ if (equipo.imagenequipo) {
     const activo = formData.get("equipoactivo") === "true";
     formData.set("equipoactivo", activo.toString());
 
-    const logo = formData.get("logoequipo");
-    if (!(logo instanceof File) || logo.size === 0) {
-      formData.delete("logoequipo");
-    }
-
-    // Agregar ID del equipo
-    const id = window.location.pathname.split("/").slice(-2, -1)[0];
-    formData.append("idequipo", id);
+    const logo = formData.get("imagenequipo");
 
     try {
+      if (logo) {
+        const file = logo as File;
+        const base64 = await fileToBase64(file)
+        formData.set("imagenequipo", base64); 
+      }
+      
       const { data, error } = await actions.updateEquipo(formData);
       if (error) {
         await Swal.fire("Error", error.message, "error");

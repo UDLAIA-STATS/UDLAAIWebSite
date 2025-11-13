@@ -9,17 +9,15 @@ export const createEquipo = defineAction({
   handler: async ( { idinstitucion, nombreequipo, imagenequipo, equipoactivo } ) => {
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
-      const formData = new FormData();
-      formData.append("idinstitucion", idinstitucion.toString());
-      formData.append("nombreequipo", nombreequipo);
-      if( imagenequipo instanceof File ) {
-        formData.append("imagenequipo", imagenequipo);
-      }
-      formData.append("equipoactivo", equipoactivo.toString());
-
       const response = await fetch(`${baseUrl}/equipos/`, {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          idinstitucion: idinstitucion,
+          nombreequipo: nombreequipo,
+          imagenequipo: imagenequipo,
+          equipoactivo: equipoactivo,
+        })
        
       });
 

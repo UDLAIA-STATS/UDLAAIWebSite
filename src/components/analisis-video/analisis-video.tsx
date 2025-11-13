@@ -5,23 +5,27 @@ import UploadIcon from "@assets/upload_icon.svg";
 import Add from "@assets/add.svg";
 import { actions } from "astro:actions";
 import Swal from "sweetalert2";
-import type { Partido } from "@interfaces/torneos.interface";
+import type { Partido, Temporada } from "@interfaces/torneos.interface";
 
 export default function VideoContainer() {
   const [partidoSeleccionado, setPartido] = createSignal<Partido | null>(null);
-  const [fecha, setFecha] = createSignal("");
   const [file, setFile] = createSignal<File | null>(null);
   const [preview, setPreview] = createSignal<string | null>(null);
   const [loading, setLoading] = createSignal(false);
-  const [creatingNew, setCreatingNew] = createSignal(false);
+  const [partidosBase, setPartidosBase] = createSignal<Partido[]>([]);
   const [partidos, setPartidos] = createSignal<Partido[]>([]);
+  const [temporadas, setTemporadas] = createSignal<Temporada[]>([]);
+  const [ temporadaSeleccionada, setTemporadaSeleccionada ] = createSignal<number | null>(null);
 
   onMount(async () => {
     const { data, error } = await actions.getPartidos({
       page: 1,
       pageSize: 1000,
     });
-    if (error || !data) {
+    const { data: temporadasData, error: temporadasError } =
+      await actions.getTemporadas({ page: 1, pageSize: 1000 });
+    
+    if (error || !data || temporadasError || !temporadasData) {
       console.error("Error al cargar partidos:", error);
       Swal.fire({
         icon: "error",
@@ -31,7 +35,10 @@ export default function VideoContainer() {
     }
 
     const partidos = data?.data || [];
+    const temporadas = temporadasData?.data || [];
+    setTemporadas(temporadas);
     setPartidos(partidos);
+    setPartidosBase(partidos);
   });
 
   // Limpia el URL temporal cuando el componente se desmonta
@@ -61,6 +68,11 @@ export default function VideoContainer() {
       video.onerror = reject;
     });
 
+  const onTemporadaChange = (temporadaId: number) => {
+    const partidosList = partidosBase().filter((partido) => partido.idtemporada === temporadaId);
+    setPartidos(partidosList);
+    setTemporadaSeleccionada(temporadaId);
+  } 
   // Maneja la carga del archivo
   const handleFileChange = async (e: Event) => {
     const target = e.target as HTMLInputElement;
@@ -102,11 +114,11 @@ export default function VideoContainer() {
 
   // Envía el formulario
   const submitVideo = async () => {
-    if (!partidoSeleccionado() || !fecha().trim() || !file()) {
+    if (!partidoSeleccionado() ||  !file()) {
       Swal.fire({
         icon: "error",
         title: "Campos incompletos",
-        text: "Debes ingresar el nombre, la fecha y seleccionar un video.",
+        text: "Debes seleccionar un partido e ingresar un video.",
       });
       return;
     }
@@ -116,23 +128,32 @@ export default function VideoContainer() {
       "nombrePartido",
       partidoSeleccionado()?.idpartido.toString() || ""
     );
-    formData.append("fecha", fecha());
     formData.append("video", file()!);
 
     setLoading(true);
     try {
-      const response = await actions.uploadVideo(formData);
-      console.log("Archivo enviado correctamente:", response);
+      // const response = await actions.uploadVideo(formData);
+      // console.log("Archivo enviado correctamente:", response);
+      const { data: notifyData, error: errorData } = await actions.notifyVideoUpload({
+        url: "http://example.com/video.mp4",
+      }); 
+      if (errorData) {
+        Swal.fire({
+          icon: "error",
+          title: "Error al notificar",
+          text: errorData.message,
+        });
+        return;
+      }
       Swal.fire({
         icon: "success",
         title: "Video subido correctamente",
         text: "Tu análisis fue creado con éxito.",
       });
-      setCreatingNew(false);
       setPartido(null);
-      setFecha("");
       setFile(null);
       setPreview(null);
+      setTemporadaSeleccionada(null);
     } catch (error) {
       console.error("Error enviando video:", error);
       Swal.fire({
@@ -147,17 +168,50 @@ export default function VideoContainer() {
 
   return (
     <div class="flex flex-col w-full align-middle h-full bg-[#D9D9D9] p-6">
+      <div class="flex flex-row w-full h-min align-start self-start pb-5">
+        <h2 class="text-2xl font-bold text-gray-800">Análisis de Video</h2>
+      </div>
       {/* Layout dividido */}
       <div class="flex flex-row gap-6 bg-white rounded-xl shadow-md p-6 w-full h-[70vh]">
         {/* Columna izquierda - Formulario */}
         <div class="flex flex-col w-1/3 gap-1">
           <label class="text-sm font-medium text-gray-600">
-            Nombre del partido
+            Temporada (Opcional)
+          </label>
+          <select
+            name="temporadas"
+            id="options-temporadas"
+            class="p-2 border rounded-md border-gray-300"
+            onChange={(e) => onTemporadaChange(Number(e.currentTarget.value))}
+            value={temporadaSeleccionada() || ""}
+          >
+            <option value="" disabled selected>
+              Selecciona una temporada
+            </option>
+            <For each={temporadas()}>
+              {(temporada) => (
+                <option
+                  value={temporada.idtemporada}
+                >
+                  {temporada.nombretemporada}
+                </option>
+              )}
+            </For>
+          </select>
+          <label class="text-sm font-medium text-gray-600">
+            Partido
           </label>
           <select
             name="partido"
             id="options-partidos"
             class="p-2 border rounded-md border-gray-300"
+            onChange={(e) => {
+              const partido = partidos().find(
+                (p) => p.idpartido === Number(e.currentTarget.value)
+              );
+              setPartido(partido || null);
+            }}
+            value={partidoSeleccionado()?.idpartido || ""}
           >
             <option value="" disabled selected>
               Selecciona un partido
@@ -165,12 +219,13 @@ export default function VideoContainer() {
             <For each={partidos()}>
               {(partido) => (
                 <option
-                  onClick={() => {
-                    setPartido(partido);
-                  }}
                   value={partido.idpartido}
                 >
-                  {partido.fechapartido +
+                  {new Date(partido.fechapartido).toLocaleDateString("es-ES", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  }) +
                     " - " +
                     partido.equipo_local_nombre +
                     " vs " +
@@ -179,15 +234,6 @@ export default function VideoContainer() {
               )}
             </For>
           </select>
-
-          <label class="mt-2 text-sm font-medium text-gray-600">Fecha</label>
-          <input
-            type="date"
-            lang="es-ES"
-            onInput={(e) => setFecha(e.currentTarget.value)}
-            value={fecha()}
-            class="p-2 border rounded-md border-gray-300"
-          />
 
           <label class="mt-2 text-sm font-medium text-gray-600">Video</label>
           <span class="text-sm text-gray-400">
