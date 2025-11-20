@@ -1,5 +1,5 @@
 import { defineAction } from "astro:actions";
-import { equipoUpdateSchema } from "./equipoSchemas";
+import { equipoUpdateSchema } from "./equipoSchema";
 import type { Equipo } from "@interfaces/index";
 
 export const updateEquipo = defineAction({

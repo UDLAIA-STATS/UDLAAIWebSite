@@ -230,7 +230,8 @@ import { privateRoutesMap } from "@consts/routes";
       (j) => {
         return (
           j.numerocamisetajugador.toString() ===
-          formData.get("numerocamisetajugador")?.toString() && j.jugadoractivo
+          formData.get("numerocamisetajugador")?.toString() && j.jugadoractivo 
+          && j.idjugador !== idJugador
         )
       }
     )

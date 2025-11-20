@@ -16,8 +16,8 @@ export const notifyVideoUpload = defineAction({
           "La URL proporcionada es inválida, no se pudo notificar el envío del video."
         );
       }
-      const karkaServiceUrl = import.meta.env.KAFKA_SERVICE;
-      const health = await fetch(`${karkaServiceUrl}/health`, {
+      const kafkaServiceUrl = import.meta.env.KAFKA_SERVICE;
+      const health = await fetch(`${kafkaServiceUrl}/health`, {
         method: "GET",
       });
 
@@ -29,7 +29,7 @@ export const notifyVideoUpload = defineAction({
         );
       }
 
-      const response = await fetch(`${karkaServiceUrl}/publish`, {
+      const response = await fetch(`${kafkaServiceUrl}/publish`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

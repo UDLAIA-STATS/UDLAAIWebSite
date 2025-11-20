@@ -94,9 +94,9 @@ const { super: superRole } = roles;
           />
         </div>
 
-        <div class="flex flex-col gap-2 mb-4 px-5">
+        <div class="flex flex-col gap-2 mb-4 px-5" hidden>
           <label class="text-base font-medium" for="rol">Rol</label>
-          <select id="rol" name="rol" class={inputClass} required>
+          <select id="rol" name="rol" class={inputClass}>
             <option value="" selected disabled>-- Selecciona --</option>
             <option value="superuser">Administrador</option>
             <option value="profesor">Profesor</option>
