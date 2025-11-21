@@ -1,7 +1,7 @@
 import type { Equipo } from "@interfaces/index";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import { equipoSchema } from "./equipoSchemas";
+import { equipoSchema } from "./equipoSchema";
 
 export const createEquipo = defineAction({
   accept: "form",
@@ -27,7 +27,7 @@ export const createEquipo = defineAction({
       }
 
       const data = await response.json();
-      return { data: data as Equipo };
+      return { data: data.equipo as Equipo };
     } catch (error) {
       console.error("Error al crear equipo:", error);
       throw new Error("No se pudo crear el equipo");

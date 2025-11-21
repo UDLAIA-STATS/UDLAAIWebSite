@@ -123,6 +123,8 @@ const instituciones = institucionesData.data;
         const file = logo as File;
         const base64 = await fileToBase64(file)
         formData.set("imagenequipo", base64); 
+      } else {
+        formData.delete("imagenequipo");
       }
       const { data, error } = await actions.createEquipo(formData);
       if (error) {
