@@ -6,10 +6,11 @@ export const registerUser = defineAction({
   input: z.object({
     name: z.string().min(2).max(100),
     email: z.string().email(),
+    rol: z.enum(["superuser", "profesor"]),
     password: z.string().min(8),
     userCredential: z.string().min(8).max(100),
   }),
-  handler: async ({ email, password, name, userCredential }, { cookies }) => {
+  handler: async ({ email, password, name, rol, userCredential }, { cookies }) => {
     try {
       console.log("Registrando usuario:", { name, email, password });
       const loggedInUser = cookies.get("user")
@@ -28,6 +29,7 @@ export const registerUser = defineAction({
         body: JSON.stringify({
           nombre_usuario: name,
           email_usuario: email,
+          rol: rol,
           contrasenia_usuario: password,
         }),
       });

@@ -18,10 +18,11 @@ export const getInstituciones = defineAction({
         throw new Error(errorData.error || `Error ${res.status}: ${res.statusText}`);
       };
       const data = await res.json();
+      const content = data.data;
       console.log('Datos obtenidos de instituciones' + data)
       debug.log('Datos obtenidos de instituciones' + data)
       return { 
-        count: data.count,
+        count: content.count,
         page: data.page,
         offset: data.offset,
         pages: data.pages,

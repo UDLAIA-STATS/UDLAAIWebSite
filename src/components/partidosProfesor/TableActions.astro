@@ -76,6 +76,9 @@ const orderParam = searchParams.get("orderBy") ?? "asc";
                    focus:ring-1 focus:outline-none
                    transition"
             >
+              <option value="" disabled selected>
+                -- Selecciona --
+              </option>
               <option value="asc" selected={orderParam === "asc"}>
                 Asc
               </option>

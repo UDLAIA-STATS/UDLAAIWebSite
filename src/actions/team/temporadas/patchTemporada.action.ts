@@ -16,8 +16,14 @@ export const updateTemporada = defineAction({
           body: JSON.stringify(payload),
         }
       );
-      if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
-      return { data: (await res.json()) as Temporada };
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || `Error ${res.status}: ${res.statusText}`
+        );
+      }
+      const data = await res.json();
+      return { data: data.data as Temporada };
     } catch (err) {
       console.error(
         `Error al actualizar temporada ${payload.idtemporada}:`,

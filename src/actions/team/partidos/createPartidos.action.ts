@@ -24,11 +24,11 @@ export const createPartido = defineAction({
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.detail || `Error ${res.status}: ${res.statusText}`);
+        throw new Error(errorData.error || `Error ${res.status}: ${res.statusText}`);
       }
 
       const data = await res.json();
-      return { data: data as Partido };
+      return { data: data.data as Partido };
     } catch (err) {
       console.error("Error al crear partido:", err);
       throw new Error(err instanceof Error ? err.message : "No se pudo crear el partido");

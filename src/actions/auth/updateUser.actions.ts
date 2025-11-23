@@ -7,11 +7,13 @@ export const updateUser = defineAction({
     originalName: z.string().min(2).max(100),
     name: z.string().min(2).max(100).optional(),
     email: z.string().email().optional(),
+    rol: z.enum(["superuser", "profesor"]).optional(),
+    is_active: z.boolean().optional(),
     password: z.string().min(8).optional(),
     userCredential: z.string().min(8).max(100),
   }),
   handler: async (
-    { email, password, name, originalName, userCredential },
+    { email, password, name, originalName, rol, is_active, userCredential },
     { cookies }
   ) => {
     try {
@@ -32,6 +34,8 @@ export const updateUser = defineAction({
         body: JSON.stringify({
           nombre_usuario: name,
           email_usuario: email,
+          rol: rol,
+          is_active: is_active,
           contrasenia_usuario: password,
         }),
       });

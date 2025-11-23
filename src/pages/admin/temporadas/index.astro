@@ -1,17 +1,12 @@
 ---
-import type { GetStaticPaths } from "astro";
 import { getAddHref, matchOptions } from "@utils/handle-partidos-table";
 import { actions } from "astro:actions";
-import type { Temporada, Torneo } from "@interfaces/torneos.interface";
-import { privateRoutesMap } from "@consts/routes";
-import Layout from "@layouts/Layout.astro";
 import AdminPanelLayout from "@layouts/AdminPanelLayout.astro";
 import PartidosSideBar from "@components/partidosProfesor/PartidosSideBar.astro";
 import NotAuthorized from "@components/shared/NotAuthorized.astro";
 import type { Link } from "@interfaces/link.interface";
 import PartidosProfesorTable from "@components/partidosProfesor/PartidosProfesorTable.astro";
 import Pagination from "@components/shared/Pagination.astro";
-import { buttonClass } from "@consts/styles";
 import PartidosProfesorActions from "@components/partidosProfesor/TableActions.astro";
 import type { SortOptions } from "@interfaces/index";
 import { matchSidebarLinks } from "@consts/index";
@@ -30,8 +25,8 @@ const { data, error } = await Astro.callAction(actions.getTemporadas, {
 if (error) {
   console.error("Error fetching torneos data:", error);
   throw new Error("No se pudo obtener la lista de temporadas.");
-  //return Astro.redirect("/");
 }
+
 
 const pages = data.pages;
 
@@ -40,6 +35,10 @@ const sidebarLinks: Link[] = matchSidebarLinks;
 const sortOptions: SortOptions[] = [
   { searchParam: "nombretemporada", displayName: "Nombre" },
   { searchParam: "torneo_nombre", displayName: "Torneo" },
+  { searchParam: "fechainiciotemporada", displayName: "Fecha de Inicio" },
+  { searchParam: "fechafintemporada", displayName: "Fecha de Fin" },
+  { searchParam: "tipotemporada", displayName: "Tipo" },
+  { searchParam: "temporadaactiva", displayName: "Activo" },
 ];
 ---
 
@@ -86,11 +85,9 @@ const sortOptions: SortOptions[] = [
     const rows = document.querySelectorAll("tr[id^='match-temporadas-']");
     rows.forEach((row) => {
       const temporadaName =
-        row.querySelector("td:nth-child(2)")?.textContent || "";
-      const torneo = row.querySelector("td:nth-child(4)")?.textContent || "";
+        row.querySelector("td:nth-child(1)")?.textContent || "";
       if (
-        temporadaName.toLowerCase().includes(search.toLowerCase()) ||
-        torneo.toLowerCase().includes(search.toLowerCase())
+        temporadaName.toLowerCase().includes(search.toLowerCase())
       ) {
         row.classList.remove("hidden");
       } else {

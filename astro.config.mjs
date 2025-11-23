@@ -7,7 +7,8 @@ import netlify from "@astrojs/netlify";
 
 import db from "@astrojs/db";
 
-// https://astro.build/config
+import cloudflare from "@astrojs/cloudflare";
+
 export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
@@ -15,11 +16,11 @@ export default defineConfig({
     },
   },
   integrations: [solidJs()],
-  site: "http://localhost:4321", //'https://udlaia-stats.netlify.app',
+  site: "http://localhost:4321", 
   base: "/",
   trailingSlash: "ignore",
   output: "server",
-  adapter: netlify(),
+  adapter: cloudflare(),
   outDir: "./dist",
   security: {
     checkOrigin: true,

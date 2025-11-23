@@ -18,14 +18,15 @@ export const getPartidos = defineAction({
         throw new Error(errorData.error || `Error ${res.status}: ${res.statusText}`);
       };
       const data = await res.json();
+      const content = data.data;
       console.log('Datos obtenidos de partido' + data)
       debug.log('Datos obtenidos de partido' + data)
       return { 
-        count: data.count,
-        page: data.page,
-        offset: data.offset,
-        pages: data.pages,
-        data: data.results as Partido[]
+        count: content.count,
+        page: content.page,
+        offset: content.offset,
+        pages: content.pages,
+        data: content.results as Partido[]
        };
     } catch (err) {
       console.error("Error al obtener partidos:", err);
@@ -44,7 +45,7 @@ export const getPartidoById = defineAction({
       const res = await fetch(`${baseUrl}/partidos/${id}/`);
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
       const data = await res.json();
-      return { data: data as Partido };
+      return { data: data.data as Partido };
     } catch (err) {
       console.error(`Error al obtener partido ID ${id}:`, err);
       throw new Error("No se pudo obtener el partido");

@@ -35,6 +35,16 @@ pageTitle="Registro de Usuario">
               required
             />
           </div>
+
+          <div class="flex flex-col gap-2 mb-4 px-5">
+          <label class="text-base font-medium" for="rol">Rol</label>
+          <select id="rol" name="rol" class={inputClass} required>
+            <option value="" selected disabled>-- Selecciona --</option>
+            <option value="superuser">Administrador</option>
+            <option value="profesor">Profesor</option>
+          </select>
+        </div>
+
           <div class="flex flex-col gap-2 mb-4 px-5">
             <label class="text-base font-medium" for="email">
               Correo Electrónico
@@ -99,7 +109,9 @@ import { navigate } from "astro:transitions/client";
     navigate(privateRoutesMap.ADMINS_USERS);
   });
 
-  form.addEventListener("submit", async (e) => {
+  form.addEventListener("submit", (e) => e.preventDefault());
+
+  btnSubmit.addEventListener("click", async (e) => {
     e.preventDefault();
     btnSubmit.disabled = true;
     btnSubmit.classList.add("opacity-50", "cursor-not-allowed");

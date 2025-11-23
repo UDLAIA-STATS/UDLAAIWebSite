@@ -14,6 +14,7 @@ export const getEquipos = defineAction({
       const response = await fetch(`${baseUrl}/equipos/all/?page=${page}&offset=${pageSize}`);
       if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
       const data = await response.json();
+      const content = data.data;
       return {
         count: data.count,
         page: data.page,
@@ -38,7 +39,7 @@ export const getEquipoById = defineAction({
       const response = await fetch(`${baseUrl}/equipos/${id}/`, { method: "GET" });
       if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
       const data = await response.json();
-      return { data: data as Equipo };
+      return { data: data.data as Equipo };
     } catch (error) {
       console.error(`Error al obtener equipo con ID ${id}:`, error);
       throw new Error("No se pudo obtener el equipo solicitado");
@@ -56,7 +57,7 @@ export const getEquipoByName = defineAction({
       const response = await fetch(`${baseUrl}/equipos/search/${nombre}/`);
       if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
       const data = await response.json();
-      return { data: data as Equipo[] };
+      return { data: data.data as Equipo[] };
     } catch (error) {
       console.error(`Error al buscar equipo con nombre ${nombre}:`, error);
       throw new Error("No se pudo obtener el equipo solicitado");

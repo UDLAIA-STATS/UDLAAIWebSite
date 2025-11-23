@@ -18,7 +18,7 @@ export const deleteTorneo = defineAction({
 
       const data = await res.json();
       return { 
-        mensaje: data.mensaje,
+        mensaje: data.message,
         status: data.status
        };
     } catch (err) {

@@ -16,11 +16,11 @@ export const updatePartido = defineAction({
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.detail || `Error ${res.status}: ${res.statusText}`);
+        throw new Error(errorData.error || `Error ${res.status}: ${res.statusText}`);
       }
 
       const data = await res.json();
-      return { data: data as Partido };
+      return { data: data.data as Partido };
     } catch (err) {
       console.error(`Error al actualizar partido ${payload.idpartido}:`, err);
       throw new Error("No se pudo actualizar el partido");

@@ -23,11 +23,11 @@ export const createEquipo = defineAction({
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || `Error ${response.status}: ${response.statusText}`);
+        throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
       }
 
       const data = await response.json();
-      return { data: data.equipo as Equipo };
+      return { data: data.data as Equipo };
     } catch (error) {
       console.error("Error al crear equipo:", error);
       throw new Error("No se pudo crear el equipo");

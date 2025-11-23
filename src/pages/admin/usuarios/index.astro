@@ -27,6 +27,7 @@ const headers: TableContent[] = [
   { data: "Nombre de usuario" },
   { data: "Email" },
   { data: "Rol" },
+  { data: "Activo" },
   { data: "Editar" },
   { data: "Eliminar" },  
 ];
@@ -50,9 +51,10 @@ const sortOptions: SortOptions[] = [
   { searchParam: "nombre_usuario", displayName: "Nombre de usuario" },
   { searchParam: "email_usuario", displayName: "Email" },
   { searchParam: "rol", displayName: "Rol" },
+  { searchParam: "is_active", displayName: "Activo" },
 ];
 
-const rows = users.map((u) => [u.nombre_usuario, u.email_usuario, u.rol]).sort(
+const rows = users.map((u) => [u.nombre_usuario, u.email_usuario, u.rol, u.is_active ? "Sí" : "No"]).sort(
   (a, b) => {
     if (sortParam && orderParam) {
       const index = headers.indexOf(
@@ -163,6 +165,7 @@ tableActions.push(
                             value={row[0]}
                             data-delete-user
                             data-username={row[0]}
+                            data-is-active={row[3] === "Sí" ? true : false}
                             class="cursor-pointer"
                           >
                             <img
@@ -194,6 +197,7 @@ tableActions.push(
   import { actions } from "astro:actions";
   import Swal from "sweetalert2";
   import { navigate } from "astro:transitions/client";
+  import { privateRoutesMap } from "@consts/routes";
 
   const users = await actions.getUsers({
     userCredential: "123456789",
@@ -207,6 +211,16 @@ tableActions.push(
     if (target.closest("[data-delete-user]")) {
       const button = target.closest("[data-delete-user]") as HTMLButtonElement;
       const username = button.getAttribute("data-username");
+      const isActive = button.getAttribute("data-is-active");
+
+      if (username && isActive) {
+        await Swal.fire({
+          icon: "error",
+          title: "No se pudo eliminar el usuario",
+          text: "El usuario no está activo y no puede ser eliminado.",
+        });
+        return;
+      }
 
       if (username) {
         const formData = new FormData();
@@ -236,7 +250,7 @@ tableActions.push(
                 `Usuario ${username} eliminado`,
                 "success"
               ).then(() => {
-                navigate("/admin");
+                navigate(privateRoutesMap.ADMINS_USERS);
               });
             }
           }

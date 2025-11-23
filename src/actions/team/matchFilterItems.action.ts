@@ -25,13 +25,14 @@ export const getDataByFilter = defineAction({
       }
 
       const data = await response.json();
+      const content = data.data;
 
       return {
-        [filterOption]: data.results,
-        count: data.count,
-        page: data.page,
-        offset: data.offset,
-        pages: data.pages
+        [filterOption]: content.results,
+        count: content.count,
+        page: content.page,
+        offset: content.offset,
+        pages: content.pages
       };
     } catch (err) {
       console.error(`Error al obtener datos (${filterOption}):`, err);

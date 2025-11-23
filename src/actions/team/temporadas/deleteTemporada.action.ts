@@ -18,7 +18,7 @@ export const deleteTemporada = defineAction({
         );
       }
       const response = await res.json();
-      return { data: response.mensaje };
+      return { data: response.message };
     } catch (err) {
       console.error(`Error al eliminar temporada ${idtemporada}:`, err);
       throw err;

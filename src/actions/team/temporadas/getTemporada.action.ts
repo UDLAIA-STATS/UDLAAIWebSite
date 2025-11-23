@@ -14,14 +14,20 @@ export const getTemporadas = defineAction({
       const res = await fetch(
         `${baseUrl}/temporadas/all/?page=${page}&offset=${pageSize}`
       );
-      if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || `Error ${res.status}: ${res.statusText}`
+        );
+      };
       const data = await res.json();
+      const content = data.data;
       return {
-        count: data.count,
-        page: data.page,
-        offset: data.offset,
-        pages: data.pages,
-        data: data.results as Temporada[],
+        count: content.count,
+        page: content.page,
+        offset: content.offset,
+        pages: content.pages,
+        data: content.results as Temporada[],
       };
     } catch (err) {
       console.error("Error al obtener temporadas:", err);
@@ -38,8 +44,12 @@ export const getTemporadaById = defineAction({
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
       const res = await fetch(`${baseUrl}/temporadas/${id}/`);
-      if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
-      return { data: (await res.json()) as Temporada };
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `Error ${res.status}: ${res.statusText}`);
+      }
+      const data = await res.json();
+      return { data: data.data as Temporada };
     } catch (err) {
       console.error(`Error al obtener temporada ${id}:`, err);
       throw new Error("No se pudo obtener la temporada");

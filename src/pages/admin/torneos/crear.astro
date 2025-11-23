@@ -127,12 +127,12 @@ const temporadas = dataTemporadas?.data ?? [];
     const formData = new FormData(form);
     const errorMessage = validateTorneo(formData);
 
-    if (errorMessage) {
-      Swal.fire("Error", errorMessage, "error");
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-      return;
-    }
+    //if (errorMessage) {
+    //  Swal.fire("Error", errorMessage, "error");
+    //  btnSubmit.disabled = false;
+    //  btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+    //  return;
+    //}
 
     // Normalización de datos antes de enviar
     console.log("torneo Activo" + formData.get("torneoactivo"));
@@ -150,7 +150,7 @@ const temporadas = dataTemporadas?.data ?? [];
       const { data, error } = await actions.createTorneo(formData);
 
       if (error) {
-        Swal.fire("Error", "Ya existe un torneo con ese nombre", "error");
+        Swal.fire("Error", error.message, "error");
         btnSubmit.disabled = false;
         btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
         return;
@@ -164,6 +164,8 @@ const temporadas = dataTemporadas?.data ?? [];
     } catch (err) {
       console.error("Error al crear torneo:", err);
       Swal.fire("Error", "Ocurrió un problema al crear el torneo", "error");
+      btnSubmit.disabled = false;
+      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
     } finally {
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
