@@ -23,7 +23,7 @@ export const createEquipo = defineAction({
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+        throw new Error(errorData.non_field_errors || `Error ${response.status}: ${response.statusText}`);
       }
 
       const data = await response.json();

@@ -24,7 +24,7 @@ export const createPartido = defineAction({
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `Error ${res.status}: ${res.statusText}`);
+        throw new Error(errorData.non_field_errors || `Error ${res.status}: ${res.statusText}`);
       }
 
       const data = await res.json();

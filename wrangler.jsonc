@@ -21,5 +21,13 @@
       "persist": true,
       "head_sampling_rate": 1
     }
-  }
+  },
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "r2_buckets": [
+    {
+      "binding": "videos_bucket",
+      "bucket_name": "videos"
+    }
+  ]
+
 }

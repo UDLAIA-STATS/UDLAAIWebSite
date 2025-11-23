@@ -11,6 +11,7 @@ interface ImportMetaEnv {
   readonly R2_BUCKET: string;
   readonly CATALOG_URI: string;
   readonly WAREHOUSE: string;
+  readonly R2_AUTH_SECRET: string;
 }
 
 interface ImportMeta {

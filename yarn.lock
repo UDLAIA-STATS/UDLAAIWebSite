@@ -962,6 +962,14 @@
     cross-fetch "^3.0.4"
     fontkit "^2.0.2"
 
+"@cloudflare/actors@^0.0.1-beta.6":
+  version "0.0.1-beta.6"
+  resolved "https://registry.yarnpkg.com/@cloudflare/actors/-/actors-0.0.1-beta.6.tgz#6038849f9454a91d2b24bc39b787cff9ef6e3486"
+  integrity sha512-8SuwZww14K5YHdF6HdkWCthWZCvuIKk7E0xARI/7vWYtd+OymA2Y3JBhPd+hnuA2R9sr57cZHKhKOcfNbf9xOQ==
+  optionalDependencies:
+    cron-schedule "^5.0.4"
+    nanoid "^5.1.5"
+
 "@cloudflare/kv-asset-handler@0.4.0":
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/@cloudflare/kv-asset-handler/-/kv-asset-handler-0.4.0.tgz#a8588c6a2e89bb3e87fb449295a901c9f6d3e1bf"
@@ -4658,6 +4666,11 @@ cron-parser@^4.1.0, cron-parser@^4.9.0:
   dependencies:
     luxon "^3.2.1"
 
+cron-schedule@^5.0.4:
+  version "5.0.4"
+  resolved "https://registry.yarnpkg.com/cron-schedule/-/cron-schedule-5.0.4.tgz#406a2e962c9f69445d24e1f69549a46e245d6f8c"
+  integrity sha512-nH0a49E/kSVk6BeFgKZy4uUsy6D2A16p120h5bYD9ILBhQu7o2sJFH+WI4R731TSBQ0dB1Ik7inB/dRAB4C8QQ==
+
 cross-fetch@^3.0.4:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/cross-fetch/-/cross-fetch-3.2.0.tgz#34e9192f53bc757d6614304d9e5e6fb4edb782e3"
@@ -7051,7 +7064,7 @@ nanoid@^3.3.11:
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.11.tgz#4f4f112cefbe303202f2199838128936266d185b"
   integrity sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==
 
-nanoid@^5.1.6:
+nanoid@^5.1.5, nanoid@^5.1.6:
   version "5.1.6"
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-5.1.6.tgz#30363f664797e7d40429f6c16946d6bd7a3f26c9"
   integrity sha512-c7+7RQ+dMB5dPwwCp4ee1/iV/q2P6aK1mTZcfr1BTuVlyW9hJYiMPybJCcnBlQtuSmTIWNeazm/zqNoZSSElBg==
