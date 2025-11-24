@@ -5,6 +5,7 @@ export interface Player {
     apellidojugador: string,
     posicionjugador: 'Delantero' | 'Mediocampista' | 'Defensa' | 'Portero',
     numerocamisetajugador: number,
+    imagenjugador?: string | null,
     jugadoractivo: boolean,
 }
 
