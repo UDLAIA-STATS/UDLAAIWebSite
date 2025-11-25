@@ -200,7 +200,7 @@ tableActions.push(
   import { privateRoutesMap } from "@consts/routes";
 
   const users = await actions.getUsers({
-    userCredential: "123456789",
+    userCredential: import.meta.env.DEFAULT_ADMIN_PASSWORD,
     page: 1,
     pageSize: 20,
   });
@@ -225,7 +225,7 @@ tableActions.push(
       if (username) {
         const formData = new FormData();
         formData.append("nickname", username);
-        formData.append("userCredential", "123456789");
+        formData.append("userCredential", import.meta.env.DEFAULT_ADMIN_PASSWORD);
         Swal.fire({
           title: `¿Estás seguro de eliminar al usuario ${username}?`,
           text: "Esta acción no se puede deshacer.",

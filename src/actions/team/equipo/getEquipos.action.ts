@@ -16,11 +16,11 @@ export const getEquipos = defineAction({
       const data = await response.json();
       const content = data.data;
       return {
-        count: data.count,
-        page: data.page,
-        offset: data.offset,
-        pages: data.pages,
-        data: data.results as Equipo[],
+        count: content.count,
+        page: content.page,
+        offset: content.offset,
+        pages: content.pages,
+        data: content.results as Equipo[],
       };
     } catch (error) {
       console.error("Error al obtener equipos:", error);

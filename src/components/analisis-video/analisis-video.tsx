@@ -134,14 +134,32 @@ export default function VideoContainer() {
     try {
       // const response = await actions.uploadVideo(formData);
       // console.log("Archivo enviado correctamente:", response);
-      const { data: notifyData, error: errorData } = await actions.notifyVideoUpload({
-        url: "http://example.com/video.mp4",
-      }); 
-      if (errorData) {
+      // const { data: notifyData, error: errorData } = await actions.notifyVideoUpload({
+      //   url: "http://example.com/video.mp4",
+      // }); 
+      // if (errorData) {
+      //   Swal.fire({
+      //     icon: "error",
+      //     title: "Error al notificar",
+      //     text: errorData.message,
+      //   });
+      //   return;
+      // }
+      const video = file()!;
+      const videoContent = await file()!.stream().getReader().read().then(({ value }) => value!);
+      const partidoDate = new Date(partidoSeleccionado()!.fechapartido);
+      const partidoName = partidoSeleccionado()?.equipo_local_nombre + " vs " + partidoSeleccionado()?.equipo_visitante_nombre + " - " + partidoSeleccionado()?.idpartido.toString() || "";
+      const { data, error } = await actions.uploadVideo({ 
+        video: video,
+        nombrePartido: partidoName,
+        fechaPartido: partidoDate,
+        videoContent: videoContent
+      })
+      if (error) {
         Swal.fire({
           icon: "error",
-          title: "Error al notificar",
-          text: errorData.message,
+          title: "Error al subir",
+          text: error.message,
         });
         return;
       }
@@ -159,7 +177,7 @@ export default function VideoContainer() {
       Swal.fire({
         icon: "error",
         title: "Error al subir",
-        text: "Ocurrió un problema al enviar el video. Inténtalo de nuevo.",
+        text: error instanceof Error ? error.message : "Ocurrió un error al subir el video.",
       });
     } finally {
       setLoading(false);

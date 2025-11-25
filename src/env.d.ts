@@ -3,6 +3,7 @@ interface ImportMetaEnv {
   readonly TEAMSERVICE_URL: string;
   readonly JUGADORES_API: string;
   readonly KAFKA_SERVICE: string;
+  readonly DEFAULT_ADMIN_PASSWORD: string;
   readonly R2_ACCESS_TOKEN: string;
   readonly R2_ACCESS_KEY_ID: string;
   readonly R2_SECRET_ACCESS_KEY: string;

@@ -23,10 +23,10 @@ export const getInstituciones = defineAction({
       debug.log('Datos obtenidos de instituciones' + data)
       return { 
         count: content.count,
-        page: data.page,
-        offset: data.offset,
-        pages: data.pages,
-        data: data.results as Institucion[]
+        page: content.page,
+        offset: content.offset,
+        pages: content.pages,
+        data: content.results as Institucion[]
        };
     } catch (err) {
       console.error("Error al obtener instituciones:", err);
