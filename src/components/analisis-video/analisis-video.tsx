@@ -6,6 +6,7 @@ import Add from "@assets/add.svg";
 import { actions } from "astro:actions";
 import Swal from "sweetalert2";
 import type { Partido, Temporada } from "@interfaces/torneos.interface";
+import { uploadWithParallelChunks } from "@services/uploadFile";
 
 export default function VideoContainer() {
   const [partidoSeleccionado, setPartido] = createSignal<Partido | null>(null);
@@ -15,7 +16,9 @@ export default function VideoContainer() {
   const [partidosBase, setPartidosBase] = createSignal<Partido[]>([]);
   const [partidos, setPartidos] = createSignal<Partido[]>([]);
   const [temporadas, setTemporadas] = createSignal<Temporada[]>([]);
-  const [ temporadaSeleccionada, setTemporadaSeleccionada ] = createSignal<number | null>(null);
+  const [temporadaSeleccionada, setTemporadaSeleccionada] = createSignal<
+    number | null
+  >(null);
 
   onMount(async () => {
     const { data, error } = await actions.getPartidos({
@@ -24,7 +27,7 @@ export default function VideoContainer() {
     });
     const { data: temporadasData, error: temporadasError } =
       await actions.getTemporadas({ page: 1, pageSize: 1000 });
-    
+
     if (error || !data || temporadasError || !temporadasData) {
       console.error("Error al cargar partidos:", error);
       Swal.fire({
@@ -69,10 +72,12 @@ export default function VideoContainer() {
     });
 
   const onTemporadaChange = (temporadaId: number) => {
-    const partidosList = partidosBase().filter((partido) => partido.idtemporada === temporadaId);
+    const partidosList = partidosBase().filter(
+      (partido) => partido.idtemporada === temporadaId
+    );
     setPartidos(partidosList);
     setTemporadaSeleccionada(temporadaId);
-  } 
+  };
   // Maneja la carga del archivo
   const handleFileChange = async (e: Event) => {
     const target = e.target as HTMLInputElement;
@@ -111,10 +116,9 @@ export default function VideoContainer() {
       });
     }
   };
-
   // Envía el formulario
   const submitVideo = async () => {
-    if (!partidoSeleccionado() ||  !file()) {
+    if (!partidoSeleccionado() || !file()) {
       Swal.fire({
         icon: "error",
         title: "Campos incompletos",
@@ -122,51 +126,65 @@ export default function VideoContainer() {
       });
       return;
     }
-
-    const formData = new FormData();
-    formData.append(
-      "nombrePartido",
-      partidoSeleccionado()?.idpartido.toString() || ""
-    );
-    formData.append("video", file()!);
-
     setLoading(true);
     try {
-      // const response = await actions.uploadVideo(formData);
-      // console.log("Archivo enviado correctamente:", response);
-      // const { data: notifyData, error: errorData } = await actions.notifyVideoUpload({
-      //   url: "http://example.com/video.mp4",
-      // }); 
-      // if (errorData) {
-      //   Swal.fire({
-      //     icon: "error",
-      //     title: "Error al notificar",
-      //     text: errorData.message,
-      //   });
-      //   return;
-      // }
       const video = file()!;
-      const videoContent = await file()!.stream().getReader().read().then(({ value }) => value!);
       const partidoDate = new Date(partidoSeleccionado()!.fechapartido);
-      const partidoName = partidoSeleccionado()?.equipo_local_nombre + " vs " + partidoSeleccionado()?.equipo_visitante_nombre + " - " + partidoSeleccionado()?.idpartido.toString() || "";
-      const { data, error } = await actions.uploadVideo({ 
-        video: video,
-        nombrePartido: partidoName,
-        fechaPartido: partidoDate,
-        videoContent: videoContent
-      })
-      if (error) {
-        Swal.fire({
-          icon: "error",
-          title: "Error al subir",
-          text: error.message,
-        });
-        return;
-      }
+      const partidoName =
+        partidoSeleccionado()?.equipo_local_nombre +
+          " vs " +
+          partidoSeleccionado()?.equipo_visitante_nombre +
+          " - " +
+          partidoSeleccionado()?.idpartido.toString() || "";
+      const formData = new FormData();
+      formData.append("video", video);
+      formData.append("nombrePartido", partidoName);
+      formData.append("fechaPartido", partidoDate.toISOString());
+
+      const { data, error } = await actions.uploadVideo(formData);
+          console.log(data, error);
+          if (error || !data || !data.ok) {
+            Swal.fire({
+              icon: "error",
+              title: "Error al subir",
+              text: error
+                ? error.message
+                : "No se pudo subir el video, inténtalo de nuevo.",
+            });
+            return;
+          }
+          console.log("Datos de subida recibidos:", data);
+
+      const downloadUrl = data.downloadUrl;
+      const uploadUrl = data.uploadUrl;
+
+      await Swal.fire({
+        title: "Subiendo video...",
+        text: "Esto puede tardar varios minutos dependiendo del tamaño del archivo.",
+        html: `<div style="width: 100%; background-color: #e0e0e0; border-radius: 5px; margin-top: 10px;">
+                 <div id="progress-bar" style="width: 0%; height: 20px; background-color: #76c7c0; border-radius: 5px;"></div>
+               </div>
+               <div id="progress-text" style="margin-top: 10px;">0%</div>`,
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: async () => {
+          Swal.showLoading();
+          const bar = document.getElementById("progress-bar")!;
+
+          const text = document.getElementById("progress-text")!;
+
+          await uploadWithParallelChunks(video, uploadUrl, (percent) => {
+            bar.style.width = percent + "%";
+            text.innerHTML = percent + "%";
+          });
+          return;
+        },
+      });
+
       Swal.fire({
         icon: "success",
         title: "Video subido correctamente",
-        text: "Tu análisis fue creado con éxito.",
+        text: "Tu video fue subido y está siendo analizado, este proceso tardará varios minutos.",
       });
       setPartido(null);
       setFile(null);
@@ -177,7 +195,10 @@ export default function VideoContainer() {
       Swal.fire({
         icon: "error",
         title: "Error al subir",
-        text: error instanceof Error ? error.message : "Ocurrió un error al subir el video.",
+        text:
+          error instanceof Error
+            ? error.message
+            : "Ocurrió un error al subir el video.",
       });
     } finally {
       setLoading(false);
@@ -208,17 +229,13 @@ export default function VideoContainer() {
             </option>
             <For each={temporadas()}>
               {(temporada) => (
-                <option
-                  value={temporada.idtemporada}
-                >
+                <option value={temporada.idtemporada}>
                   {temporada.nombretemporada}
                 </option>
               )}
             </For>
           </select>
-          <label class="text-sm font-medium text-gray-600">
-            Partido
-          </label>
+          <label class="text-sm font-medium text-gray-600">Partido</label>
           <select
             name="partido"
             id="options-partidos"
@@ -236,9 +253,7 @@ export default function VideoContainer() {
             </option>
             <For each={partidos()}>
               {(partido) => (
-                <option
-                  value={partido.idpartido}
-                >
+                <option value={partido.idpartido}>
                   {new Date(partido.fechapartido).toLocaleDateString("es-ES", {
                     day: "2-digit",
                     month: "2-digit",

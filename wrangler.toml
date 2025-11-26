@@ -1,0 +1,8 @@
+name = "video-uploader"
+main = "worker/index.ts"
+compatibility_date = "2024-11-01"
+
+[[r2_buckets]]
+binding = "videos_bucket"
+bucket_name = "videos"
+preview_bucket_name = "videos-preview"
