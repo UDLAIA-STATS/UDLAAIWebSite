@@ -38,6 +38,7 @@ export interface Partido {
   fechapartido: string;
   marcadorequipolocal?: number | null;
   marcadorequipovisitante?: number | null;
+  partidosubido: boolean;
 
   // --- Equipos ---
   idequipolocal: number;

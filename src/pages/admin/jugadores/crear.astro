@@ -107,6 +107,11 @@ const user = Astro.cookies.get("user")
       </select>
     </div>
 
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="imagenjugador" class="text-base font-medium">Logo</label>
+      <input id="imagenjugador" name="imagenjugador" type="file" class={inputClass} accept="image/*" />
+    </div>
+
     <!-- Botón -->
     <div class="flex gap-2 justify-center pt-5">
       <button id="btnSubmit" class={buttonClass} type="button">

@@ -7,6 +7,7 @@ export const validateJugador = (formData: FormData) => {
   const posicion = (formData.get("posicionjugador")?.toString().trim()) ?? "";
   const numero = Number(formData.get("numerocamisetajugador")) || 0;
   const activo = (formData.get("jugadoractivo")?.toString().trim()) ?? "";
+  const imagenjugador = formData.get("imagenjugador") as File | null;
 
   // Expresión regular: 1 letra seguida de 8 dígitos (A00088850)
   const idBannerRegex = new RegExp(/^[A-Za-z]\d{8}$/);
@@ -47,6 +48,18 @@ export const validateJugador = (formData: FormData) => {
     activo:
       activo !== "true" && activo !== "false"
         ? "Debe indicar si el jugador está activo o no."
+        : "",
+    imagenjugador:
+      imagenjugador && imagenjugador.size > 2 * 1024 * 1024
+        ? "La imagen del jugador no debe superar los 2MB."
+        : "",
+    imagejugadorTipo: 
+      imagenjugador && imagenjugador.size > 0 && !imagenjugador.type.startsWith("image/")
+        ? "El archivo seleccionado debe ser una imagen."
+        : "",
+    imagenVacia:
+      !imagenjugador || imagenjugador.size === 0
+        ? "La imagen del jugador es obligatoria."
         : "",
   };
 

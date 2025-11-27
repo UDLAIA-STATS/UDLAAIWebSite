@@ -1,3 +1,17 @@
+// compresión real sin async/await directos
+const compressChunk = (chunk: Blob): Promise<Blob> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const readable = chunk.stream();
+      const compressedStream = readable.pipeThrough(
+        new CompressionStream("deflate-raw")
+      );
+      const compressedBlob = await new Response(compressedStream).blob();
+      resolve(compressedBlob);
+    } catch (err) { reject(err); }
+  });
+};
+
 export async function uploadWithParallelChunks(
   file: File,
   uploadUrl: string,

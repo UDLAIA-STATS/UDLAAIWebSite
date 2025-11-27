@@ -33,7 +33,7 @@ const headers: TableContent[] = [
 ];
 
 const { data, error } = await Astro.callAction(actions.getUsers, {
-  userCredential: "123456789",
+  userCredential: import.meta.env.DEFAULT_ADMIN_PASSWORD,
   page: pageParam,
   pageSize: 10,
 });

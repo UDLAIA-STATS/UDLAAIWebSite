@@ -66,10 +66,14 @@ const temporadas: Temporada[] = temporadaData?.data ?? [];
       <input
         id="fechapartido"
         name="fechapartido"
-        type="date"
+        type="datetime-local"
         class={inputClass}
         required
-        value={new Date(partido.fechapartido).toISOString().split("T")[0]}
+        value={partido.fechapartido
+          ? new Date(partido.fechapartido)
+              .toISOString()
+              .slice(0, 16)
+          : ""}
       />
     </div>
 

@@ -141,6 +141,15 @@ export default function VideoContainer() {
       formData.append("nombrePartido", partidoName);
       formData.append("fechaPartido", partidoDate.toISOString());
 
+      if(partidoSeleccionado()!.partidosubido) {
+        Swal.fire({
+          icon: "warning",
+          title: "Video ya subido",
+          text: "El video ya fue subido anteriormente.",
+        });
+        return;
+      }
+
       const { data, error } = await actions.uploadVideo(formData);
           console.log(data, error);
           if (error || !data || !data.ok) {
@@ -155,7 +164,7 @@ export default function VideoContainer() {
           }
           console.log("Datos de subida recibidos:", data);
 
-      const downloadUrl = data.downloadUrl;
+      const objectKey = data.objectKey;
       const uploadUrl = data.uploadUrl;
 
       await Swal.fire({
@@ -170,7 +179,6 @@ export default function VideoContainer() {
         didOpen: async () => {
           Swal.showLoading();
           const bar = document.getElementById("progress-bar")!;
-
           const text = document.getElementById("progress-text")!;
 
           await uploadWithParallelChunks(video, uploadUrl, (percent) => {
@@ -181,11 +189,26 @@ export default function VideoContainer() {
         },
       });
 
-      Swal.fire({
+      await Swal.fire({
         icon: "success",
         title: "Video subido correctamente",
         text: "Tu video fue subido y está siendo analizado, este proceso tardará varios minutos.",
       });
+      const partido = partidoSeleccionado()!;
+      partido.partidosubido = true;
+
+      const { data: partidoData, error: partidoError } = await actions.partidoSubido(partido);
+      if (partidoError || !partidoData) {
+        Swal.fire({
+          icon: "error",
+          title: "Error al subir",
+          text: partidoError
+            ? partidoError.message
+            : "No se pudo subir el partido, inténtalo de nuevo.",
+        });
+        return;
+      }
+
       setPartido(null);
       setFile(null);
       setPreview(null);

@@ -23,12 +23,12 @@ export const uploadVideo = defineAction({
         throw new Error("Error al comunicarse con Cloudflare.");
       }
 
-      const { uploadUrl, downloadUrl } = await res.json();
+      const { uploadUrl, objectKey } = await res.json();
 
       return {
         ok: true,
         uploadUrl,
-        downloadUrl,
+        objectKey,
       };
     } catch (error) {
       console.error(error);

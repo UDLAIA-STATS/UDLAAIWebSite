@@ -8,6 +8,7 @@ export const partidoSchema = z.object({
   idtemporada: z.number().int().positive(),
   marcadorequipolocal: z.number().int().nonnegative().optional().nullable(),
   marcadorequipovisitante: z.number().int().nonnegative().optional().nullable(),
+  partidosubido: z.boolean().optional(),
 });
 
 export const partidoUpdateSchema = partidoSchema.extend({

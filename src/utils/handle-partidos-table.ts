@@ -99,7 +99,13 @@ export const getRows = (
       return partidos.map((p) => [
         { data: String(p.idpartido ?? "-"), isVisible: false },
         {
-          data: p.fechapartido.split("T")[0] ??
+          data: new Date(p.fechapartido).toLocaleDateString("es-ES", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          }) ??
              "-",
         },
         { data: p.equipo_local_nombre ?? "-" },

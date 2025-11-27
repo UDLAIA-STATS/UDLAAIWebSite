@@ -151,7 +151,7 @@ import { navigate } from "astro:transitions/client";
     if (error) {
       console.error("Error:", error);
       if (error.message.toString().includes("validation")) {
-        Swal.fire({
+        await Swal.fire({
           icon: "error",
           title: "Error al registrar el usuario",
           text: "Uno de los campos no es válido. Por favor, verifica e intenta nuevamente.",
@@ -161,7 +161,7 @@ import { navigate } from "astro:transitions/client";
         return;
       }
       // const nameError = error. 
-      Swal.fire({
+      await Swal.fire({
         icon: "error",
         title: "Error al registrar el usuario",
         text: error.message,
@@ -173,7 +173,7 @@ import { navigate } from "astro:transitions/client";
 
     if (data) {
       console.log("Success:", data);
-      Swal.fire({
+      await Swal.fire({
         icon: "success",
         title: "Registro de usuario exitoso",
       });
