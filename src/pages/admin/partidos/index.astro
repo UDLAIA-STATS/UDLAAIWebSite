@@ -40,6 +40,8 @@ const sortOptions: SortOptions[] = [
   { searchParam: "fechapartido", displayName: "Fecha" },
   { searchParam: "equipo_local", displayName: "Equipo Local" },
   { searchParam: "equipo_visitante", displayName: "Equipo Visitante" },
+  { searchParam: "torneo_nombre", displayName: "Torneo" },
+  { searchParam: "temporada_nombre", displayName: "Temporada" },
 ];
 ---
 
@@ -86,17 +88,21 @@ const sortOptions: SortOptions[] = [
     const search = searchBox.value;
     const rows = document.querySelectorAll("tr[id^='match-partidos-']");
     rows.forEach((row) => {
-      const fecha = row.children[1];
-      const equipoLocal = row.children[2];
-      const equipoVisitante = row.children[3];
-      if (fecha && equipoLocal && equipoVisitante) {
-        const fechaText = fecha.textContent || "";
-        const localText = equipoLocal.textContent || "";
-        const visitanteText = equipoVisitante.textContent || "";
+      const equipoLocalCell = row.querySelector("td:nth-child(2)");
+      const equipoVisitanteCell = row.querySelector("td:nth-child(3)");
+      const torneoCell = row.querySelector("td:nth-child(5)");
+      const temporadaCell = row.querySelector("td:nth-child(6)");
+      if (equipoLocalCell && equipoVisitanteCell) {
+        const localText = equipoLocalCell?.textContent || "";
+        const visitanteText = equipoVisitanteCell?.textContent || "";
+        const torneoText = torneoCell?.textContent || "";
+        const temporadaText = temporadaCell?.textContent || "";
 
         if (
           localText.toLowerCase().includes(search.toLowerCase()) ||
-          visitanteText.toLowerCase().includes(search.toLowerCase())
+          visitanteText.toLowerCase().includes(search.toLowerCase()) ||
+          torneoText.toLowerCase().includes(search.toLowerCase()) ||
+          temporadaText.toLowerCase().includes(search.toLowerCase())
         ) {
           row.classList.remove("hidden");
         } else {

@@ -211,9 +211,10 @@ tableActions.push(
     if (target.closest("[data-delete-user]")) {
       const button = target.closest("[data-delete-user]") as HTMLButtonElement;
       const username = button.getAttribute("data-username");
+      console.log("Eliminar usuario:", username);
       const isActive = button.getAttribute("data-is-active");
 
-      if (username && isActive) {
+      if (username && isActive === "false") {
         await Swal.fire({
           icon: "error",
           title: "No se pudo eliminar el usuario",
@@ -228,7 +229,6 @@ tableActions.push(
         formData.append("userCredential", import.meta.env.DEFAULT_ADMIN_PASSWORD);
         Swal.fire({
           title: `¿Estás seguro de eliminar al usuario ${username}?`,
-          text: "Esta acción no se puede deshacer.",
           icon: "warning",
           showCancelButton: true,
           confirmButtonColor: "#d33",

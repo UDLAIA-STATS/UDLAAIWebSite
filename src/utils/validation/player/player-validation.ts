@@ -75,11 +75,13 @@ export const validateJugador = (formData: FormData) => {
     const numero = Number(formData.get("numerocamisetajugador")) || 0;
     const activo = (formData.get("jugadoractivo")?.toString().trim()) ?? "";
     const activoBool = activo === "true" || activo === "on";
+    const imagenjugador = (formData.get("imagenjugador")?.toString().trim()) ?? "";
     return (
       idbanner !== jugador.idbanner ||
       nombre !== jugador.nombrejugador ||
       apellido !== jugador.apellidojugador ||
       posicion !== jugador.posicionjugador ||
       numero !== jugador.numerocamisetajugador ||
+      imagenjugador !== (jugador.imagenjugador ?? "") ||
       activoBool !== jugador.jugadoractivo);
   };

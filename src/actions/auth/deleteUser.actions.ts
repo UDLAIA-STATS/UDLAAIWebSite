@@ -9,9 +9,10 @@ export const deleteUser = defineAction({
   }),
   handler: async ({ nickname, userCredential }, { cookies }) => {
     const authUrl = import.meta.env.AUTH_URL;
+    const adminKey = import.meta.env.DEFAULT_ADMIN_PASSWORD;
     const loggedInUser = cookies.get("user")
-  ? (JSON.parse(cookies.get("user")?.value as string) as LoggedUser)
-  : null;;
+  ? (JSON.parse(cookies.get("user")?.value as string) as LoggedUser).nickname
+  : 'admin';;
 
     if (!authUrl) {
       console.error("AUTH_URL no está definida en import.meta.env");
@@ -32,10 +33,10 @@ export const deleteUser = defineAction({
       console.log("Eliminando usuario:", { nickname });
 
       const basicAuth = Buffer.from(
-        `${loggedInUser.nickname}:${userCredential}`
+        `${loggedInUser}:${adminKey}`
       ).toString("base64");
 
-      const url = `${authUrl}/users/${encodeURIComponent(nickname)}/delete/`;
+      const url = `${authUrl}/users/${nickname}/delete/`;
 
       const response = await fetch(url, {
         method: "DELETE",
@@ -49,7 +50,7 @@ export const deleteUser = defineAction({
 
       // Si el servidor responde 204 No Content o no tiene body, manejarlo.
       if (response.status === 204) {
-        return { data: { success: true, message: "Usuario eliminado correctamente (204 No Content)" } };
+        return { data: { success: true, message: "Usuario eliminado correctamente" } };
       }
 
       // Intentar leer el body (puede ser JSON o texto)

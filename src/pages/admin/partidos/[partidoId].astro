@@ -58,25 +58,6 @@ const temporadas: Temporada[] = temporadaData?.data ?? [];
   <form id="form-partido" class="flex flex-col w-full max-w-md">
     <input type="hidden" name="idpartido" value={partido.idpartido} />
 
-    <!-- Fecha del partido -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="fechapartido" class="text-base font-medium"
-        >Fecha del Partido</label
-      >
-      <input
-        id="fechapartido"
-        name="fechapartido"
-        type="datetime-local"
-        class={inputClass}
-        required
-        value={partido.fechapartido
-          ? new Date(partido.fechapartido)
-              .toISOString()
-              .slice(0, 16)
-          : ""}
-      />
-    </div>
-
     <!-- Temporada -->
     <div class="flex gap-2 flex-col mb-4">
       <label for="idtemporada" class="text-base font-medium">Temporada</label>
@@ -113,6 +94,24 @@ const temporadas: Temporada[] = temporadaData?.data ?? [];
       </select>
     </div>
 
+    <div class="flex gap-2 flex-col mb-4">
+      <label for="fechapartido" class="text-base font-medium"
+        >Fecha del Partido</label
+      >
+      <input
+        id="fechapartido"
+        name="fechapartido"
+        type="datetime-local"
+        class={inputClass}
+        required
+        value={partido.fechapartido
+          ? new Date(partido.fechapartido)
+              .toISOString()
+              .slice(0, 16)
+          : ""}
+      />
+    </div>
+
     <!-- Equipos -->
     <div class="flex gap-2 flex-col mb-4">
       <label for="idequipolocal" class="text-base font-medium"
@@ -137,6 +136,8 @@ const temporadas: Temporada[] = temporadaData?.data ?? [];
         }
       </select>
     </div>
+
+    
 
     <div class="flex gap-2 flex-col mb-4">
       <label for="idequipovisitante" class="text-base font-medium"
@@ -264,6 +265,8 @@ const temporadas: Temporada[] = temporadaData?.data ?? [];
   });
 
   btnSubmit.addEventListener("click", async () => {
+    btnSubmit.disabled = true;
+    btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
     const formData = new FormData(form);
     const errorMessage = validatePartidos(formData);
     

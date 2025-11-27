@@ -16,8 +16,8 @@ export async function uploadWithParallelChunks(
   file: File,
   uploadUrl: string,
   onProgress: (percent: number) => void,
-  concurrency = 4,
-  chunkSize = 5 * 1024 * 1024
+  concurrency = 3,
+  chunkSize = 5 * 1024
 ): Promise<boolean> {
   const totalChunks = Math.ceil(file.size / chunkSize);
   let uploadedBytes = 0;

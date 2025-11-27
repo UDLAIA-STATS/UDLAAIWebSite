@@ -108,12 +108,15 @@ const user = Astro.cookies.get("user")
     </div>
 
     <div class="flex gap-2 flex-col mb-4">
-      <label for="imagenjugador" class="text-base font-medium">Logo</label>
+      <label for="imagenjugador" class="text-base font-medium">Foto</label>
       <input id="imagenjugador" name="imagenjugador" type="file" class={inputClass} accept="image/*" />
     </div>
 
     <!-- Botón -->
-    <div class="flex gap-2 justify-center pt-5">
+    <div class="flex justify-center text-center mt-5 mx-5 pt-2 gap-5">
+      <button class={buttonClass} type="button" id="btn-cancel">
+        Cancelar
+      </button>
       <button id="btnSubmit" class={buttonClass} type="button">
         Guardar Jugador
         <img
@@ -127,13 +130,20 @@ const user = Astro.cookies.get("user")
 </FormLayout>
 
 <script>
-  import { validateJugador } from "@utils/validation/player/player-validation";
+  import { privateRoutesMap } from "@consts/index";
+import { fileToBase64 } from "@utils/index";
+import { validateJugador } from "@utils/validation/player/player-validation";
   import { actions } from "astro:actions";
   import { navigate } from "astro:transitions/client";
   import Swal from "sweetalert2";
 
   const btnSubmit = document.getElementById("btnSubmit") as HTMLButtonElement;
+  const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
 
+  btnCancel.addEventListener("click", () => {
+    navigate(privateRoutesMap.ADMIN_JUGADORES);
+  });
+  
   btnSubmit.addEventListener("click", async () => {
     btnSubmit.disabled = true;
     btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
@@ -175,7 +185,16 @@ const user = Astro.cookies.get("user")
       return;
     }
 
+
     try {
+      const logo = formData.get("imagenjugador");
+      if (logo) {
+        const file = logo as File;
+        const base64 = await fileToBase64(file)
+        formData.set("imagenjugador", base64); 
+      } else {
+        formData.delete("imagenjugador");
+      }
       const { data, error } = await actions.createJugador(formData);
 
       if (error) {

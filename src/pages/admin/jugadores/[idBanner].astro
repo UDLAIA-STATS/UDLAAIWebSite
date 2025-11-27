@@ -26,6 +26,7 @@ if (error || !data) {
 
 const jugador = data.data as Player;
 const logoJugador = jugador.imagenjugador ?? null;
+console.log(logoJugador);
 ---
 
 <FormLayout
@@ -162,7 +163,7 @@ const logoJugador = jugador.imagenjugador ?? null;
 
     <div class="flex gap-2 flex-col mb-4">
       <label for="imagenjugador" class="text-base font-medium"
-        >Cambiar logo (opcional)</label
+        >Cambiar Foto (opcional)</label
       >
       <input
         id="imagenjugador"
@@ -176,19 +177,21 @@ const logoJugador = jugador.imagenjugador ?? null;
     {
       logoJugador && (
         <div class="flex flex-col items-start mb-4">
-          <label class="text-base font-medium mb-2">Logo actual</label>
+          <label class="text-base font-medium mb-2">Foto actual</label>
           <img
             src={logoJugador}
-            alt="Logo del jugador"
+            alt="Foto del jugador"
             class="w-fit h-fit object-cover rounded-lg shadow-md border"
           />
         </div>
       )
     }
 
-
     <!-- Botón -->
-    <div class="flex gap-2 justify-center pt-5">
+    <div class="flex justify-center text-center mt-5 mx-5 pt-2 gap-5">
+      <button class={buttonClass} type="button" id="btn-cancel">
+        Cancelar
+      </button>
       <button id="btnSubmit" class={buttonClass} type="button">
         Actualizar Jugador
         <img
@@ -210,9 +213,15 @@ const logoJugador = jugador.imagenjugador ?? null;
     isJugadorUpdated,
   } from "@utils/validation/player/player-validation";
   import type { Player } from "@interfaces/index";
-import { privateRoutesMap } from "@consts/routes";
+  import { privateRoutesMap } from "@consts/routes";
+  import { fileToBase64 } from "@utils/index";
 
   const btnSubmit = document.getElementById("btnSubmit") as HTMLButtonElement;
+  const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
+
+  btnCancel.addEventListener("click", () => {
+    navigate(privateRoutesMap.ADMIN_JUGADORES);
+  });
 
   btnSubmit.addEventListener("click", async () => {
     btnSubmit.disabled = true;
@@ -252,17 +261,18 @@ import { privateRoutesMap } from "@consts/routes";
       return;
     }
 
-    const jugadoresData = await actions.getJugadores.orThrow({pageSize: 1000});
+    const jugadoresData = await actions.getJugadores.orThrow({
+      pageSize: 1000,
+    });
     const jugadores = jugadoresData.data;
-    const camisetaOcupada = jugadores.some(
-      (j) => {
-        return (
-          j.numerocamisetajugador.toString() ===
-          formData.get("numerocamisetajugador")?.toString() && j.jugadoractivo 
-          && j.idjugador !== idJugador
-        )
-      }
-    )
+    const camisetaOcupada = jugadores.some((j) => {
+      return (
+        j.numerocamisetajugador.toString() ===
+          formData.get("numerocamisetajugador")?.toString() &&
+        j.jugadoractivo &&
+        j.idjugador !== idJugador
+      );
+    });
 
     if (camisetaOcupada) {
       Swal.fire({
@@ -276,6 +286,14 @@ import { privateRoutesMap } from "@consts/routes";
     }
 
     try {
+      const logo = formData.get("imagenjugador");
+      if (logo) {
+        const file = logo as File;
+        const base64 = await fileToBase64(file);
+        formData.set("imagenjugador", base64);
+      } else {
+        formData.delete("imagenjugador");
+      }
       const { data, error } = await actions.updateJugador(formData);
 
       if (error) {

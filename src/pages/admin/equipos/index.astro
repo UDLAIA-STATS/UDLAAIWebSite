@@ -41,6 +41,8 @@ const sidebarLinks: Link[] = matchSidebarLinks;
 
 const sortOptions: SortOptions[] = [
   { searchParam: "nombreequipo", displayName: "Nombre" },
+  { searchParam: "institucion_nombre", displayName: "Institución" },
+  { searchParam: "equipoactivo", displayName: "Activo" }
 ];
 ---
 
@@ -89,7 +91,7 @@ const sortOptions: SortOptions[] = [
     const rows = document.querySelectorAll("tr[id^='match-equipos-']");
     console.log("Filtrando equipos con término:", rows);
     rows.forEach((row) => {
-      const nameCell = row.querySelector("td:nth-child(2)");
+      const nameCell = row.querySelector("td:nth-child(1)");
       if (nameCell) {
         const name = nameCell?.textContent ?? "";
         if (name.toLowerCase().includes(search.toLowerCase())) {

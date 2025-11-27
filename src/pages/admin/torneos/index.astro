@@ -39,6 +39,9 @@ const sidebarLinks: Link[] = matchSidebarLinks;
 
 const sortOptions: SortOptions[] = [
   { searchParam: "nombretorneo", displayName: "Nombre" },
+  { searchParam: "fechainiciotorneo", displayName: "Fecha de Inicio" },
+  { searchParam: "fechafintorneo", displayName: "Fecha de Fin" },
+  { searchParam: "torneoactivo", displayName: "Activo" } 
 ];
 ---
 
@@ -86,7 +89,7 @@ const sortOptions: SortOptions[] = [
     const rows = document.querySelectorAll("tr[id^='match-torneos-']");
     rows.forEach((row) => {
       const nombreText =
-        row.querySelector("td:nth-child(2)")?.textContent?.trim() || "";
+        row.querySelector("td:nth-child(1)")?.textContent?.trim() || "";
 
       if (nombreText.toLowerCase().includes(search.toLowerCase())) {
         row.classList.remove("hidden");

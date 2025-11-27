@@ -4,7 +4,7 @@ export const jugadorSchema = z.object({
   nombrejugador: z.string().min(2).max(100),
   idbanner: z.string().min(9).max(10),
   apellidojugador: z.string().min(2).max(100),
-  imagenjugador: z.instanceof(File).optional(),
+  imagenjugador: z.string().optional().nullable(),
   posicionjugador: z.enum(["Delantero", "Mediocampista", "Defensa", "Portero"]),
   numerocamisetajugador: z.number().int().positive(),
   jugadoractivo: z.boolean(),

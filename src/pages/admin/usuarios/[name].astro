@@ -12,7 +12,7 @@ const { name } = Astro.params;
 
 const { data, error } = await Astro.callAction(actions.getUserByUsername, {
   username: name?.replaceAll("_", " ") ?? "",
-  userCredential: "123456789",
+  userCredential: import.meta.env.DEFAULT_ADMIN_PASSWORD,
 });
 const user = data?.data;
 
