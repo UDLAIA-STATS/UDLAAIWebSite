@@ -6,7 +6,7 @@ export const getDataByFilter = defineAction({
   input: z.object({
     filter: z.string(), // 'torneos' | 'partidos' | 'temporadas' | 'equipos'
     page: z.number().int().positive().optional().default(1),
-    pageSize: z.number().int().positive().optional().default(10),
+    pageSize: z.number().int().positive().optional().default(20),
   }),
   handler: async ({ filter, page, pageSize }) => {
     const filterOption = filter.toLowerCase();

@@ -238,13 +238,13 @@ export default function VideoContainer() {
             <option value="" disabled selected>
               Selecciona una temporada
             </option>
-            <For each={temporadas()}>
+            {/* <For each={temporadas()}>
               {(temporada) => (
                 <option value={temporada.idtemporada}>
                   {temporada.nombretemporada}
                 </option>
               )}
-            </For>
+            </For> */}
           </select>
           <label class="text-sm font-medium text-gray-600">Partido</label>
           <select

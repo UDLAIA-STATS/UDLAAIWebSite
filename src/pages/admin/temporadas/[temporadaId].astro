@@ -192,6 +192,8 @@ import type { Temporada } from "@interfaces/torneos.interface";
     } catch (err) {
       console.error("Error al actualizar:", err);
       Swal.fire("Error", "Ocurrió un problema al actualizar la temporada", "error");
+      btnSubmit.disabled = false;
+      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
     } finally {
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");

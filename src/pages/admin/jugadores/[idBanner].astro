@@ -4,6 +4,7 @@ import arrowNext from "@assets/arrow_next.svg";
 import FormLayout from "@layouts/FormLayout.astro";
 import { actions } from "astro:actions";
 import type { Player } from "@interfaces/index";
+import NotFoundImage from "@assets/not_found.svg";
 
 const buttonClass =
   "text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md flex items-center justify-center cursor-pointer transition";
@@ -179,7 +180,7 @@ console.log(logoJugador);
         <div class="flex flex-col items-start mb-4">
           <label class="text-base font-medium mb-2">Foto actual de la camiseta</label>
           <img
-            src={logoJugador}
+            src={logoJugador ?? NotFoundImage.src }
             alt="Foto del jugador"
             class="w-fit h-fit object-cover rounded-lg shadow-md border"
           />

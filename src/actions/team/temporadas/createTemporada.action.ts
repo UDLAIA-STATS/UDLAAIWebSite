@@ -27,7 +27,7 @@ export const createTemporada = defineAction({
         }),
       });
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
+        const errorData = await res.json();
         throw new Error(errorData.non_field_errors || `Error ${res.status}: ${res.statusText}`);
       }
       const data = await res.json();

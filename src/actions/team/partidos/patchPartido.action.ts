@@ -16,8 +16,8 @@ export const updatePartido = defineAction({
       });
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `Error ${res.status}: ${res.statusText}`);
+        const errorData = await res.json();
+        throw new Error(errorData.non_field_errors || `Error ${res.status}: ${res.statusText}`);
       }
 
       const data = await res.json();
@@ -41,8 +41,8 @@ export const partidoSubido = defineAction({
       });
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `Error ${res.status}: ${res.statusText}`);
+        const errorData = await res.json();
+        throw new Error(errorData.non_field_errors || `Error ${res.status}: ${res.statusText}`);
       }
 
       const data = await res.json();
