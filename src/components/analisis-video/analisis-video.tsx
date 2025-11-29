@@ -6,7 +6,7 @@ import Add from "@assets/add.svg";
 import { actions } from "astro:actions";
 import Swal from "sweetalert2";
 import type { Partido, Temporada } from "@interfaces/torneos.interface";
-import { uploadWithParallelChunks } from "@services/uploadFile";
+import { uploadFile } from "@services/uploadFile";
 
 export default function VideoContainer() {
   const [partidoSeleccionado, setPartido] = createSignal<Partido | null>(null);
@@ -118,54 +118,26 @@ export default function VideoContainer() {
   };
   // Envía el formulario
   const submitVideo = async () => {
-    if (!partidoSeleccionado() || !file()) {
+    if (!partidoSeleccionado() || !file() || !temporadaSeleccionada()) {
       Swal.fire({
         icon: "error",
         title: "Campos incompletos",
-        text: "Debes seleccionar un partido e ingresar un video.",
+        text: "Debes seleccionar una temporada, partido e ingresar un video.",
       });
       return;
     }
     setLoading(true);
     try {
       const video = file()!;
-      const partidoDate = new Date(partidoSeleccionado()!.fechapartido);
-      const partidoName =
-        partidoSeleccionado()?.equipo_local_nombre +
-          " vs " +
-          partidoSeleccionado()?.equipo_visitante_nombre +
-          " - " +
-          partidoSeleccionado()?.idpartido.toString() || "";
-      const formData = new FormData();
-      formData.append("video", video);
-      formData.append("nombrePartido", partidoName);
-      formData.append("fechaPartido", partidoDate.toISOString());
 
-      if(partidoSeleccionado()!.partidosubido) {
-        Swal.fire({
-          icon: "warning",
-          title: "Video ya subido",
-          text: "El video ya fue subido anteriormente.",
-        });
-        return;
-      }
-
-      const { data, error } = await actions.uploadVideo(formData);
-          console.log(data, error);
-          if (error || !data || !data.ok) {
-            Swal.fire({
-              icon: "error",
-              title: "Error al subir",
-              text: error
-                ? error.message
-                : "No se pudo subir el video, inténtalo de nuevo.",
-            });
-            return;
-          }
-          console.log("Datos de subida recibidos:", data);
-
-      const objectKey = data.objectKey;
-      const uploadUrl = data.uploadUrl;
+      // if (partidoSeleccionado()!.partidosubido) {
+      //   Swal.fire({
+      //     icon: "warning",
+      //     title: "Video ya subido",
+      //     text: "El video ya fue subido anteriormente.",
+      //   });
+      //   return;
+      // }
 
       await Swal.fire({
         title: "Subiendo video...",
@@ -178,36 +150,52 @@ export default function VideoContainer() {
         showConfirmButton: false,
         didOpen: async () => {
           Swal.showLoading();
-          const bar = document.getElementById("progress-bar")!;
-          const text = document.getElementById("progress-text")!;
-
-          await uploadWithParallelChunks(video, uploadUrl, (percent) => {
-            bar.style.width = percent + "%";
-            text.innerHTML = percent + "%";
-          });
+          try {
+            const { ok, key } = await uploadFile(
+              video,
+              partidoSeleccionado()!.idpartido,
+              (percent) => {
+                const bar = document.getElementById("progress-bar")!;
+                const text = document.getElementById("progress-text")!;
+                bar.style.width = percent + "%";
+                text.innerHTML = percent + "%";
+              }
+            );
+          } catch (error) {
+            Swal.fire({
+              icon: "error",
+              title: "Error al subir",
+              text:
+                error instanceof Error
+                  ? error.message
+                  : "Ocurrió un error al subir el video.",
+            });
+            return;
+          }
           return;
         },
       });
 
-      await Swal.fire({
-        icon: "success",
-        title: "Video subido correctamente",
-        text: "Tu video fue subido y está siendo analizado, este proceso tardará varios minutos.",
-      });
-      const partido = partidoSeleccionado()!;
-      partido.partidosubido = true;
+      // await Swal.fire({
+      //   icon: "success",
+      //   title: "Video subido correctamente",
+      //   text: "Tu video fue subido y está siendo analizado, este proceso tardará varios minutos.",
+      // });
+      // const partido = partidoSeleccionado()!;
+      // partido.partidosubido = true;
 
-      const { data: partidoData, error: partidoError } = await actions.partidoSubido(partido);
-      if (partidoError || !partidoData) {
-        Swal.fire({
-          icon: "error",
-          title: "Error al subir",
-          text: partidoError
-            ? partidoError.message
-            : "No se pudo subir el partido, inténtalo de nuevo.",
-        });
-        return;
-      }
+      // const { data: partidoData, error: partidoError } =
+      //   await actions.partidoSubido(partido);
+      // if (partidoError || !partidoData) {
+      //   Swal.fire({
+      //     icon: "error",
+      //     title: "Error al subir",
+      //     text: partidoError
+      //       ? partidoError.message
+      //       : "No se pudo subir el partido, inténtalo de nuevo.",
+      //   });
+      //   return;
+      // }
 
       setPartido(null);
       setFile(null);
@@ -238,7 +226,7 @@ export default function VideoContainer() {
         {/* Columna izquierda - Formulario */}
         <div class="flex flex-col w-1/3 gap-1">
           <label class="text-sm font-medium text-gray-600">
-            Temporada (Opcional)
+            Temporada
           </label>
           <select
             name="temporadas"

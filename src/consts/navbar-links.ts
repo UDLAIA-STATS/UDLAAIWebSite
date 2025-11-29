@@ -13,25 +13,25 @@ export const matchSidebarLinks: Link[] = [
 
 export const getNavbarLinks = (user?: LoggedUser) => {
   let links: Link[] = [
-    { name: "Estadísticas", href: publicRoutesMap.PLAYER_STATS }
+    // { name: "Módulo de estadísticas", href: publicRoutesMap.PLAYER_STATS }
   ]
 
   if (!user) return links;
 
   if ( user.rol === roles.profesor ) {
     links = [...links,
-    { name: "Análisis", href: privateRoutesMap.VIDEO_ANALYSIS },
-    { name: "Administrar Jugadores", href: privateRoutesMap.ADMIN_JUGADORES },
-    { name: "Administrar Partidos y Torneos", href: privateRoutesMap.ADMIN_PARTIDOS }
+    { name: "Módulo de subida de video", href: privateRoutesMap.VIDEO_ANALYSIS },
+    { name: "Módulo Jugadores", href: privateRoutesMap.ADMIN_JUGADORES },
+    { name: "Módulo Partidos y Torneos", href: privateRoutesMap.ADMIN_PARTIDOS }
   ]
   }
 
   if ( user.rol === roles.super ) {
     links = [...links,
-    { name: "Analizar Video", href: privateRoutesMap.VIDEO_ANALYSIS },
-    { name: "Administrar Usuarios", href: privateRoutesMap.ADMINS_USERS },
-    { name: "Administrar Jugadores", href: privateRoutesMap.ADMIN_JUGADORES },
-    { name: "Administrar Partidos y Torneos", href: privateRoutesMap.ADMIN_PARTIDOS },
+    { name: "Módulo de subida de video", href: privateRoutesMap.VIDEO_ANALYSIS },
+    { name: "Módulo Usuarios", href: privateRoutesMap.ADMINS_USERS },
+    { name: "Módulo Jugadores", href: privateRoutesMap.ADMIN_JUGADORES },
+    { name: "Módulo Partidos y Torneos", href: privateRoutesMap.ADMIN_PARTIDOS },
     ]
   }
   return links;
@@ -39,8 +39,8 @@ export const getNavbarLinks = (user?: LoggedUser) => {
 
 export const navbarLinks: Link[] = [
   { name: "Inicio", href: publicRoutesMap.HOME },
-  { name: "Estadísticas", href: publicRoutesMap.PLAYER_STATS },
-  { name: "Herramienta", href: privateRoutesMap.VIDEO_ANALYSIS }
+  { name: "Módulo de estadísticas", href: publicRoutesMap.PLAYER_STATS },
+  { name: "Módulo de subida de video", href: privateRoutesMap.VIDEO_ANALYSIS }
 ];
 
 export const ejemplosPartidos: Partido[] = [

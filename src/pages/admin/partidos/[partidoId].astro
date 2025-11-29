@@ -272,6 +272,8 @@ const temporadas: Temporada[] = temporadaData?.data ?? [];
     
     if (errorMessage) {
       Swal.fire("Error", errorMessage, "error");
+      btnSubmit.disabled = false;
+      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
       return;
     }
     const partidoData = await actions.getPartidoById.orThrow({
@@ -312,6 +314,8 @@ const temporadas: Temporada[] = temporadaData?.data ?? [];
     } catch (err) {
       console.error(err);
       Swal.fire("Error", "Error inesperado al actualizar el partido", "error");
+      btnSubmit.disabled = false;
+      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
     } finally {
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");

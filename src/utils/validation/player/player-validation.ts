@@ -56,11 +56,7 @@ export const validateJugador = (formData: FormData) => {
     imagejugadorTipo: 
       imagenjugador && imagenjugador.size > 0 && !imagenjugador.type.startsWith("image/")
         ? "El archivo seleccionado debe ser una imagen."
-        : "",
-    imagenVacia:
-      !imagenjugador || imagenjugador.size === 0
-        ? "La imagen del jugador es obligatoria."
-        : "",
+        : ""
   };
 
   const errors = Object.values(validations).filter(Boolean);

@@ -14,6 +14,7 @@ interface ImportMetaEnv {
   readonly WAREHOUSE: string;
   readonly R2_AUTH_SECRET: string;
   readonly WORKER_URL: string;
+  readonly UPLOAD_SERVICE_URL: string;
 }
 
 interface ImportMeta {

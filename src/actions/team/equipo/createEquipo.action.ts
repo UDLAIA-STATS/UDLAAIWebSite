@@ -1,6 +1,5 @@
 import type { Equipo } from "@interfaces/index";
 import { defineAction } from "astro:actions";
-import { z } from "astro:schema";
 import { equipoSchema } from "./equipoSchema";
 
 export const createEquipo = defineAction({
@@ -9,15 +8,21 @@ export const createEquipo = defineAction({
   handler: async ( { idinstitucion, nombreequipo, imagenequipo, equipoactivo } ) => {
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
+      const payload = !!imagenequipo ? {
+        idinstitucion: idinstitucion,
+        nombreequipo: nombreequipo,
+        equipoactivo: equipoactivo
+      } : {
+        idinstitucion: idinstitucion,
+        nombreequipo: nombreequipo,
+        imagenequipo: imagenequipo,
+        equipoactivo: equipoactivo
+      }
+
       const response = await fetch(`${baseUrl}/equipos/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          idinstitucion: idinstitucion,
-          nombreequipo: nombreequipo,
-          imagenequipo: imagenequipo,
-          equipoactivo: equipoactivo,
-        })
+        body: JSON.stringify(payload)
        
       });
 

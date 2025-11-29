@@ -1,38 +1,29 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import debug from "debug";
+import axios from "axios";
 
 export const uploadVideo = defineAction({
-  accept: "form",
   input: z.object({
     video: z.instanceof(File),
+    id_partido: z.number(),
   }),
-  handler: async ({ video }) => {
+  handler: async ({ video, id_partido }) => {
     try {
-      const workerUrl = import.meta.env.WORKER_URL;
+      const uploadApi = import.meta.env.UPLOAD_SERVICE_URL;
 
-      const res = await fetch(workerUrl, {
-        method: "POST",
-        body: JSON.stringify({ filename: video.name }),
-        headers: {
-           "Access-Control-Allow-Headers": "content-range, content-type"
-          }
-      });
+      const formData = new FormData();
+      formData.append("video", video);
+      formData.append("id_partido", String(id_partido));
 
-      if (!res.ok) {
-        throw new Error("Error al comunicarse con Cloudflare.");
-      }
-
-      const { uploadUrl, objectKey } = await res.json();
+      const res = await axios.post(`${uploadApi}/upload/`, formData);
 
       return {
         ok: true,
-        uploadUrl,
-        objectKey,
+        key: res.data.key as string,
       };
-    } catch (error) {
-      console.error(error);
-      throw error;
+    } catch (err) {
+      console.error(err);
+      throw new Error("Error al subir el video, por favor intente nuevamente.");
     }
   },
 });

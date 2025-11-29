@@ -10,6 +10,9 @@ export const createJugador = defineAction({
   handler: async (formData) => {
     try {
       const baseUrl = import.meta.env.JUGADORES_API;
+      if (!!!formData.imagenjugador) {
+        delete formData.imagenjugador;
+      }
       const response = await fetch(`${baseUrl}/jugadores/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
