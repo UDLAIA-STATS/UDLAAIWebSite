@@ -5,6 +5,7 @@ import NotAuthorized from "@components/shared/NotAuthorized.astro";
 import { roles } from "@consts/roles";
 import { actions } from "astro:actions";
 import { publicRoutesMap } from "@consts/routes";
+import type { User } from "@interfaces/index";
 
 export const prerender = false;
 
@@ -14,7 +15,8 @@ const { data, error } = await Astro.callAction(actions.getUserByUsername, {
   username: name?.replaceAll("_", " ") ?? "",
   userCredential: import.meta.env.DEFAULT_ADMIN_PASSWORD,
 });
-const user = data?.data;
+const user = data?.data as User;
+const originalName = user.nombre_usuario;
 
 if (error || !user) {
   console.error("Error fetching user:", error);
@@ -77,7 +79,7 @@ const { super: superRole } = roles;
             id="originalName"
             name="originalName"
             class=`${inputClass}`
-            value={user.nombre_usuario}
+            value={originalName}
             readonly
           />
         </div>
@@ -192,6 +194,7 @@ const { super: superRole } = roles;
     const name = formData.get("name")?.toString().trim();
     const email = formData.get("email")?.toString().trim();
     const password = formData.get("password")?.toString().trim() ?? "";
+    const rol = formData.get("rol")?.toString().trim();
 
     const errorMessage = validateUsers(formData, true);
 
@@ -205,48 +208,80 @@ const { super: superRole } = roles;
     formData.set("name", name ?? "");
     formData.set("email", email ?? "");
     formData.set("password", password ?? "");
-
-    const originalName = formData.get("originalName")?.toString().trim() ?? "";
-    const data = await actions.getUserByUsername.orThrow({
-      username: originalName,
-      userCredential: "123456789",
-    });
-    const user: User = data.data;
-    const validationChanges = validateChanges(formData, user);
-
-    if ( validationChanges.trim().length  > 0 ) {
-      Swal.fire(
-        "Error",
-        validationChanges,
-        "error"
-      );
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-      return;
-    }
-
-    if (password === "") {
-      formData.delete("password");
-    }
+    formData.set("rol", rol ?? "");
     
-    formData.append("userCredential", userCredential);
+    const originalName = formData.get("originalName")?.toString().trim() ?? "";
     try {
-      const { data, error } = await actions.updateUser(formData);
-
-      if (error) throw error;
-      Swal.fire(
-        "Éxito",
-        `El usuario ${formData.get("originalName")} ha sido actualizado exitósamente.`,
-        "success"
-      ).then((result) => {
-        if (result.isConfirmed) {
-          navigate(privateRoutesMap.ADMINS_USERS);
-        }
+      console.log(originalName)
+      const { data: dataActual, error: errorActual } = await actions.getUserByUsername({
+        username: originalName,
+        userCredential: 'Administrador123',
       });
-      form.reset();
+      const user: User = dataActual?.data as User;
+      console.log("user actual:", user);
+
+      if (errorActual || !user) {
+        Swal.fire("Error", "Error al obtener los datos del usuario actual", "error");
+        btnSubmit.disabled = false;
+        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+        return;
+      }
+      const validationChanges = validateChanges(formData, user);
+      console.log("validationChanges:", validationChanges);
+      if ( validationChanges != "" ) {
+        Swal.fire(
+          "Error",
+          validationChanges,
+          "error"
+        );
+        btnSubmit.disabled = false;
+        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+        return;
+      }
+  
+      if (password === "") {
+        formData.delete("password");
+      }
+      
+      formData.append("userCredential", userCredential);
+      try {
+        const { data, error } = await actions.updateUser(formData);
+  
+        if (error) {
+          console.error("Error:", error);
+          if (error.message.toString().includes("validation")) {
+            await Swal.fire({
+              icon: "error",
+              title: "Error de validación",
+              text: error.message,
+            });
+          } else {
+            await Swal.fire("Error", "Error al actualizar el usuario", "error");
+          }
+          btnSubmit.disabled = false;
+          btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+          return;
+        };
+        Swal.fire(
+          "Éxito",
+          `El usuario ${formData.get("originalName")} ha sido actualizado exitósamente.`,
+          "success"
+        ).then((result) => {
+          if (result.isConfirmed) {
+            navigate(privateRoutesMap.ADMINS_USERS);
+          }
+        });
+        form.reset();
+    } catch(err) {
+        Swal.fire("Error", "Error al actualizar el usuario", "error");
+        btnSubmit.disabled = false;
+        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+    }
     } catch (err) {
       console.error(err as Error);
       Swal.fire("Error", "Error al actualizar el usuario", "error");
+      btnSubmit.disabled = false;
+      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
     } finally {
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");

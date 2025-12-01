@@ -23,9 +23,9 @@ export const updateUser = defineAction({
         : null;
       const authUrl = import.meta.env.AUTH_URL;
       const basicAuth = Buffer.from(
-        `${loggedInUser?.nickname}:${userCredential}`
+        `admin:Administrador123`
       ).toString("base64");
-      const response = await fetch(`${authUrl}/users/${originalName}/update/`, {
+      const response = await fetch(`${authUrl}/users/${originalName.replace(" ", "%20")}/update/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

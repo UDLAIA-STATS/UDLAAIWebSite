@@ -44,19 +44,12 @@ export const validateChanges = (formData: FormData, originalData: User) => {
   const newPassword = formData.get("password")?.toString().trim() ?? "";
   const is_active = (formData.get("is_active")?.toString().trim() ?? "") === "true" ? true : false;
 
-  const validationErrors: Record<string, string> = {
-    noChanges:
-      newName == originalData.nombre_usuario && newEmail == originalData.email_usuario && 
-      newPassword == "" && newRol == originalData.rol && is_active == originalData.is_active &&
-      (newPassword === "" || newPassword === null)
-        ? "No se han realizado cambios. Modifique al menos un campo para continuar."
-        : "",
-  };
-  if (Object.values(validationErrors).some((msg) => msg !== "")) {
-    const errorMessages = Object.values(validationErrors).filter(
-      (msg) => msg !== ""
-    );
-    return errorMessages.join("<br/>");
-  }
+  if (newName === originalData.nombre_usuario && 
+    newEmail === originalData.email_usuario && 
+    newRol.trim() === originalData.rol.trim() && 
+    is_active === originalData.is_active) {
+      return "No se han realizado cambios. Modifique al menos un campo para continuar." 
+    }
+
   return "";
 };

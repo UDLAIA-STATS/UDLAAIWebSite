@@ -130,14 +130,14 @@ export default function VideoContainer() {
     try {
       const video = file()!;
 
-      // if (partidoSeleccionado()!.partidosubido) {
-      //   Swal.fire({
-      //     icon: "warning",
-      //     title: "Video ya subido",
-      //     text: "El video ya fue subido anteriormente.",
-      //   });
-      //   return;
-      // }
+      if (partidoSeleccionado()!.partidosubido) {
+        Swal.fire({
+          icon: "warning",
+          title: "Video ya subido",
+          text: "El video ya fue subido anteriormente.",
+        });
+        return;
+      }
 
       await Swal.fire({
         title: "Subiendo video...",
@@ -176,26 +176,26 @@ export default function VideoContainer() {
         },
       });
 
-      // await Swal.fire({
-      //   icon: "success",
-      //   title: "Video subido correctamente",
-      //   text: "Tu video fue subido y está siendo analizado, este proceso tardará varios minutos.",
-      // });
-      // const partido = partidoSeleccionado()!;
-      // partido.partidosubido = true;
+      await Swal.fire({
+        icon: "success",
+        title: "Video subido correctamente",
+        text: "Tu video fue subido y está siendo analizado, este proceso tardará varios minutos.",
+      });
+      const partido = partidoSeleccionado()!;
+      partido.partidosubido = true;
 
-      // const { data: partidoData, error: partidoError } =
-      //   await actions.partidoSubido(partido);
-      // if (partidoError || !partidoData) {
-      //   Swal.fire({
-      //     icon: "error",
-      //     title: "Error al subir",
-      //     text: partidoError
-      //       ? partidoError.message
-      //       : "No se pudo subir el partido, inténtalo de nuevo.",
-      //   });
-      //   return;
-      // }
+      const { data: partidoData, error: partidoError } =
+        await actions.partidoSubido(partido);
+      if (partidoError || !partidoData) {
+        Swal.fire({
+          icon: "error",
+          title: "Error al subir",
+          text: partidoError
+            ? partidoError.message
+            : "No se pudo subir el partido, inténtalo de nuevo.",
+        });
+        return;
+      }
 
       setPartido(null);
       setFile(null);
@@ -238,13 +238,13 @@ export default function VideoContainer() {
             <option value="" disabled selected>
               Selecciona una temporada
             </option>
-            {/* <For each={temporadas()}>
+            <For each={temporadas()}>
               {(temporada) => (
                 <option value={temporada.idtemporada}>
                   {temporada.nombretemporada}
                 </option>
               )}
-            </For> */}
+            </For>
           </select>
           <label class="text-sm font-medium text-gray-600">Partido</label>
           <select

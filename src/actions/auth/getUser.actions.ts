@@ -68,7 +68,7 @@ export const getUserByUsername = defineAction({
   }),
   handler: async ({ username, userCredential }, { locals, cookies }) => {
     console.log("getUserByUsername llamado con username:", username);
-
+    const credential = import.meta.env.DEFAULT_ADMIN_PASSWORD;
     const baseUrl = import.meta.env.AUTH_URL;
     const loggedInUser = cookies.get("user")
   ? (JSON.parse(cookies.get("user")?.value as string) as LoggedUser)
@@ -92,8 +92,10 @@ export const getUserByUsername = defineAction({
       });
 
       if (!response.ok) {
-        console.error("Error HTTP:", response.status, response.statusText);
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error( errorData.mensaje ??
+          `Fallo al obtener el usuario: ${response.status} ${response.statusText}`
+        );
       }
 
       const data = await response.json();
