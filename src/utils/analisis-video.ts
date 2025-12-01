@@ -1,7 +1,3 @@
-import type { file } from "astro/loaders";
-import { actions } from "astro:actions";
-import Swal from "sweetalert2";
-
 export const generateVideoThumbnail = (videoFile: File) =>
   new Promise<string>((resolve, reject) => {
     const video = document.createElement("video");

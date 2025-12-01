@@ -18,14 +18,11 @@ export const updateUser = defineAction({
   ) => {
     try {
       console.log("Actualizando usuario:", { name, email, password });
-      const loggedInUser = cookies.get("user")
-        ? (JSON.parse(cookies.get("user")?.value as string) as LoggedUser)
-        : null;
       const authUrl = import.meta.env.AUTH_URL;
       const basicAuth = Buffer.from(
         `admin:Administrador123`
       ).toString("base64");
-      const response = await fetch(`${authUrl}/users/${originalName.replace(" ", "%20")}/update/`, {
+      const response = await fetch(`${authUrl}/users/${originalName}/update/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

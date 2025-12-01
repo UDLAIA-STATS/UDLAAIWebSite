@@ -1,5 +1,4 @@
 import { defineAction } from "astro:actions";
-import { z } from "astro:schema";
 
 export const logout = defineAction({
   handler: async (_, { cookies }) => {

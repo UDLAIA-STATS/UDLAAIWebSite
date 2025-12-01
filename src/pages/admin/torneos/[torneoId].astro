@@ -139,7 +139,7 @@ if (!torneo) {
   import { actions } from "astro:actions";
   import { navigate } from "astro:transitions/client";
   import { privateRoutesMap } from "@consts/routes";
-  import { validateTorneo, isTorneoUpdated } from "@utils/validation/admin/torneo-validation";
+  import { validateTorneo, isTorneoUpdated } from "@utils/validation/partidos/torneo-validation";
 import type { Torneo } from "@interfaces/index";
 
   const form = document.getElementById("form-torneo") as HTMLFormElement;

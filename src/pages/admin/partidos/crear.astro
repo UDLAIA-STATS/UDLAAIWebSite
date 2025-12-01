@@ -189,7 +189,7 @@ const temporadas: Temporada[] = temporadaData?.data ?? [];
   import { actions } from "astro:actions";
   import { navigate } from "astro:transitions/client";
   import { privateRoutesMap } from "@consts/index";
-  import { validatePartidos } from "@utils/validation/admin/partidos-validation";
+  import { validatePartidos } from "@utils/validation/partidos/partidos-validation";
   import type { Torneo } from "@interfaces/torneos.interface";
 
   const form = document.querySelector("#form-partido") as HTMLFormElement;

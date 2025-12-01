@@ -110,7 +110,7 @@ const temporadas = dataTemporadas?.data ?? [];
   import { actions } from "astro:actions";
   import { navigate } from "astro:transitions/client";
   import { privateRoutesMap } from "@consts/routes";
-  import {validateTorneo} from "@utils/validation/admin/torneo-validation";
+  import {validateTorneo} from "@utils/validation/partidos/torneo-validation";
 
   const btnSubmit = document.getElementById("btn-submit") as HTMLButtonElement;
   const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;

@@ -10,6 +10,17 @@
     "node_modules"
   ],
   "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "target": "es6",
+    "removeComments": true,
+    "stripInternal": true,
+    "noEmitHelpers": true,
+    "strict": true,
+    "declaration": false,
+    "sourceMap": false,
+    "downlevelIteration": false,
+    "lib": ["ES6", "DOM"],
     "paths": {
       "@components/*": [
         "./src/components/*"

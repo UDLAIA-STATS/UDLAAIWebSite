@@ -111,7 +111,7 @@ const user = Astro.cookies.get("user")
   import { actions } from "astro:actions";
   import { navigate } from "astro:transitions/client";
   import { privateRoutesMap } from "@consts/routes";
-  import { validateTemporadas } from "@utils/validation/admin/temporadas-validation";
+  import { validateTemporadas } from "@utils/validation/partidos/temporadas-validation";
 
   const btnSubmit = document.getElementById("btn-submit") as HTMLButtonElement;
   const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;

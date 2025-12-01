@@ -7,7 +7,6 @@ export const onRequest = defineMiddleware(
   async ({ url, locals, cookies, redirect }, next) => {
 
     const user = cookies.get("user")?.value ?? "";
-    const token = cookies.get("token")?.value ?? "";
 
     const rol = locals.user?.rol ?? "";
 
