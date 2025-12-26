@@ -57,7 +57,11 @@ export const getEquipoByName = defineAction({
       const response = await fetch(`${baseUrl}/equipos/search/${nombre}/`);
       if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
       const data = await response.json();
-      return { data: data.data as Equipo[] };
+      return { 
+        mensaje: data.mensaje,
+        status: data.status,
+        data: data.data as Equipo
+       };
     } catch (error) {
       console.error(`Error al buscar equipo con nombre ${nombre}:`, error);
       throw new Error("No se pudo obtener el equipo solicitado");

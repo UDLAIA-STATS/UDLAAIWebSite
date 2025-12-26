@@ -115,6 +115,22 @@ const temporadas = dataTemporadas?.data ?? [];
   const btnSubmit = document.getElementById("btn-submit") as HTMLButtonElement;
   const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
   const form = document.getElementById("form-torneo") as HTMLFormElement;
+  const temporadasSelect = document.getElementById("idtemporada") as HTMLSelectElement;
+
+  temporadasSelect.addEventListener("change", async () => {
+    const selectedValue = temporadasSelect.value;
+    const data = await actions.getTemporadaById.orThrow({ id: Number(selectedValue) });
+    const temporada = data.data;
+    const fechaInicioInput = document.getElementById("fechainiciotorneo") as HTMLInputElement;
+    const fechaFinInput = document.getElementById("fechafintorneo") as HTMLInputElement;
+    
+    fechaInicioInput.value = temporada.fechainiciotemporada.split("T")[0];
+    fechaInicioInput.min = temporada.fechainiciotemporada.split("T")[0];
+    fechaInicioInput.max = temporada.fechafintemporada.split("T")[0];
+    fechaFinInput.value = temporada.fechafintemporada.split("T")[0];
+    fechaFinInput.min = temporada.fechainiciotemporada.split("T")[0];
+    fechaFinInput.max = temporada.fechafintemporada.split("T")[0];
+  });
 
   btnCancel.addEventListener("click", () => {
     navigate(privateRoutesMap.VER_TORNEOS);

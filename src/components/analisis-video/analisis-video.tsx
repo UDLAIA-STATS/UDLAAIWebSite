@@ -37,7 +37,7 @@ export default function VideoContainer() {
       });
     }
 
-    const partidos = data?.data || [];
+    const partidos = data?.data.filter((p) => !p.partidosubido) || [];
     const temporadas = temporadasData?.data || [];
     setTemporadas(temporadas);
     setPartidos(partidos);
@@ -73,7 +73,7 @@ export default function VideoContainer() {
 
   const onTemporadaChange = (temporadaId: number) => {
     const partidosList = partidosBase().filter(
-      (partido) => partido.idtemporada === temporadaId
+      (partido) => partido.idtemporada === temporadaId && !partido.partidosubido
     );
     setPartidos(partidosList);
     setTemporadaSeleccionada(temporadaId);
@@ -139,7 +139,7 @@ export default function VideoContainer() {
         return;
       }
 
-      await Swal.fire({
+      const { value: key } = await Swal.fire({
         title: "Subiendo video...",
         text: "Esto puede tardar varios minutos dependiendo del tamaño del archivo.",
         html: `<div style="width: 100%; background-color: #e0e0e0; border-radius: 5px; margin-top: 10px;">
@@ -161,6 +161,7 @@ export default function VideoContainer() {
                 text.innerHTML = percent + "%";
               }
             );
+            return key;
           } catch (error) {
             Swal.fire({
               icon: "error",
@@ -172,7 +173,6 @@ export default function VideoContainer() {
             });
             return;
           }
-          return;
         },
       });
 
@@ -180,6 +180,10 @@ export default function VideoContainer() {
         icon: "success",
         title: "Video subido correctamente",
         text: "Tu video fue subido y está siendo analizado, este proceso tardará varios minutos.",
+      });
+      await new Promise(async (resolve) => {
+        setTimeout(resolve, 60000);
+        await actions.analyzeVideo({key: key, match_id: partidoSeleccionado()!.idpartido})
       });
       const partido = partidoSeleccionado()!;
       partido.partidosubido = true;
@@ -269,6 +273,8 @@ export default function VideoContainer() {
                     day: "2-digit",
                     month: "2-digit",
                     year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
                   }) +
                     " - " +
                     partido.equipo_local_nombre +

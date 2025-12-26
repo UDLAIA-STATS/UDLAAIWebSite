@@ -44,7 +44,11 @@ export const getTorneoById = defineAction({
         throw new Error(errorData.error || `Error ${res.status}: ${res.statusText}`);
       }
       const data = await res.json();
-      return { data: data.data as Torneo };
+      return { 
+        mensaje: data.mensaje,
+        status: data.status,
+        data: data.data as Torneo
+       };
     } catch (err) {
       console.error(`Error al obtener torneo ID ${id}:`, err);
       throw new Error("No se pudo obtener el torneo");

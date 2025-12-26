@@ -49,7 +49,11 @@ export const getTemporadaById = defineAction({
         throw new Error(errorData.error || `Error ${res.status}: ${res.statusText}`);
       }
       const data = await res.json();
-      return { data: data.data as Temporada };
+      return { 
+        mensaje: data.mensaje,
+        status: data.status,
+        data: data.data as Temporada
+       };
     } catch (err) {
       console.error(`Error al obtener temporada ${id}:`, err);
       throw new Error("No se pudo obtener la temporada");

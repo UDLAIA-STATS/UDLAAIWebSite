@@ -13,7 +13,7 @@ export const matchSidebarLinks: Link[] = [
 
 export const getNavbarLinks = (user?: LoggedUser) => {
   let links: Link[] = [
-    // { name: "Módulo de estadísticas", href: publicRoutesMap.PLAYER_STATS }
+    { name: "Módulo de estadísticas", href: publicRoutesMap.PLAYER_STATS }
   ]
 
   if (!user) return links;

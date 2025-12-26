@@ -45,7 +45,11 @@ export const getPartidoById = defineAction({
       const res = await fetch(`${baseUrl}/partidos/${id}/`);
       if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
       const data = await res.json();
-      return { data: data.data as Partido };
+      return { 
+        mensaje: data.mensaje,
+        status: data.status,
+        data: data.data as Partido
+       };
     } catch (err) {
       console.error(`Error al obtener partido ID ${id}:`, err);
       throw new Error("No se pudo obtener el partido");

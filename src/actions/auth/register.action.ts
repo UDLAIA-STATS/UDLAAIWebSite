@@ -1,5 +1,7 @@
+import { usuarioSerializer } from "@utils/serializers/usuario/usuario_serializer";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
+import { log } from "console";
 
 export const registerUser = defineAction({
   accept: "form",
@@ -36,20 +38,17 @@ export const registerUser = defineAction({
       console.log("Respuesta del servidor:", response);
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        let errorMessage = "";
-        if(errorData.nombre_usuario && errorData.email_usuario) {
-          errorMessage = "El nombre de usuario y el correo electrónico ya están en uso.";
-        } else if (errorData.nombre_usuario) {
-          errorMessage = "El nombre de usuario ya está en uso.";
-        } else if (errorData.email_usuario) {
-          errorMessage = "El correo electrónico ya está en uso.";
-        }
-
-        throw new Error(errorMessage);
+        const errorMessage = usuarioSerializer(errorData);
+        log(`Response: ${errorData.data}`);
+        throw new Error(errorData.data);
       }
       const data = await response.json();
 
-      return { data: data };
+      return { 
+        message: data.mensaje,
+        status: data.status,
+        data: data.data
+       };
     } catch (err) {
       console.error("Fallo en la acción:", err);
       throw err;
