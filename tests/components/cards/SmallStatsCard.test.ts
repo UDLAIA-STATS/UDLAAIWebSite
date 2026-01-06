@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import SmallStatsCard from "../../../src/components/cards/SmallStatsCard.astro";
+import SmallStatsCard from "../../../src/components/molecules/cards/SmallStatsCard.astro";
 import { renderAstroComponent } from "../../helpers.ts";
 
 test("SmallStatsCard renders correctly with props", async () => {

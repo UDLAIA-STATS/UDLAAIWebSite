@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import Footer from "../../../src/components/shared/Footer.astro";
+import Footer from "@components/organisms/Footer.astro";
 import { renderAstroComponent } from "../../helpers.ts";
 
 test("Footer renders resource links correctly", async () => {

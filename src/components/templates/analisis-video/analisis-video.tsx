@@ -1,6 +1,6 @@
 import { createSignal, For, onCleanup, onMount } from "solid-js";
 import "@styles/global.css";
-import { FilledButton } from "@components/buttons/FilledButton";
+import { FilledButton } from "@components/atoms/buttons/FilledButton";
 import UploadIcon from "@assets/upload_icon.svg";
 import Add from "@assets/add.svg";
 import { actions } from "astro:actions";

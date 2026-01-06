@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import CardContainer from "../../../src/components/cards/CardContainer.astro";
+import CardContainer from "../../../src/components/molecules/cards/CardContainer.astro";
 import { renderAstroComponent } from "../../helpers.ts";
 
 test("CardContainer renders correctly with slot content", async () => {

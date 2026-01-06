@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import LargeStatsCard from "../../../src/components/cards/LargeStatsCard.astro";
+import LargeStatsCard from "../../../src/components/molecules/cards/LargeStatsCard.astro";
 import { renderAstroComponent } from "../../helpers.ts";
 import type { PlayerStatistic } from "../../../src/interfaces/player.interface.ts"; 
 test("LargeStatsCard renders player stats correctly", async () => {
