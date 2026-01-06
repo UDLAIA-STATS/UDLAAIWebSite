@@ -1,18 +1,15 @@
 ---
 import "@styles/global.css";
 import FormLayout from "@layouts/FormLayout.astro";
-import arrowNext from "@assets/arrow_next.svg";
 import { actions } from "astro:actions";
-import {  buttonClass, inputClass } from "@consts/index";
+import { Input, ComboBox, FormButtons } from "@components/forms/index";
 
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
 
-const { data: institucionesData, error: institucionesError } = await Astro.callAction(
-  actions.getInstituciones,
-  { pageSize: 1000 }
-);
+const { data: institucionesData, error: institucionesError } =
+  await Astro.callAction(actions.getInstituciones, { pageSize: 1000 });
 
 if (institucionesError || !institucionesData) {
   console.error("Error fetching instituciones:", institucionesError);
@@ -20,128 +17,42 @@ if (institucionesError || !institucionesData) {
 }
 
 const instituciones = institucionesData.data;
-
 ---
 
 <FormLayout formTitle="Agregar Equipo" pageTitle="Agregar Equipo" user={user}>
-  <form id="form-equipo" class="flex flex-col w-full max-w-md"  enctype="multipart/form-data">
+  <form
+    id="form-equipo"
+    class="flex flex-col w-full max-w-md"
+    enctype="multipart/form-data"
+  >
     <!-- Nombre del equipo -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="nombreequipo" class="text-base font-medium">Nombre del Equipo</label>
-      <input
-        id="nombreequipo"
-        name="nombreequipo"
-        maxlength="100"
-        type="text"
-        class={inputClass}
-        required
-      />
-    </div>
+    <Input id="nombreequipo" label="Nombre del Equipo" required={true} />
 
     <!-- Institución -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="idinstitucion" class="text-base font-medium">Institución</label>
-      <select id="idinstitucion" name="idinstitucion" class={inputClass}>
-        <option value="" disabled selected>Selecciona una institución</option>
-        {
-          instituciones.map((inst) => (
-            <option value={inst.idinstitucion}>{inst.nombreinstitucion}</option>
-          ))
-        }
-      </select>
-    </div>
+    <ComboBox id="idinstitucion" label="Institución">
+      <option value="" disabled selected>Selecciona una institución</option>
+      {
+        instituciones.map((inst) => (
+          <option value={inst.idinstitucion}>{inst.nombreinstitucion}</option>
+        ))
+      }
+    </ComboBox>
 
-    <!-- Logo del equipo -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="imagenequipo" class="text-base font-medium">Logo (opcional)</label>
-      <input id="imagenequipo" name="imagenequipo" type="file" class={inputClass} accept="image/*" />
-    </div>
+    <Input
+      id="imagenequipo"
+      label="Logo (opcional)"
+      type="file"
+      accept="image/*"
+    />
 
     <!-- Estado activo -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="equipoactivo" class="text-base font-medium">Activo</label>
-      <select id="equipoactivo" name="equipoactivo" class={inputClass}>
-        <option value="true" selected>Sí</option>
-        <option value="false">No</option>
-      </select>
-    </div>
+    <ComboBox id="equipoactivo" label="Activo">
+      <option value="true" selected>Sí</option>
+      <option value="false">No</option>
+    </ComboBox>
 
-    <!-- Botones -->
-    <div class="flex justify-center text-center mt-5 mx-5 pt-2 gap-5">
-      <button class={buttonClass} type="button" id="btn-cancel">
-        Cancelar
-      </button>
-      <button class={buttonClass} type="submit" id="btn-submit">
-        Agregar Equipo
-        <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
-      </button>
-    </div>
+    <FormButtons label="Crear Equipo" />
   </form>
 </FormLayout>
 
-<script>
-  import Swal from "sweetalert2";
-  import { actions } from "astro:actions";
-  import { privateRoutesMap } from "@consts/routes";
-  import { navigate } from "astro:transitions/client";
-  import { validateEquipos } from "@utils/validation/partidos/equipos-validation";
-  import { fileToBase64 } from "@utils/index";
-
-  const form = document.querySelector("#form-equipo") as HTMLFormElement;
-  const btnSubmit = document.querySelector("#btn-submit") as HTMLButtonElement;
-  const btnCancel = document.querySelector("#btn-cancel") as HTMLButtonElement;
-
-  btnCancel.addEventListener("click", () => navigate(privateRoutesMap.VER_EQUIPOS));
-
-  btnSubmit.addEventListener("click", async (e) => {
-    e.preventDefault();
-    btnSubmit.disabled = true;
-    btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
-
-    const formData = new FormData(form);
-    const errorMessage = validateEquipos(formData);
-
-    if (errorMessage.length > 0) {
-      await Swal.fire({
-        icon: "error",
-        title: "Error",
-        html: errorMessage,
-      });
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-      return;
-    }
-
-    // Normalizar datos
-    const activo = formData.get("equipoactivo") === "true";
-    formData.set("equipoactivo", activo.toString());
-
-    const logo = formData.get("imagenequipo");
-
-    try {
-      if (logo) {
-        const file = logo as File;
-        const base64 = await fileToBase64(file)
-        formData.set("imagenequipo", base64); 
-      } else {
-        formData.delete("imagenequipo");
-      }
-      const { data, error } = await actions.createEquipo(formData);
-      if (error) {
-        await Swal.fire("Error", error.message, "error");
-      } else {
-        await Swal.fire("Éxito", "Equipo creado correctamente", "success");
-        navigate(privateRoutesMap.VER_EQUIPOS);
-        form.reset();
-      }
-    } catch (err) {
-      console.error("Error al crear equipo:", err);
-      Swal.fire("Error", "No se pudo crear el equipo", "error");
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-    } finally {
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-    }
-  });
-</script>
+<script src="@pages/admin/equipos/scripts/create.ts" type="module" />

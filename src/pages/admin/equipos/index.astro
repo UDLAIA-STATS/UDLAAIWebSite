@@ -1,19 +1,12 @@
 ---
 import { getAddHref, matchOptions } from "@utils/handle-partidos-table";
 import { actions } from "astro:actions";
-import type {
-  Equipo,
-  Partido,
-  Temporada,
-  Torneo,
-} from "@interfaces/torneos.interface";
 import AdminPanelLayout from "@layouts/AdminPanelLayout.astro";
 import PartidosSideBar from "@components/partidosProfesor/PartidosSideBar.astro";
 import NotAuthorized from "@components/shared/NotAuthorized.astro";
 import type { Link } from "@interfaces/link.interface";
 import PartidosProfesorTable from "@components/partidosProfesor/PartidosProfesorTable.astro";
 import Pagination from "@components/shared/Pagination.astro";
-import { buttonClass } from "@consts/styles";
 import PartidosProfesorActions from "@components/partidosProfesor/TableActions.astro";
 import type { SortOptions } from "@interfaces/index";
 import { matchSidebarLinks } from "@consts/index";

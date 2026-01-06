@@ -1,7 +1,6 @@
 ---
 import "@styles/global.css";
 import FormLayout from "@layouts/FormLayout.astro";
-import arrowNext from "@assets/arrow_next.svg";
 import { actions } from "astro:actions";
 import type {
   Equipo,
@@ -9,10 +8,7 @@ import type {
   Temporada,
   Torneo,
 } from "@interfaces/torneos.interface";
-import { buttonClass, inputClass, privateRoutesMap } from "@consts/index";
-import Swal from "sweetalert2";
-import debug from "debug";
-import { navigate } from "astro:transitions/client";
+import { Input, ComboBox, FormButtons } from "@components/forms/index";
 
 const { partidoId } = Astro.params;
 
@@ -56,269 +52,101 @@ const temporadas: Temporada[] = temporadaData?.data ?? [];
 
 <FormLayout formTitle="Editar Partido" pageTitle="Editar Partido" user={user}>
   <form id="form-partido" class="flex flex-col w-full max-w-md">
-    <input type="hidden" name="idpartido" value={partido.idpartido} />
+    <Input
+      id="idpartido"
+      label="ID del Partido"
+      value={partido.idpartido}
+      hidden
+    />
 
     <!-- Temporada -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="idtemporada" class="text-base font-medium">Temporada</label>
-      <select name="idtemporada" class={inputClass} id="idtemporada" required>
-        <option value="" disabled>Selecciona una temporada</option>
-        {
-          temporadas.map((temporada: Temporada) => (
-            <option
-              value={temporada.idtemporada}
-              selected={temporada.idtemporada === partido.idtemporada}
-            >
-              {temporada.nombretemporada}
-            </option>
-          ))
-        }
-      </select>
-    </div>
-
+    <ComboBox id="idtemporada" label="Temporada">
+      <option value="" disabled>Selecciona una temporada</option>
+      {
+        temporadas.map((temporada: Temporada) => (
+          <option
+            value={temporada.idtemporada}
+            selected={temporada.idtemporada === partido.idtemporada}
+          >
+            {temporada.nombretemporada}
+          </option>
+        ))
+      }
+    </ComboBox>
     <!-- Torneo -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="idtorneo" class="text-base font-medium">Torneo</label>
-      <select name="idtorneo" class={inputClass} id="idtorneo" required>
-        <option value="" disabled selected>Selecciona un torneo</option>
-        {
-          torneos.map((torneo: Torneo) => (
-            <option
-              value={torneo.idtorneo}
-              selected={torneo.idtorneo === partido.idtorneo}
-            >
-              {torneo.nombretorneo}
-            </option>
-          ))
-        }
-      </select>
-    </div>
+    <ComboBox id="idtorneo" label="Torneo">
+      <option value="" disabled>Selecciona un torneo</option>
+      {
+        torneos.map((torneo: Torneo) => (
+          <option
+            value={torneo.idtorneo}
+            selected={torneo.idtorneo === partido.idtorneo}
+          >
+            {torneo.nombretorneo}
+          </option>
+        ))
+      }
+    </ComboBox>
 
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="fechapartido" class="text-base font-medium"
-        >Fecha del Partido</label
-      >
-      <input
-        id="fechapartido"
-        name="fechapartido"
-        type="datetime-local"
-        class={inputClass}
-        required
-        value={partido.fechapartido
-          ? new Date(partido.fechapartido)
-              .toISOString()
-              .slice(0, 16)
-          : ""}
-      />
-    </div>
+    <Input
+      id="fechapartido"
+      label="Fecha del Partido"
+      type="datetime-local"
+      value={partido.fechapartido
+        ? new Date(partido.fechapartido).toISOString().slice(0, 16)
+        : ""}
+      required
+    />
 
     <!-- Equipos -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="idequipolocal" class="text-base font-medium"
-        >Equipo Local</label
-      >
-      <select
-        name="idequipolocal"
-        class={inputClass}
-        id="idequipolocal"
-        required
-      >
-        <option value="" disabled>Selecciona un equipo</option>
-        {
-          equipos.map((equipo: Equipo) => (
-            <option
-              value={equipo.idequipo}
-              selected={equipo.idequipo === partido.idequipolocal}
-            >
-              {equipo.nombreequipo}
-            </option>
-          ))
-        }
-      </select>
-    </div>
+    <ComboBox id="idequipolocal" label="Equipo Local" required>
+      <option value="" disabled>Selecciona un equipo</option>
+      {
+        equipos.map((equipo: Equipo) => (
+          <option
+            value={equipo.idequipo}
+            selected={equipo.idequipo === partido.idequipolocal}
+          >
+            {equipo.nombreequipo}
+          </option>
+        ))
+      }
+    </ComboBox>
 
-    
-
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="idequipovisitante" class="text-base font-medium"
-        >Equipo Visitante</label
-      >
-      <select
-        name="idequipovisitante"
-        class={inputClass}
-        id="idequipovisitante"
-        required
-      >
-        <option value="" disabled>Selecciona un equipo</option>
-        {
-          equipos.map((equipo: Equipo) => (
-            <option
-              value={equipo.idequipo}
-              selected={equipo.idequipo === partido.idequipovisitante}
-            >
-              {equipo.nombreequipo}
-            </option>
-          ))
-        }
-      </select>
-    </div>
+    <ComboBox id="idequipovisitante" label="Equipo Visitante" required>
+      <option value="" disabled>Selecciona un equipo</option>
+      {
+        equipos.map((equipo: Equipo) => (
+          <option
+            value={equipo.idequipo}
+            selected={equipo.idequipo === partido.idequipovisitante}
+          >
+            {equipo.nombreequipo}
+          </option>
+        ))
+      }
+    </ComboBox>
 
     <!-- Marcadores -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="marcadorequipolocal" class="text-base font-medium"
-        >Marcador Equipo Local</label
-      >
-      <input
-        id="marcadorequipolocal"
-        name="marcadorequipolocal"
-        type="number"
-        min="0"
-        max="100"
-        class={inputClass}
-        value={partido.marcadorequipolocal ?? ""}
-      />
-    </div>
+    <Input
+      id="marcadorequipolocal"
+      label="Marcador Equipo Local"
+      type="number"
+      min="0"
+      max="100"
+      value={partido.marcadorequipolocal ?? ""}
+    />
+    <Input
+      id="marcadorequipovisitante"
+      label="Marcador Equipo Visitante"
+      type="number"
+      min="0"
+      max="100"
+      value={partido.marcadorequipovisitante ?? ""}
+    />
 
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="marcadorequipovisitante" class="text-base font-medium"
-        >Marcador Equipo Visitante</label
-      >
-      <input
-        id="marcadorequipovisitante"
-        name="marcadorequipovisitante"
-        type="number"
-        min="0"
-        max="100"
-        class={inputClass}
-        value={partido.marcadorequipovisitante ?? ""}
-      />
-    </div>
-
-    <div class="flex justify-center text-center mt-5 mx-5 pt-2 gap-5">
-      <button class={buttonClass} type="button" id="btn-cancel">Cancelar</button
-      >
-      <button class={buttonClass} type="submit">
-        Actualizar Partido
-        <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
-      </button>
-    </div>
+    <FormButtons label="Actualizar Partido" />
   </form>
 </FormLayout>
 
-<script>
-  import Swal from "sweetalert2";
-  import { actions } from "astro:actions";
-  import { navigate } from "astro:transitions/client";
-  import { privateRoutesMap } from "@consts/index";
-  import { validatePartidos, isPartidoUpdated } from "@utils/validation/partidos/partidos-validation";
-  import type { Torneo } from "@interfaces/index";
-
-  const form = document.querySelector("#form-partido") as HTMLFormElement;
-  const btnSubmit = form.querySelector(
-    'button[type="submit"]'
-  ) as HTMLButtonElement;
-  const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
-
-  const torneosData = await actions.getTorneos.orThrow({ pageSize: 1000 });
-  const torneos: Torneo[] = torneosData.data ?? [];
-
-  const selectTemporada = document.getElementById(
-    "idtemporada"
-  ) as HTMLSelectElement;
-  const selectTorneo = document.getElementById("idtorneo") as HTMLSelectElement;
-
-  // === Filtrar torneos por temporada ===
-  selectTemporada.addEventListener("change", () => {
-    const temporadaSeleccionada = selectTemporada.value;
-
-    selectTorneo.innerHTML =
-      '<option value="" disabled selected>Selecciona un torneo</option>';
-
-    const torneosFiltrados = torneos.filter(
-      (torneo) => torneo.idtemporada === Number(temporadaSeleccionada)
-    );
-
-    if (torneosFiltrados.length === 0) {
-      selectTorneo.innerHTML = "";
-      const option = document.createElement("option");
-      option.value = "";
-      option.textContent = "No hay torneos para esta temporada";
-      selectTorneo.appendChild(option);
-      return;
-    }
-
-    torneosFiltrados.forEach((torneo) => {
-      const option = document.createElement("option");
-      option.value = String(torneo.idtorneo);
-      option.textContent = torneo.nombretorneo;
-      selectTorneo.appendChild(option);
-    });
-  });
-
-  // === Acciones de los botones ===
-  btnCancel.addEventListener("click", () =>
-    navigate(privateRoutesMap.VER_PARTIDOS)
-  );
-
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-  });
-
-  btnSubmit.addEventListener("click", async () => {
-    btnSubmit.disabled = true;
-    btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
-    const formData = new FormData(form);
-    const errorMessage = validatePartidos(formData);
-    
-    if (errorMessage) {
-      Swal.fire("Error", errorMessage, "error");
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-      return;
-    }
-    const partidoData = await actions.getPartidoById.orThrow({
-      id: Number.parseInt(formData.get("idpartido")?.toString() ?? "0"),
-    });
-    const partido = partidoData.data ?? {};
-    const isChanged = isPartidoUpdated(partido, formData);
-
-    if (!isChanged) {
-      await Swal.fire("Información", "No se han detectado cambios en el partido.", "info");
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-      return;
-    }
-
-    formData.set(
-      "fechapartido",
-      new Date(formData.get("fechapartido") as string).toISOString()
-    );
-
-    try {
-      const { data, error } = await actions.updatePartido(formData);
-
-      if (error || !data) {
-        Swal.fire("Error", "No se pudo actualizar el partido", "error");
-        btnSubmit.disabled = false;
-        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-        return;
-      }
-
-      Swal.fire("Éxito", "Partido actualizado correctamente", "success").then(
-        (result) => {
-          if (result.isConfirmed) {
-            navigate(privateRoutesMap.VER_PARTIDOS);
-          }
-        }
-      );
-    } catch (err) {
-      console.error(err);
-      Swal.fire("Error", "Error inesperado al actualizar el partido", "error");
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-    } finally {
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-    }
-  });
-</script>
+<script src="@pages/admin/partidos/scripts/edit.ts" type="module" />

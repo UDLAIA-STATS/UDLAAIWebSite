@@ -6,8 +6,7 @@ interface Props {
     alt: string; 
     id: string;
     onClick?: () => void;
-    label: string;
-
+    label: string
 }
 
 export const FilledButton: Component<Props> = ({

@@ -1,11 +1,16 @@
 ---
 import "@styles/global.css";
 import FormLayout from "@layouts/FormLayout.astro";
-import arrowNext from "@assets/arrow_next.svg";
 import type { Torneo } from "@interfaces/torneos.interface";
-import { buttonClass, inputClass, privateRoutesMap } from "@consts/index";
+import { privateRoutesMap } from "@consts/index";
 import { actions } from "astro:actions";
 import Swal from "sweetalert2";
+import {
+  Input,
+  ComboBox,
+  FormButtons,
+  TextArea,
+} from "@components/forms/index";
 
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
@@ -44,114 +49,68 @@ if (!torneo) {
 ---
 
 <FormLayout formTitle="Editar Torneo" pageTitle="Editar Torneo" user={user}>
-  <form id="form-torneo" class="flex flex-col w-full max-w-md">
-    <!-- Campo oculto ID -->
-    <input
-      type="hidden"
-      name="idtorneo"
-      id="idtorneo"
-      value={torneo.idtorneo}
-    />
+  <Input id="idtorneo" label="ID Torneo" value={torneo.idtorneo} hidden />
 
-    <!-- Nombre -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="nombretorneo" class="text-base font-medium"
-        >Nombre del Torneo</label
-      >
-      <input
-        type="text"
-        id="nombretorneo"
-        name="nombretorneo"
-        value={torneo.nombretorneo ?? ""}
-        maxlength="100"
-        class={inputClass}
-        required
-      />
-    </div>
+  <!-- Nombre -->
+  <Input
+    id="nombretorneo"
+    label="Nombre del Torneo"
+    type="text"
+    value={torneo.nombretorneo ?? ""}
+    required
+  />
 
-    <!-- Temporada -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="idtemporada" class="text-base font-medium">Temporada</label>
-      <select name="idtemporada" id="idtemporada" class={inputClass} required>
-        <option value="" disabled>Selecciona una temporada</option>
-        {
-          temporadas.map((temp) => (
-            <option
-              value={temp.idtemporada}
-              selected={temp.idtemporada === torneo.idtemporada}
-            >
-              {temp.nombretemporada}
-            </option>
-          ))
-        }
-      </select>
-    </div>
+  <!-- Temporada -->
+  <ComboBox id="idtemporada" label="Temporada" required>
+    <option value="" disabled>Selecciona una temporada</option>
+    {
+      temporadas.map((temp) => (
+        <option
+          value={temp.idtemporada}
+          selected={temp.idtemporada === torneo.idtemporada}
+        >
+          {temp.nombretemporada}
+        </option>
+      ))
+    }
+  </ComboBox>
 
-    <!-- Fechas -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="fechainiciotorneo" class="text-base font-medium"
-        >Fecha de Inicio</label
-      >
-      <input
-        type="date"
-        id="fechainiciotorneo"
-        name="fechainiciotorneo"
-        value={torneo.fechainiciotorneo
-          ? torneo.fechainiciotorneo.split("T")[0]
-          : ""}
-        class={inputClass}
-        required
-      />
-    </div>
+  <!-- Fechas -->
+  <Input
+    id="fechainiciotorneo"
+    label="Fecha de Inicio"
+    type="date"
+    value={torneo.fechainiciotorneo
+      ? torneo.fechainiciotorneo.split("T")[0]
+      : ""}
+    required
+  />
+  <Input
+    id="fechafintorneo"
+    label="Fecha de Fin"
+    type="date"
+    value={torneo.fechafintorneo ? torneo.fechafintorneo.split("T")[0] : ""}
+    required
+  />
 
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="fechafintorneo" class="text-base font-medium"
-        >Fecha de Fin</label
-      >
-      <input
-        type="date"
-        id="fechafintorneo"
-        name="fechafintorneo"
-        value={torneo.fechafintorneo ? torneo.fechafintorneo.split("T")[0] : ""}
-        class={inputClass}
-        required
-      />
-    </div>
+  <!-- Estado activo -->
+  <ComboBox id="torneoactivo" label="Activo" required>
+    <option value="true" selected={torneo.torneoactivo}>Sí</option>
+    <option value="false" selected={!torneo.torneoactivo}>No</option>
+  </ComboBox>
 
-    <!-- Estado activo -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="torneoactivo" class="text-base font-medium">Activo</label>
-      <select name="torneoactivo" id="torneoactivo" class={inputClass}>
-        <option value="true" selected={torneo.torneoactivo}>Sí</option>
-        <option value="false" selected={!torneo.torneoactivo}>No</option>
-      </select>
-    </div>
+  <!-- Descripción -->
+  <TextArea
+    id="descripciontorneo"
+    label="Descripción"
+    value={torneo.descripciontorneo ?? ""}
+    rows={3}
+    maxlength={250}
+    required
+  />
 
-    <!-- Descripción -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="descripciontorneo" class="text-base font-medium"
-        >Descripción</label
-      >
-      <textarea
-        id="descripciontorneo"
-        name="descripciontorneo"
-        maxlength="250"
-        class={inputClass}
-        rows="3">{torneo.descripciontorneo ?? ""}</textarea
-      >
-    </div>
-
-    <!-- Botones -->
-    <div class="flex justify-center text-center mt-5 mx-5 pt-2 gap-5">
-      <button class={buttonClass} type="button" id="btn-cancel">
-        Cancelar
-      </button>
-      <button class={buttonClass} type="submit" id="btn-submit">
-        Actualizar Torneo
-        <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
-      </button>
-    </div>
-  </form>
+  <!-- Botones -->
+  <FormButtons label="Actualizar Torneo" />
 </FormLayout>
 
 <script>

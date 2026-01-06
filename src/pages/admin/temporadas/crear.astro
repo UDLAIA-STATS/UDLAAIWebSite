@@ -1,13 +1,16 @@
 ---
 import "@styles/global.css";
 import FormLayout from "@layouts/FormLayout.astro";
-import arrowNext from "@assets/arrow_next.svg";
-import { buttonClass, inputClass } from "@consts/index";
+import {
+  Input,
+  ComboBox,
+  FormButtons,
+  TextArea,
+} from "@components/forms/index";
 
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
-
 ---
 
 <FormLayout
@@ -17,92 +20,36 @@ const user = Astro.cookies.get("user")
 >
   <form id="form-temporada" class="flex flex-col w-full max-w-md">
     <!-- Nombre de temporada -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="nombretemporada" class="text-base font-medium">
-        Nombre de la Temporada
-      </label>
-      <input
-        id="nombretemporada"
-        name="nombretemporada"
-        type="text"
-        maxlength="100"
-        class={inputClass}
-      />
-    </div>
+    <Input id="nombretemporada" label="Nombre de la Temporada" type="text" />
 
     <!-- Temporada activa -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="temporadaactiva" class="text-base font-medium">
-        Temporada Activa
-      </label>
-      <select name="temporadaactiva" class={inputClass} id="temporadaactiva">
-        <option value="true" selected>Sí</option>
-        <option value="false">No</option>
-      </select>
-    </div>
+    <ComboBox id="temporadaactiva" label="Temporada Activa">
+      <option value="true" selected>Sí</option>
+      <option value="false">No</option>
+    </ComboBox>
 
     <!-- Tipo de temporada -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="tipotemporada" class="text-base font-medium">
-        Tipo de Temporada
-      </label>
-      <select name="tipotemporada" class={inputClass} id="tipotemporada">
-        <option value="" disabled selected>Selecciona un tipo</option>
-        <option value="Oficial">Oficial</option>
-        <option value="Amistosa">Amistosa</option>
-      </select>
-    </div>
+    <ComboBox id="tipotemporada" label="Tipo de Temporada">
+      <option value="" disabled selected>Selecciona un tipo</option>
+      <option value="Oficial">Oficial</option>
+    </ComboBox>
 
     <!-- Fecha de inicio -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="fechainiciotemporada" class="text-base font-medium">
-        Fecha de Inicio
-      </label>
-      <input
-        id="fechainiciotemporada"
-        name="fechainiciotemporada"
-        type="date"
-        class={inputClass}
-      />
-    </div>
+    <Input id="fechainiciotemporada" label="Fecha de Inicio" type="date" />
 
     <!-- Fecha de fin -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="fechafintemporada" class="text-base font-medium">
-        Fecha de Fin
-      </label>
-      <input
-        id="fechafintemporada"
-        name="fechafintemporada"
-        type="date"
-        class={inputClass}
-      />
-    </div>
+    <Input id="fechafintemporada" label="Fecha de Fin" type="date" />
 
     <!-- Descripción de temporada -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="descripciontemporada" class="text-base font-medium">
-        Descripción de la Temporada
-      </label>
-      <textarea
-        id="descripciontemporada"
-        name="descripciontemporada"
-        maxlength="250"
-        rows="3"
-        class={`${inputClass} resize-none`}
-      ></textarea>
-    </div>
+    <TextArea
+      id="descripciontemporada"
+      label="Descripción"
+      maxlength={250}
+      rows={3}
+    />
 
     <!-- Botones -->
-    <div class="flex justify-center text-center mt-5 mx-5 pt-2 gap-5">
-      <button class={buttonClass} type="button" id="btn-cancel">
-        Cancelar
-      </button>
-      <button class={buttonClass} type="button" id="btn-submit">
-        Agregar Temporada
-        <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
-      </button>
-    </div>
+    <FormButtons label="Agregar Temporada" />
   </form>
 </FormLayout>
 
@@ -137,22 +84,32 @@ const user = Astro.cookies.get("user")
     }
 
     // 🧠 Normalización de datos antes de enviar
-    const tipo = (formData.get("tipotemporada")?.toString() ?? "");
+    const tipo = formData.get("tipotemporada")?.toString() ?? "";
     const fechaInicio = formData.get("fechainiciotemporada")?.toString();
     const fechaFin = formData.get("fechafintemporada")?.toString();
 
     // Convertimos fechas a formato ISO si existen
-    const fechaInicioISO = fechaInicio ? new Date(fechaInicio).toISOString() : "";
+    const fechaInicioISO = fechaInicio
+      ? new Date(fechaInicio).toISOString()
+      : "";
     const fechaFinISO = fechaFin ? new Date(fechaFin).toISOString() : "";
 
     // Creamos un nuevo FormData limpio con los tipos correctos
-    formData.set("nombretemporada", formData.get("nombretemporada")?.toString().trim() ?? "");
-    formData.set("descripciontemporada", formData.get("descripciontemporada")?.toString().trim() ?? "");
+    formData.set(
+      "nombretemporada",
+      formData.get("nombretemporada")?.toString().trim() ?? ""
+    );
+    formData.set(
+      "descripciontemporada",
+      formData.get("descripciontemporada")?.toString().trim() ?? ""
+    );
     formData.set("tipotemporada", tipo);
     formData.set("fechainiciotemporada", fechaInicioISO);
     formData.set("fechafintemporada", fechaFinISO);
-    formData.set("temporadaactiva", formData.get("temporadaactiva")?.toString() ?? "");
-
+    formData.set(
+      "temporadaactiva",
+      formData.get("temporadaactiva")?.toString() ?? ""
+    );
 
     try {
       const { data, error } = await actions.createTemporada(formData);
@@ -164,9 +121,11 @@ const user = Astro.cookies.get("user")
         return;
       }
 
-      Swal.fire("Éxito", "Temporada creada exitosamente", "success").then(() => {
-        navigate(privateRoutesMap.VER_TEMPORADAS);
-      });
+      Swal.fire("Éxito", "Temporada creada exitosamente", "success").then(
+        () => {
+          navigate(privateRoutesMap.VER_TEMPORADAS);
+        }
+      );
 
       form.reset();
     } catch (err) {
