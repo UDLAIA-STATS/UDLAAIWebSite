@@ -2,7 +2,7 @@
 import "@styles/global.css";
 import Layout from "@layouts/Layout.astro";
 import arrowNext from "@assets/arrow_next.svg";
-import { Input, FormButtons } from "@components/forms/index";
+import { Input, FormButtons } from "@components/molecules/forms/index";
 
 export const prerender = false;
 
@@ -27,30 +27,15 @@ const loggedInUser = Astro.cookies.get("user")
       </div>
       <div id="register-form" class="flex flex-col gap-5">
         <form autocomplete="on" data-astro-reload>
-          <div class="flex flex-col gap-2 mb-4 px-5">
-            <label class="text-base font-medium" for="name">Usuario</label>
-            <input
-              type="text"
-              maxlength="70"
-              id="name"
-              name="name"
-              class={inputClass}
-              required
-            />
-          </div>
-          <div class="flex flex-col gap-2 mb-4 px-5">
-            <label class="text-base font-medium" for="password"
-              >Contraseña</label
-            >
-            <input
-              type="password"
-              maxlength="30"
-              id="password"
-              name="password"
-              class={inputClass}
-              required
-            />
-          </div>
+          <Input id="name" label="Usuario" required maxlength={70} />
+
+          <Input
+            type="password"
+            id="password"
+            label="Contraseña"
+            required
+            maxlength={30}
+          />
           <div class="flex flex-row gap-2 mb-4 px-5 justify-between" hidden>
             <div>
               <input
@@ -81,4 +66,4 @@ const loggedInUser = Astro.cookies.get("user")
   </section>
 </Layout>
 
-<script src="@pages/auth/scripts/login.ts" type="module"></script>
+<script src="./scripts/login.ts"></script>

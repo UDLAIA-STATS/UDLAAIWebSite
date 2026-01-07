@@ -10,7 +10,7 @@ import {
   ComboBox,
   FormButtons,
   TextArea,
-} from "@components/forms/index";
+} from "@components/molecules/forms/index";
 
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
@@ -113,4 +113,4 @@ if (!torneo) {
   <FormButtons label="Actualizar Torneo" />
 </FormLayout>
 
-<script src="@pages/admin/torneos/scripts/edit.ts" type="module" />
+<script src="./scripts/edit.ts"/>

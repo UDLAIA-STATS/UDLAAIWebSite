@@ -1,3 +1,4 @@
+import { errorResponseSerializer, partidoSerializer } from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 
@@ -11,8 +12,9 @@ export const deletePartido = defineAction({
       });
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `Error ${res.status}: ${res.statusText}`);
+        const errorData = await res.json();
+        const errorMessage = partidoSerializer(errorData);
+        throw new Error(errorMessage || errorResponseSerializer(errorData).error || `Error ${res.status}: ${res.statusText}`);
       }
 
       return { success: true };

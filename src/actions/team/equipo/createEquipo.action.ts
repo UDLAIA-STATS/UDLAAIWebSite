@@ -1,6 +1,7 @@
 import type { Equipo } from "@interfaces/index";
 import { defineAction } from "astro:actions";
 import { equipoSchema } from "./equipoSchema";
+import { successResponseSerializer } from "@utils/serializers";
 
 export const createEquipo = defineAction({
   accept: "form",
@@ -31,8 +32,8 @@ export const createEquipo = defineAction({
         throw new Error(errorData.non_field_errors || `Error ${response.status}: ${response.statusText}`);
       }
 
-      const data = await response.json();
-      return { data: data.data as Equipo };
+      const data = successResponseSerializer(await response.json());
+      return data;
     } catch (error) {
       console.error("Error al crear equipo:", error);
       throw new Error("No se pudo crear el equipo");

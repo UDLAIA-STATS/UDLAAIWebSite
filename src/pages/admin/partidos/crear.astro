@@ -2,7 +2,7 @@
 import "@styles/global.css";
 import FormLayout from "@layouts/FormLayout.astro";
 import { actions } from "astro:actions";
-import { Input, ComboBox, FormButtons } from "@components/forms/index";
+import { Input, ComboBox, FormButtons } from "@components/molecules/forms/index";
 import type { Equipo, Temporada, Torneo } from "@interfaces/torneos.interface";
 import debug from "debug";
 
@@ -124,4 +124,4 @@ const temporadas: Temporada[] = temporadaData?.data ?? [];
   </form>
 </FormLayout>
 
-<script src="@pages/admin/partidos/scripts/create.ts" type="module" />
+<script src="./scripts/create.ts"/>

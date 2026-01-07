@@ -6,7 +6,7 @@ import {
   ComboBox,
   FormButtons,
   TextArea,
-} from "@components/forms/index";
+} from "@components/molecules/forms/index";
 
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
@@ -80,4 +80,4 @@ const temporadas = dataTemporadas?.data ?? [];
   </form>
 </FormLayout>
 
-<script src="@pages/admin/torneos/scripts/create.ts" type="module" />
+<script src="./scripts/create.ts"/>

@@ -2,7 +2,7 @@
 import "@styles/global.css";
 import FormLayout from "@layouts/FormLayout.astro";
 import { actions } from "astro:actions";
-import { Input, ComboBox, FormButtons } from "@components/forms/index";
+import { Input, ComboBox, FormButtons } from "@components/molecules/forms/index";
 import NotFoundImage from "@assets/not_found.svg";
 
 const user = Astro.cookies.get("user")
@@ -86,4 +86,4 @@ const logoEquipo = equipo.imagenequipo ?? null;
      <FormButtons label="Actualizar Equipo" />
 </FormLayout>
 
-<script src="@pages/admin/equipos/scripts/edit.ts" type="module" />
+<script src="./scripts/edit.ts" type="module" />

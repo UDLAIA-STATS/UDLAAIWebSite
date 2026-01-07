@@ -2,8 +2,19 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import type { User } from "@interfaces/user.interface";
-import type { Pagination } from "@interfaces/index";
-import debug from "debug";
+import {
+  errorResponseSerializer,
+  paginationResponseSerializer,
+  successResponseSerializer,
+  usuarioSerializer,
+} from "@utils/index";
+
+const sortableFields: (keyof User)[] = [
+  "nombre_usuario",
+  "email_usuario",
+  "rol",
+  "is_active",
+];
 
 export const getUsers = defineAction({
   accept: "json",
@@ -11,12 +22,17 @@ export const getUsers = defineAction({
     userCredential: z.string().min(8).max(100),
     page: z.number().int().positive().optional().default(1),
     pageSize: z.number().int().positive().optional().default(10),
+    sortBy: z.string().optional(),
+    orderBy: z.enum(["asc", "desc"]).optional(),
   }),
-  handler: async ({ userCredential, page, pageSize }, { cookies }) => {
+  handler: async (
+    { userCredential, page, pageSize, sortBy, orderBy },
+    { cookies }
+  ) => {
     const baseUrl = import.meta.env.AUTH_URL;
     const loggedInUser = cookies.get("user")
-  ? (JSON.parse(cookies.get("user")?.value as string) as LoggedUser)
-  : null;
+      ? (JSON.parse(cookies.get("user")?.value as string) as LoggedUser)
+      : null;
 
     if (!loggedInUser?.nickname) {
       console.error("No se encontró la cookie 'user'.");
@@ -28,31 +44,31 @@ export const getUsers = defineAction({
         `${loggedInUser.nickname}:${userCredential}`
       ).toString("base64");
 
-      const response = await fetch(`${baseUrl}/users/?page=${page}&offset=${pageSize}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Basic ${basicAuth}`,
-        },
-      });
+      const response = await fetch(
+        `${baseUrl}/users/?page=${page}&offset=${pageSize}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Basic ${basicAuth}`,
+          },
+        }
+      );
+
+      const details = await response.json();
 
       if (!response.ok) {
-        const detail = await response.text();
-        console.error(`Error ${response.status}: ${detail}`);
+        const errorMessage = usuarioSerializer(details);
         throw new Error(
-          `Fallo al obtener usuarios: ${response.status} ${response.statusText}`
+          errorMessage ||
+            errorResponseSerializer(details).error ||
+            `Fallo al obtener usuarios: ${response.status} ${response.statusText}`
         );
       }
 
-      const data = await response.json();
-      console.log("Usuarios obtenidos:", data);
-      const items = data.items as User[];
-      const paginationData = data.pagination as Pagination;
-
-      return { data: {
-        items: items,
-        paginationData: paginationData
-      } };
+      const result = paginationResponseSerializer(details);
+      result.results = sortUsers(result.results, sortBy as keyof User, orderBy);
+      return result;
     } catch (error) {
       console.error("Error al obtener usuarios:", error);
       throw new Error("No se pudo obtener la lista de usuarios");
@@ -71,16 +87,16 @@ export const getUserByUsername = defineAction({
     const credential = import.meta.env.DEFAULT_ADMIN_PASSWORD;
     const baseUrl = import.meta.env.AUTH_URL;
     const loggedInUser = cookies.get("user")
-  ? (JSON.parse(cookies.get("user")?.value as string) as LoggedUser)
-  : null; 
+      ? (JSON.parse(cookies.get("user")?.value as string) as LoggedUser)
+      : null;
 
     if (!loggedInUser) {
       throw new Error("Usuario autenticado no encontrado en las cookies");
     }
 
-    const basicAuth = Buffer.from(`${loggedInUser.nickname}:${userCredential}`).toString(
-      "base64"
-    );
+    const basicAuth = Buffer.from(
+      `${loggedInUser.nickname}:${userCredential}`
+    ).toString("base64");
 
     try {
       const response = await fetch(`${baseUrl}/users/${username}/`, {
@@ -91,15 +107,17 @@ export const getUserByUsername = defineAction({
         },
       });
 
+      const details = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error( errorData.mensaje ??
-          `Fallo al obtener el usuario: ${response.status} ${response.statusText}`
+        const errorMessage = usuarioSerializer(details);
+        throw new Error(
+          errorMessage ||
+            errorResponseSerializer(details).error ||
+            `Fallo al obtener el usuario: ${response.status} ${response.statusText}`
         );
       }
-
-      const data = await response.json();
-      return { data: data };
+      return successResponseSerializer(details);
     } catch (error) {
       console.error(
         `Error al obtener el usuario con nombre de usuario "${username}":`,
@@ -109,3 +127,32 @@ export const getUserByUsername = defineAction({
     }
   },
 });
+
+const sortUsers = (
+  items: User[],
+  sortBy?: keyof User,
+  orderBy: "asc" | "desc" = "asc"
+): User[] => {
+  if (!sortBy || !sortableFields.includes(sortBy)) {
+    return items;
+  }
+
+  return items.sort((a, b) => {
+    const valueA = a[sortBy];
+    const valueB = b[sortBy];
+
+    if (valueA == null || valueB == null) return 0;
+
+    // boolean
+    if (typeof valueA === "boolean" && typeof valueB === "boolean") {
+      return orderBy === "asc"
+        ? Number(valueA) - Number(valueB)
+        : Number(valueB) - Number(valueA);
+    }
+
+    // string / number
+    return orderBy === "asc"
+      ? String(valueA).localeCompare(String(valueB))
+      : String(valueB).localeCompare(String(valueA));
+  });
+};

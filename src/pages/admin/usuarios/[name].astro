@@ -3,7 +3,7 @@ import { roles } from "@consts/roles";
 import { actions } from "astro:actions";
 import { publicRoutesMap } from "@consts/routes";
 import type { User } from "@interfaces/index";
-import { Input, ComboBox, FormButtons } from "@components/forms/index";
+import { Input, ComboBox, FormButtons } from "@components/molecules/forms/index";
 import FormLayout from "@layouts/FormLayout.astro";
 
 export const prerender = false;
@@ -95,4 +95,4 @@ const { super: superRole } = roles;
   </form>
 </FormLayout>
 
-<script src="@pages/admin/usuarios/scripts/edit.ts" type="module" />
+<script src="./scripts/edit.ts"/>

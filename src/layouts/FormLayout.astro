@@ -1,10 +1,9 @@
 ---
 import "@styles/global.css";
-import Navbar from "@components/shared/Navbar.astro";
-import Footer from "@components/shared/Footer.astro";
-import ClientRouter from "astro/components/ClientRouter.astro";
+import Navbar from "@components/organisms/Navbar.astro";
+import Footer from "@components/organisms/Footer.astro";
 import { roles } from "@consts/roles";
-import NotAuthorized from "@components/shared/NotAuthorized.astro";
+import NotAuthorized from "@components/organisms/NotAuthorized.astro";
 
 interface Props {
   user?: LoggedUser | null;

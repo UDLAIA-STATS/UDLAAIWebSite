@@ -1,3 +1,8 @@
+import {
+  errorResponseSerializer,
+  successResponseSerializer,
+  usuarioSerializer,
+} from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 
@@ -20,8 +25,9 @@ export const updateUser = defineAction({
       console.log("Actualizando usuario:", { name, email, password });
       const authUrl = import.meta.env.AUTH_URL;
       const basicAuth = Buffer.from(
-        `admin:Administrador123`
+        `admin:${import.meta.env.DEFAULT_ADMIN_PASSWORD}`
       ).toString("base64");
+
       const response = await fetch(`${authUrl}/users/${originalName}/update/`, {
         method: "PATCH",
         headers: {
@@ -36,16 +42,19 @@ export const updateUser = defineAction({
           contrasenia_usuario: password,
         }),
       });
-      console.log("Respuesta del servidor:", response);
+
+      const details = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = usuarioSerializer(details);
         throw new Error(
-          errorData.detail || `Error ${response.status}: ${response.statusText}`
+          errorMessage ||
+            errorResponseSerializer(details).error ||
+            `Error ${response.status}: ${response.statusText}`
         );
       }
-      const data = await response.json();
 
-      return { data: data };
+      return successResponseSerializer(details);
     } catch (err) {
       console.error("Fallo en la acción:", err);
       throw err;

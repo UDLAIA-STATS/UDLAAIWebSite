@@ -1,4 +1,4 @@
-export const getSerializerErrors = (error: any) => {
+export const jugadorSerializer = (error: any) => {
   if (!error) {
     return "";
   }

@@ -5,7 +5,7 @@ import FormLayout from "@layouts/FormLayout.astro";
 import { actions } from "astro:actions";
 import type { Player } from "@interfaces/index";
 import NotFoundImage from "@assets/not_found.svg";
-import { Input, ComboBox, FormButtons } from "@components/forms/index";
+import { Input, ComboBox, FormButtons } from "@components/molecules/forms/index";
 
 const buttonClass =
   "text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md flex items-center justify-center cursor-pointer transition";
@@ -139,4 +139,4 @@ console.log(logoJugador);
   </form>
 </FormLayout>
 
-<script src="@pages/admin/jugadores/scripts/edit.ts" type="module" />
+<script src="./scripts/edit.ts"/>

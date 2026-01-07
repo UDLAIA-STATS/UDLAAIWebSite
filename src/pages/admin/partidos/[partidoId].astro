@@ -8,7 +8,7 @@ import type {
   Temporada,
   Torneo,
 } from "@interfaces/torneos.interface";
-import { Input, ComboBox, FormButtons } from "@components/forms/index";
+import { Input, ComboBox, FormButtons } from "@components/molecules/forms/index";
 
 const { partidoId } = Astro.params;
 
@@ -149,4 +149,4 @@ const temporadas: Temporada[] = temporadaData?.data ?? [];
   </form>
 </FormLayout>
 
-<script src="@pages/admin/partidos/scripts/edit.ts" type="module" />
+<script src="./scripts/edit.ts"/>

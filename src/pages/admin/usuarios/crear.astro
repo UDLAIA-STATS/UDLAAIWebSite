@@ -2,7 +2,7 @@
 import "@styles/global.css";
 import FormLayout from "@layouts/FormLayout.astro";
 import { roles } from "@consts/roles";
-import { Input, ComboBox, FormButtons } from "@components/forms/index";
+import { Input, ComboBox, FormButtons } from "@components/molecules/forms/index";
 
 export const prerender = false;
 
@@ -39,4 +39,4 @@ const { super: superRole } = roles;
   </form>
 </FormLayout>
 
-<script src="@pages/admin/usuarios/scripts/create.ts" type="module" />
+<script src="./scripts/create.ts"/>

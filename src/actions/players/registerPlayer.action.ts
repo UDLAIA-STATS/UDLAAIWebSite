@@ -3,6 +3,7 @@ import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import type { Player } from "@interfaces/player.interface";
 import { jugadorSchema, jugadorUpdateSchema } from "./playerSchemas";
+import { successResponseSerializer } from "@utils/serializers";
 
 export const createJugador = defineAction({
   accept: "form",
@@ -22,7 +23,8 @@ export const createJugador = defineAction({
         const errorData = await response.json();
         throw new Error(errorData.error || "Error al crear jugador");
       }
-      return { data: (await response.json()) as Player };
+      const data = successResponseSerializer(await response.json());
+      return data;
     } catch (error) {
       console.error("Error al crear el jugador:", error);
       throw error;

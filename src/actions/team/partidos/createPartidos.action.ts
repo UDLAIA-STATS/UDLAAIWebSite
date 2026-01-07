@@ -1,6 +1,7 @@
 import { defineAction } from "astro:actions";
 import { partidoSchema } from "./partidoSchemas";
 import type { Partido } from "@interfaces/index";
+import { errorResponseSerializer, partidoSerializer, successResponseSerializer } from "@utils/serializers";
 
 export const createPartido = defineAction({
   accept: "form",
@@ -23,12 +24,13 @@ export const createPartido = defineAction({
       });
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.non_field_errors || `Error ${res.status}: ${res.statusText}`);
+        const errorData = await res.json();
+        const errorMessage = partidoSerializer(errorData);
+        throw new Error(errorMessage || errorResponseSerializer(errorData).error || `Error ${res.status}: ${res.statusText}`);
       }
 
-      const data = await res.json();
-      return { data: data.data as Partido };
+      const data = successResponseSerializer(await res.json());
+      return data;
     } catch (err) {
       console.error("Error al crear partido:", err);
       throw new Error(err instanceof Error ? err.message : "No se pudo crear el partido");

@@ -1,10 +1,13 @@
 ---
-import Navbar from "@components/shared/Navbar.astro";
-import Footer from "@components/shared/Footer.astro";
-import ClientRouter from "astro/components/ClientRouter.astro";
+import "@styles/global.css";
+import Navbar from "@components/organisms/Navbar.astro";
+import Footer from "@components/organisms/Footer.astro";
+import { roles } from "@consts/index";
+import NotAuthorized from "@components/organisms/NotAuthorized.astro";
 
 interface Props {
   title: string;
+  user?: LoggedUser | null;
 }
 
 const { title }: Props = Astro.props;
@@ -12,6 +15,7 @@ const { title }: Props = Astro.props;
 const user: LoggedUser | null = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
+const { super: superRole, profesor } = roles;
 ---
 
 <!doctype html>
@@ -27,7 +31,23 @@ const user: LoggedUser | null = Astro.cookies.get("user")
   <body class="min-h-full w-full h-full min-w-full">
     <Navbar />
     <main aria-hidden="false">
-      <section class="mx-10 my-5 h-svh">
+      <section
+        class:list={[
+          "h-svh md:w-svw lg:w-shw w-shw flex flex-wrap justify-self-start flex-col mx-10 my-5",
+          user && (user.rol === superRole || user.rol === profesor)
+            ? "hidden"
+            : "",
+        ]}
+      >
+        <NotAuthorized />
+      </section>
+      <section 
+      class:list={[
+          "mx-10 my-5 h-svh",
+          user && (user.rol === superRole || user.rol === profesor)
+            ? ""
+            : "hidden",
+        ]}>
         <div class="text-2xl font-bold" id="title">
           <h1>{title}</h1>
         </div>

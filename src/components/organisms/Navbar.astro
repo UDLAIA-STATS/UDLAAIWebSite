@@ -2,8 +2,8 @@
 import { getNavbarLinks } from "@consts/navbar-links";
 import LogoUdla from "@assets/logo_udla_corto.png";
 import type { LoggedUser } from "@interfaces/user.interface";
-import LogoutButton from "@components/buttons/LogOutButton.astro"
-import SideBarMenu from "@components/shared/SideBarMenu";
+import LogoutButton from "@components/atoms/buttons/LogOutButton.astro"
+import SideBarMenu from "@components/organisms/SideBarMenu";
 const currentPath = Astro.url.pathname;
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)

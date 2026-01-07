@@ -1,6 +1,6 @@
 ---
 import { privateRoutesMap } from "@consts/routes";
-import { Table } from "@components/tables/Table";
+import { Table } from "@components/templates/tables/Table";
 import type {
   SortOptions,
   TableActions,
@@ -8,10 +8,10 @@ import type {
 } from "@interfaces/table-actions.interface";
 import EditIcon from "@assets/edit_icon_black.svg";
 import DeleteIcon from "@assets/delete_icon_black.svg";
-import NotAuthorized from "@components/shared/NotAuthorized.astro";
+import NotAuthorized from "@components/organisms/NotAuthorized.astro";
 import AdminPanelLayout from "@layouts/AdminPanelLayout.astro";
-import TableActionsComponent from "@components/partidosProfesor/TableActions.astro";
-import Pagination from "@components/shared/Pagination.astro";
+import TableActionsComponent from "@components/templates/partidosProfesor/TableActions.astro";
+import Pagination from "@components/organisms/Pagination.astro";
 import type { Player } from "@interfaces/index";
 import { actions } from "astro:actions";
 

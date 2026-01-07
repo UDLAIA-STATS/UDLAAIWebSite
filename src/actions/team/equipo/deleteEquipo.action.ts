@@ -1,3 +1,4 @@
+import { equipoSerializer } from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 
@@ -8,8 +9,9 @@ export const deleteEquipo = defineAction({
     try {
       const response = await fetch(`${baseUrl}/equipos/${idequipo}/delete/`, { method: "DELETE" });
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+        const errorData = await response.json();
+        const errorMessage = equipoSerializer(errorData);
+        throw new Error(errorMessage ||  errorData.error || `Error ${response.status}: ${response.statusText}`);
       }
       return { success: true };
     } catch (error) {

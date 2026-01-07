@@ -2,6 +2,7 @@ import { defineAction } from "astro:actions";
 import { partidoUpdateSchema } from "./partidoSchemas";
 import type { Partido } from "@interfaces/torneos.interface";
 import { z } from "astro:schema";
+import { errorResponseSerializer, partidoSerializer, successResponseSerializer } from "@utils/index";
 
 export const updatePartido = defineAction({
   accept: "form",
@@ -17,7 +18,8 @@ export const updatePartido = defineAction({
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.non_field_errors || `Error ${res.status}: ${res.statusText}`);
+        const errorMessage = partidoSerializer(errorData);
+        throw new Error(errorMessage || errorResponseSerializer(errorData).error || `Error ${res.status}: ${res.statusText}`);
       }
 
       const data = await res.json();
@@ -42,11 +44,12 @@ export const partidoSubido = defineAction({
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.non_field_errors || `Error ${res.status}: ${res.statusText}`);
+        const errorMessage = partidoSerializer(errorData);
+        throw new Error(errorMessage || errorResponseSerializer(errorData).error || `Error ${res.status}: ${res.statusText}`);
       }
 
-      const data = await res.json();
-      return { data: data.data as Partido };
+      const data = successResponseSerializer(await res.json());
+      return data;
     } catch (err) {
       console.error(`Error al actualizar partido ${payload.idpartido}:`, err);
       throw new Error("No se pudo actualizar el partido");

@@ -2,7 +2,7 @@
 import "@styles/global.css";
 import FormLayout from "@layouts/FormLayout.astro";
 import { actions } from "astro:actions";
-import { Input, ComboBox, FormButtons } from "@components/forms/index";
+import { Input, ComboBox, FormButtons } from "@components/molecules/forms/index";
 
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
@@ -55,4 +55,4 @@ const instituciones = institucionesData.data;
   </form>
 </FormLayout>
 
-<script src="@pages/admin/equipos/scripts/create.ts" type="module" />
+<script src="./scripts/create.ts" type="module" />

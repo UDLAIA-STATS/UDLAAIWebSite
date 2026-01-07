@@ -1,4 +1,5 @@
 import type { Equipo } from "@interfaces/index";
+import { equipoSerializer, errorResponseSerializer, paginationResponseSerializer, successResponseSerializer } from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 
@@ -13,15 +14,8 @@ export const getEquipos = defineAction({
     try {
       const response = await fetch(`${baseUrl}/equipos/all/?page=${page}&offset=${pageSize}`);
       if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-      const data = await response.json();
-      const content = data.data;
-      return {
-        count: content.count,
-        page: content.page,
-        offset: content.offset,
-        pages: content.pages,
-        data: content.results as Equipo[],
-      };
+      const paginationData = paginationResponseSerializer(await response.json());
+      return paginationData;
     } catch (error) {
       console.error("Error al obtener equipos:", error);
       throw new Error("No se pudo obtener la lista de equipos");
@@ -38,8 +32,8 @@ export const getEquipoById = defineAction({
     try {
       const response = await fetch(`${baseUrl}/equipos/${id}/`, { method: "GET" });
       if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-      const data = await response.json();
-      return { data: data.data as Equipo };
+      const data = successResponseSerializer(await response.json());
+      return data;
     } catch (error) {
       console.error(`Error al obtener equipo con ID ${id}:`, error);
       throw new Error("No se pudo obtener el equipo solicitado");
@@ -55,13 +49,13 @@ export const getEquipoByName = defineAction({
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
       const response = await fetch(`${baseUrl}/equipos/search/${nombre}/`);
-      if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-      const data = await response.json();
-      return { 
-        mensaje: data.mensaje,
-        status: data.status,
-        data: data.data as Equipo
-       };
+      if (!response.ok) {
+        const errorData = await response.json();
+        const errorMessage = equipoSerializer(errorData);
+        throw new Error(errorMessage || errorResponseSerializer(errorData).error || `Error ${response.status}: ${response.statusText}`);
+      };
+      const data = successResponseSerializer(await response.json());
+      return data;
     } catch (error) {
       console.error(`Error al buscar equipo con nombre ${nombre}:`, error);
       throw new Error("No se pudo obtener el equipo solicitado");

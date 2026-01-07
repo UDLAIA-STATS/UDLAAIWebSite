@@ -1,3 +1,8 @@
+import {
+  errorResponseSerializer,
+  successResponseSerializer,
+  temporadaSerializer,
+} from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 
@@ -12,13 +17,16 @@ export const deleteTemporada = defineAction({
         method: "DELETE",
       });
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
+        const errorData = await res.json();
+        const errorMessage = temporadaSerializer(errorData);
         throw new Error(
-          errorData.error || `Error ${res.status}: ${res.statusText}`
+          errorMessage ||
+            errorResponseSerializer(errorData).error ||
+            `Error ${res.status}: ${res.statusText}`
         );
       }
-      const response = await res.json();
-      return { data: response.message };
+      const response = successResponseSerializer(await res.json());
+      return response;
     } catch (err) {
       console.error(`Error al eliminar temporada ${idtemporada}:`, err);
       throw err;

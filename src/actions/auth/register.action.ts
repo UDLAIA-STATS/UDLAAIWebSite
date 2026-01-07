@@ -1,3 +1,4 @@
+import { errorResponseSerializer, successResponseSerializer } from "@utils/serializers";
 import { usuarioSerializer } from "@utils/serializers/usuario/usuario_serializer";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
@@ -22,6 +23,7 @@ export const registerUser = defineAction({
       const basicAuth = Buffer.from(
         `${loggedInUser?.nickname}:${userCredential}`
       ).toString("base64");
+      
       const response = await fetch(`${authUrl}/register/`, {
         method: "POST",
         headers: {
@@ -35,20 +37,16 @@ export const registerUser = defineAction({
           contrasenia_usuario: password,
         }),
       });
+      
+      const details = await response.json();
+
       console.log("Respuesta del servidor:", response);
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = usuarioSerializer(errorData);
-        log(`Response: ${errorData.data}`);
-        throw new Error(errorData.data);
+        const errorMessage = usuarioSerializer(details);
+        throw new Error(errorMessage || errorResponseSerializer(details).error || "Error al registrar usuario");
       }
-      const data = await response.json();
 
-      return { 
-        message: data.mensaje,
-        status: data.status,
-        data: data.data
-       };
+      return successResponseSerializer(details);
     } catch (err) {
       console.error("Fallo en la acción:", err);
       throw err;

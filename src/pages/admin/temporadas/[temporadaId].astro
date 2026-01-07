@@ -9,7 +9,7 @@ import {
   ComboBox,
   FormButtons,
   TextArea,
-} from "@components/forms/index";
+} from "@components/molecules/forms/index";
 
 const { temporadaId } = Astro.params;
 
@@ -100,4 +100,4 @@ const temporada = temporadaData!.data;
   </form>
 </FormLayout>
 
-<script src="@pages/admin/temporadas/scripts/edit.ts" type="module" />
+<script src="./scripts/edit.ts"/>

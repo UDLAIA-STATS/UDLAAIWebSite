@@ -1,7 +1,7 @@
 ---
 import "@styles/global.css";
 import arrowNext from "@assets/arrow_next.svg";
-import OutlinedButton from "@components/buttons/OutlinedButton.astro";
+import OutlinedButton from "@components/atoms/buttons/OutlinedButton.astro";
 
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)

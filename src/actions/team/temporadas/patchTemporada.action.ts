@@ -1,6 +1,11 @@
 import { defineAction } from "astro:actions";
 import { temporadaUpdateSchema } from "./temporadasSchema";
 import type { Temporada } from "@interfaces/torneos.interface";
+import {
+  errorResponseSerializer,
+  successResponseSerializer,
+  temporadaSerializer,
+} from "@utils/serializers";
 
 export const updateTemporada = defineAction({
   accept: "form",
@@ -18,11 +23,15 @@ export const updateTemporada = defineAction({
       );
       if (!res.ok) {
         const errorData = await res.json();
-        const errorMessage = JSON.stringify(errorData, null, 2)
-        throw new Error(errorData.non_field_errors || `Error ${res.status}: ${res.statusText}`);
+        const errorMessage = temporadaSerializer(errorData);
+        throw new Error(
+          errorMessage ||
+            errorResponseSerializer(errorData).error ||
+            `Error ${res.status}: ${res.statusText}`
+        );
       }
-      const data = await res.json();
-      return { data: data.data as Temporada };
+      const data = successResponseSerializer(await res.json());
+      return data;
     } catch (err) {
       console.error(
         `Error al actualizar temporada ${payload.idtemporada}:`,

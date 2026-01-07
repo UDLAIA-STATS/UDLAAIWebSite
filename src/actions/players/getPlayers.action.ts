@@ -1,4 +1,5 @@
 import type { Player } from "@interfaces/index";
+import { jugadorSerializer, paginationResponseSerializer, successResponseSerializer } from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 
@@ -14,17 +15,15 @@ export const getJugadores = defineAction({
       const response = await fetch(
         `${baseUrl}/jugadores/all/?page=${page}&offset=${pageSize}`
       );
-      if (!response.ok) throw new Error("Error al obtener jugadores");
-      const data = await response.json();
-      return {
-        count: data.count,
-        page: data.page,
-        offset: data.offset,
-        pages: data.pages,
-        data: data.results as Player[],
+      if (!response.ok) {
+        const error = await response.json();
+        const errorMessage = jugadorSerializer(error);
+        throw new Error(errorMessage || error.data);
       };
+      const data = paginationResponseSerializer(await response.json());
+      return data;
     } catch (error) {
-      console.error("❌ Error en getJugadores:", error);
+      console.error("Error en getJugadores:", error);
       throw new Error(
         "No se pudieron obtener los jugadores. Intente nuevamente más tarde."
       );
@@ -39,8 +38,13 @@ export const getJugadorByBanner = defineAction({
     try {
       const baseUrl = import.meta.env.JUGADORES_API;
       const response = await fetch(`${baseUrl}/jugadores/${idJugador}/`);
-      if (!response.ok) throw new Error("Error al obtener jugador");
-      return { data: (await response.json()) as Player };
+      if (!response.ok) {
+        const error = await response.json();
+        const errorMessage = jugadorSerializer(error);
+        throw new Error(errorMessage || error.data);
+      }
+      const data = successResponseSerializer(await response.json())
+      return data;
     } catch (error) {
       console.error(`Error al obtener el jugador (ID: ${idJugador}):`, error);
       throw new Error("No se pudo obtener la información del jugador.");
@@ -55,8 +59,13 @@ export const getJugadorById = defineAction({
     try {
       const baseUrl = import.meta.env.JUGADORES_API;
       const response = await fetch(`${baseUrl}/jugadores/id/${idjugador}/`);
-      if (!response.ok) throw new Error("Error al obtener jugador");
-      return { data: (await response.json()) as Player };
+      if (!response.ok) {
+        const error = await response.json();
+        const errorMessage = jugadorSerializer(error);
+        throw new Error(errorMessage || error.data);
+      };
+      const data = successResponseSerializer(await response.json());
+      return data;
     } catch (error) {
       console.error(`Error al obtener el jugador (ID: ${idjugador}):`, error);
       throw new Error("No se pudo obtener la información del jugador.");

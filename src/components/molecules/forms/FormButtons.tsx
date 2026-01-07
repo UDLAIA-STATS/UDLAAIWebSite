@@ -1,6 +1,6 @@
 import { buttonClass } from "@consts/index";
 import type { Component } from "solid-js";
-import arrowNext from "@assets/icons/arrow-next.svg";
+import arrowNext from "@assets/arrow_next.svg";
 
 interface Props {
   label: string;

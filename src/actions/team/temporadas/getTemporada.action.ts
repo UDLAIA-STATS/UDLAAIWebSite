@@ -1,4 +1,10 @@
 import type { Temporada } from "@interfaces/torneos.interface";
+import {
+  errorResponseSerializer,
+  paginationResponseSerializer,
+  successResponseSerializer,
+  temporadaSerializer,
+} from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 
@@ -15,20 +21,16 @@ export const getTemporadas = defineAction({
         `${baseUrl}/temporadas/all/?page=${page}&offset=${pageSize}`
       );
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
+        const errorData = await res.json();
+        const errorMessage = errorData.error;
         throw new Error(
-          errorData.error || `Error ${res.status}: ${res.statusText}`
+          errorMessage ||
+            errorResponseSerializer(errorData).error ||
+            `Error ${res.status}: ${res.statusText}`
         );
-      };
-      const data = await res.json();
-      const content = data.data;
-      return {
-        count: content.count,
-        page: content.page,
-        offset: content.offset,
-        pages: content.pages,
-        data: content.results as Temporada[],
-      };
+      }
+      const data = paginationResponseSerializer(await res.json());
+      return data;
     } catch (err) {
       console.error("Error al obtener temporadas:", err);
       throw new Error("No se pudo obtener la lista de temporadas");
@@ -36,7 +38,6 @@ export const getTemporadas = defineAction({
   },
 });
 
-// ✅ Obtener temporada por ID
 export const getTemporadaById = defineAction({
   accept: "json",
   input: z.object({ id: z.number().int().positive() }),
@@ -45,15 +46,16 @@ export const getTemporadaById = defineAction({
     try {
       const res = await fetch(`${baseUrl}/temporadas/${id}/`);
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `Error ${res.status}: ${res.statusText}`);
+        const errorData = await res.json();
+        const errorMessage = temporadaSerializer(errorData);
+        throw new Error(
+          errorMessage ||
+            errorResponseSerializer(errorData).error ||
+            `Error ${res.status}: ${res.statusText}`
+        );
       }
-      const data = await res.json();
-      return { 
-        mensaje: data.mensaje,
-        status: data.status,
-        data: data.data as Temporada
-       };
+      const data = successResponseSerializer(await res.json());
+      return data;
     } catch (err) {
       console.error(`Error al obtener temporada ${id}:`, err);
       throw new Error("No se pudo obtener la temporada");
