@@ -29,8 +29,15 @@ export const createTemporada = defineAction({
       });
       if (!res.ok) {
         const errorData = await res.json();
-        const errorMessage = temporadaSerializer(errorData);
-        throw new Error(errorMessage || errorResponseSerializer(errorData).error || `Error ${res.status}: ${res.statusText}`);
+        let errorMessage;
+        errorMessage = temporadaSerializer(errorData);
+
+        if (!errorMessage) {
+          const errorResults: string[] = errorResponseSerializer(errorData).data;
+          errorMessage = errorResults.join("\n");
+        }
+
+        throw new Error(errorMessage || `Error ${res.status}: ${res.statusText}`);
       }
       const data = successResponseSerializer(await res.json());
       return data;

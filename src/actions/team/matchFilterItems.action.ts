@@ -1,3 +1,4 @@
+import { paginationResponseSerializer } from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 
@@ -25,7 +26,7 @@ export const getDataByFilter = defineAction({
       }
 
       const data = await response.json();
-      const content = data.data;
+      const content = paginationResponseSerializer(data);
 
       return {
         [filterOption]: content.results,

@@ -44,10 +44,10 @@ if (errorPartido || errorEquipos || errorTorneos || errorTemporadas) {
   throw new Error("Error al recuperar datos para editar el partido.");
 }
 
-const partido: Partido = partidoData?.data;
-const equipos: Equipo[] = equiposData?.data ?? [];
-const torneos: Torneo[] = torneoData?.data ?? [];
-const temporadas: Temporada[] = temporadaData?.data ?? [];
+const partido: Partido = partidoData?.data as Partido;
+const equipos: Equipo[] = equiposData?.results as Equipo[] ?? [];
+const torneos: Torneo[] = torneoData?.results as Torneo[] ?? [];
+const temporadas: Temporada[] = temporadaData?.results as Temporada[] ?? [];
 ---
 
 <FormLayout formTitle="Editar Partido" pageTitle="Editar Partido" user={user}>

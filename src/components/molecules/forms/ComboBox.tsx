@@ -10,7 +10,7 @@ interface Props {
 
 export const ComboBox: Component<Props> = ({ label, id, required = false, children }: Props) => {
   return (
-    <div class="flex gap-2 flex-col mb-4">
+    <div class="flex gap-2 flex-col mb-2">
       <label for={id} class="text-base font-medium">
         {label}
       </label>

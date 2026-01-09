@@ -5,27 +5,14 @@ export const validateUsers = (formData: FormData, isUpdate = false) => {
   const email = formData.get("email")?.toString().trim().toLowerCase() ?? "";
   const password = formData.get("password")?.toString().trim() ?? "";
   const rol = formData.get("rol")?.toString().trim() ?? "";
-  const emailRegexp = new RegExp(
-    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-  );
-  const usernameRegexp = new RegExp(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{3,100}$/);
-  const passwordRegexp = new RegExp(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,50}$/);
 
   const validationErrors: Record<string, string> = {
-    username: !usernameRegexp.test(username)
-      ? "El nombre debe tener entre 3 y 100 caracteres y solo puede contener letras y espacios."
-      : "",
-    email: !emailRegexp.test(email)
-      ? "Por favor, ingresa un correo electrónico válido."
-      : "",
-    password:
-      !passwordRegexp.test(password) && !isUpdate
-        ? "La contraseña debe tener entre 8 y 50 caracteres, al menos una letra y un número."
-        : "",
-    rol:
-      rol !== "superuser" && rol !== "profesor"
-        ? "Por favor, selecciona un rol válido."
-        : "",
+    nombreVacio: username.length === 0 ? "El nombre de usuario es obligatorio." : "",
+    rolVacio: rol.length === 0 ? "El rol de usuario es obligatorio." : "",
+    emailVacio: email.length === 0 ? "El correo electrónico es obligatorio." : "",
+    emailFormato: !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? "El correo electrónico no tiene un formato válido." : "",
+    passwordVacio: !isUpdate && password.length === 0 ? "La contraseña es obligatoria." : "",
+    passwordCorto: !isUpdate && password.length > 0 && password.length < 6 ? "La contraseña debe tener al menos 6 caracteres." : "",    
   };
 
   if (Object.values(validationErrors).some((msg) => msg !== "")) {

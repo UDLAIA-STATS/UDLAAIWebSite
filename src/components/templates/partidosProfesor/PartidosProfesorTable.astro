@@ -189,7 +189,7 @@ const rows = buildRows(filter);
           console.error("Error deleting torneo:", error);
           Swal.fire("Error", error.message, "error");
         } else {
-          Swal.fire("Éxito", "Torneo eliminado", "success").then(
+          Swal.fire("Éxito", data.mensaje, "success").then(
             async (result) => {
               if (result.isConfirmed) {
                 await navigate(privateRoutesMap.VER_TORNEOS);
@@ -204,9 +204,9 @@ const rows = buildRows(filter);
           await actions.deletePartido({ idpartido: id });
         if (partidoError) {
           console.error("Error deleting partido:", partidoError);
-          Swal.fire("Error", partidoError?.message, "error");
+          Swal.fire("Error", partidoError.message, "error");
         } else {
-          Swal.fire("Éxito", "Partido eliminado", "success").then(
+          Swal.fire("Éxito", partidoData.mensaje, "success").then(
             async (result) => {
               if (result.isConfirmed) {
                 await navigate(privateRoutesMap.VER_PARTIDOS);
@@ -221,9 +221,9 @@ const rows = buildRows(filter);
           await actions.deleteTemporada({ idtemporada: id });
         if (temporadaError) {
           console.error("Error deleting temporada:", temporadaError);
-          Swal.fire("Error", temporadaError?.message, "error");
+          Swal.fire("Error", temporadaError.message, "error");
         } else {
-          Swal.fire("Éxito", temporadaData.data, "success").then(
+          Swal.fire("Éxito", temporadaData.mensaje, "success").then(
             async (result) => {
               if (result.isConfirmed) {
                 await navigate(privateRoutesMap.VER_TEMPORADAS);
@@ -238,9 +238,9 @@ const rows = buildRows(filter);
           await actions.deleteEquipo({ idequipo: id });
         if (equipoError) {
           console.error("Error deleting equipo:", equipoError);
-          Swal.fire("Error", equipoError?.message, "error");
+          Swal.fire("Error", equipoError.message, "error");
         } else {
-          Swal.fire("Éxito", "Equipo eliminado", "success").then(
+          Swal.fire("Éxito", equipoData.mensaje, "success").then(
             async (result) => {
               if (result.isConfirmed) {
                 await navigate(privateRoutesMap.VER_EQUIPOS);
@@ -261,12 +261,12 @@ const rows = buildRows(filter);
         console.log("Delete button clicked for id:", id);
         if (!id) return;
         Swal.fire({
-          title: `¿Estás seguro de eliminar este elemento?`,
+          title: `¿Estás seguro de deshabilitar este elemento?`,
           icon: "warning",
           showCancelButton: true,
           confirmButtonColor: "#d33",
           cancelButtonColor: "#3085d6",
-          confirmButtonText: "Eliminar",
+          confirmButtonText: "Deshabilitar",
           cancelButtonText: "Cancelar",
         }).then(async (result) => {
           if (result.isConfirmed) {

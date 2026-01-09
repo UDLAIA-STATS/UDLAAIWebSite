@@ -21,19 +21,11 @@ export const validateTorneo = (formData: FormData): string => {
     nombreTorneo:
       nombreTorneo.length === 0
         ? "El nombre del torneo es obligatorio."
-        : nombreTorneo.length < 5
-          ? "El nombre del torneo es muy corto (mínimo 5 caracteres)."
-          : nombreTorneo.length > 100
-            ? "El nombre del torneo no puede superar los 100 caracteres."
-            : "",
+        :"",
     descripcionTorneo:
       descripcionTorneo.length === 0
         ? "La descripción del torneo es obligatoria."
-        : descripcionTorneo.length < 10
-          ? "La descripción del torneo es muy corta (mínimo 10 caracteres)."
-          : descripcionTorneo.length > 250
-            ? "La descripción del torneo no puede superar los 250 caracteres."
-            : "",
+        : "",
     idTemporada:
       idTemporada.length === 0 || idTemporada === "Selecciona una temporada"
         ? "Debe seleccionar una temporada."
@@ -46,12 +38,6 @@ export const validateTorneo = (formData: FormData): string => {
       !fechaFinStr
         ? "La fecha de fin del torneo es obligatoria."
         : "",
-    fechasInvalidas:
-      fechaInicio && fechaFin && fechaFin < fechaInicio
-        ? "La fecha de fin no puede ser anterior a la fecha de inicio."
-        : fechaInicio && fechaFin && fechaFin.getTime() === fechaInicio.getTime()
-          ? "La fecha de inicio y fin no pueden ser iguales."
-          : "",
     torneoActivo:
       torneoActivo === ""
         ? "Debe indicar si el torneo estará activo o no."

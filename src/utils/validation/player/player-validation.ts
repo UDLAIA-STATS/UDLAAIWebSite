@@ -8,55 +8,24 @@ export const validateJugador = (formData: FormData) => {
   const numero = Number(formData.get("numerocamisetajugador")) || 0;
   const activo = (formData.get("jugadoractivo")?.toString().trim()) ?? "";
   const imagenjugador = formData.get("imagenjugador") as File | null;
+  
+  console.log("Apellido:", apellido);
+  console.log("Número:", numero);
+  console.log("Posición:", posicion);
+  console.log("Estado:", activo);
+  
 
   // Expresión regular: 1 letra seguida de 8 dígitos (A00088850)
   const idBannerRegex = new RegExp(/^[A-Za-z]\d{8}$/);
 
   const validations = {
-    idbanner:
-      idbanner.length !== 9
-        ? "El ID Banner debe tener exactamente 9 caracteres."
-        : !idBannerRegex.test(idbanner)
-          ? "El ID Banner debe comenzar con una letra seguida de 8 números (ejemplo: A00088850)."
-          : "",
-    nombre:
-      nombre.length === 0
-        ? "El nombre es obligatorio."
-        : nombre.length < 2
-          ? "El nombre es muy corto (mínimo 2 caracteres)."
-          : nombre.length > 100
-            ? "El nombre es demasiado largo (máximo 100 caracteres)."
-            : "",
-    apellido:
-      apellido.length === 0
-        ? "El apellido es obligatorio."
-        : apellido.length < 2
-          ? "El apellido es muy corto (mínimo 2 caracteres)."
-          : apellido.length > 100
-            ? "El apellido es demasiado largo (máximo 100 caracteres)."
-            : "",
-    numero:
-      numero <= 0
-        ? "Debe ingresar un número de camiseta válido."
-        : numero > 99
-          ? "El número de camiseta no puede superar 99."
-          : "",
-    posicion:
-      !["Delantero", "Mediocampista", "Defensa", "Portero"].includes(posicion)
-        ? "Debe seleccionar una posición válida."
-        : "",
-    activo:
-      activo !== "true" && activo !== "false"
-        ? "Debe indicar si el jugador está activo o no."
-        : "",
-    imagenjugador:
-      imagenjugador && imagenjugador.size > 2 * 1024 * 1024
-        ? "La imagen del jugador no debe superar los 2MB."
-        : "",
-    imagejugadorTipo: 
-      imagenjugador && imagenjugador.size > 0 && !imagenjugador.type.startsWith("image/")
-        ? "El archivo seleccionado debe ser una imagen."
-        : ""
+    nombreVacio: nombre.length === 0 ? "El nombre del jugador es obligatorio." : "",
+    apellidoVacio: apellido.length === 0 ? "El apellido del jugador es obligatorio." : "",
+    idbannerVacio: idbanner.length === 0 ? "El ID Banner es obligatorio." : "",
+    idbannerFormato: !idBannerRegex.test(idbanner) ? "El ID Banner debe tener el formato A00088850." : "",
+    posicionVacio: posicion.length === 0 ? "La posición del jugador es obligatoria." : "",
+    numeroVacio: numero === 0 ? "El número del jugador es obligatorio." : "",
+    activoVacio: activo.length === 0 ? "El estado del jugador es obligatorio." : "",
   };
 
   const errors = Object.values(validations).filter(Boolean);

@@ -18,12 +18,17 @@ export const updatePartido = defineAction({
 
       if (!res.ok) {
         const errorData = await res.json();
-        const errorMessage = partidoSerializer(errorData);
-        throw new Error(errorMessage || errorResponseSerializer(errorData).error || `Error ${res.status}: ${res.statusText}`);
+        let errorMessage = partidoSerializer(errorData);
+
+        if (!errorMessage) {
+          const errorResults = errorResponseSerializer(errorData);
+          errorMessage = errorResults.data ? errorResults.data.join("\n") : errorResults.error;
+        }
+        throw new Error(errorMessage || `Error ${res.status}: ${res.statusText}`);
       }
 
-      const data = await res.json();
-      return { data: data.data as Partido };
+      const data = successResponseSerializer(await res.json());
+      return data;
     } catch (err) {
       console.error(`Error al actualizar partido ${payload.idpartido}:`, err);
       throw new Error("No se pudo actualizar el partido");

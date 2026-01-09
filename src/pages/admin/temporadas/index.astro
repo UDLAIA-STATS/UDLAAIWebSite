@@ -27,7 +27,7 @@ if (error) {
   throw new Error("No se pudo obtener la lista de temporadas.");
 }
 
-
+console.log("Temporadas data fetched:", data);
 const pages = data.pages;
 
 const sidebarLinks: Link[] = matchSidebarLinks;

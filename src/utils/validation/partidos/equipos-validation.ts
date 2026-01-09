@@ -10,11 +10,7 @@ export const validateEquipos = (formData: FormData): string => {
     nombre:
       nombre.length === 0
         ? "El nombre del equipo es obligatorio."
-        : nombre.length < 5
-          ? "El nombre del equipo es muy corto (mínimo 5 caracteres)."
-          : nombre.length > 100
-            ? "El nombre del equipo es demasiado largo (máximo 100 caracteres)."
-            : "",
+        : "",
     idInstitucion:
       idInstitucion.length === 0
         ? "Debe seleccionar una institución."

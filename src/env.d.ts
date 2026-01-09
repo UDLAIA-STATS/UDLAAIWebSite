@@ -3,6 +3,8 @@ interface ImportMetaEnv {
   readonly TEAMSERVICE_URL: string;
   readonly JUGADORES_API: string;
   readonly KAFKA_SERVICE: string;
+  readonly PUBLIC_WEBSOCKET_URL: string;
+  readonly STATS_SERVICE: string;
   readonly DEFAULT_ADMIN_PASSWORD: string;
   readonly R2_ACCESS_TOKEN: string;
   readonly R2_ACCESS_KEY_ID: string;
@@ -14,7 +16,7 @@ interface ImportMetaEnv {
   readonly WAREHOUSE: string;
   readonly R2_AUTH_SECRET: string;
   readonly WORKER_URL: string;
-  readonly UPLOAD_SERVICE_URL: string;
+  readonly PUBLIC_UPLOAD_SERVICE_URL: string;
 }
 
 interface ImportMeta {

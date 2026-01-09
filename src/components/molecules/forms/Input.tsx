@@ -50,7 +50,7 @@ export const Input: Component<Props> = ({
   placecholder = ""
 }: Props) => {
   return (
-    <div class="flex gap-2 flex-col mb-4" hidden={hidden}>
+    <div class="flex gap-2 flex-col mb-2" hidden={hidden}>
       <label for={id} class="text-base font-medium">
         {label}
       </label>

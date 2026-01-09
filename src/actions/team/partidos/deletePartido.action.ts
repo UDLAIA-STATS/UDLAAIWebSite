@@ -1,4 +1,4 @@
-import { errorResponseSerializer, partidoSerializer } from "@utils/serializers";
+import { errorResponseSerializer, partidoSerializer, successResponseSerializer } from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 
@@ -13,11 +13,17 @@ export const deletePartido = defineAction({
 
       if (!res.ok) {
         const errorData = await res.json();
-        const errorMessage = partidoSerializer(errorData);
-        throw new Error(errorMessage || errorResponseSerializer(errorData).error || `Error ${res.status}: ${res.statusText}`);
+        let errorMessage = partidoSerializer(errorData);
+        if (!errorMessage) {
+          const errorResults: string[] = errorResponseSerializer(errorData).data;
+          errorMessage = errorResults.join("\n");
+        }
+        throw new Error(errorMessage || `Error ${res.status}: ${res.statusText}`);
       }
 
-      return { success: true };
+      const data = await res.json();
+
+      return successResponseSerializer(data);
     } catch (error) {
       console.error(`Error al eliminar partido ID ${idpartido}:`, error);
       throw new Error("No se pudo eliminar el partido (posiblemente asociado a torneos)");

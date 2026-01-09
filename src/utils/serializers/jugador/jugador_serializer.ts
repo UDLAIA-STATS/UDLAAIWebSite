@@ -12,5 +12,6 @@ export const jugadorSerializer = (error: any) => {
     ...(error.jugadoractivo ? error.jugadoractivo : ""),
     ...(error.non_field_errors ? error.non_field_errors : ""),
   ];
-  return messages.join("\n");
+  console.log("Jugador Serializer Messages:", messages);
+  return messages.join("");
 };

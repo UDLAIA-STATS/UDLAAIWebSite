@@ -13,7 +13,6 @@ import DeleteIcon from "@assets/delete_icon_black.svg";
 import { actions } from "astro:actions";
 import TableActionsComponent from "@components/templates/partidosProfesor/TableActions.astro";
 import AdminPanelLayout from "@layouts/AdminPanelLayout.astro";
-import NotAuthorized from "@components/organisms/NotAuthorized.astro";
 import PaginationComponent from "@components/organisms/Pagination.astro";
 
 const { AUTH_REGISTER, EDIT_USER } = privateRoutesMap;
@@ -31,7 +30,6 @@ const safeJsonParse = <T,>(value?: string): T | null => {
   }
 };
 
-
 const searchParams = Astro.url.searchParams;
 
 const page = getNumberParam(searchParams.get("page"));
@@ -46,7 +44,7 @@ const headers: TableContent[] = [
   { data: "Rol" },
   { data: "Activo" },
   { data: "Editar" },
-  { data: "Eliminar" },
+  { data: "Desactivar" },
 ];
 
 const sortOptions: SortOptions[] = [
@@ -86,7 +84,6 @@ try {
 } catch (err) {
   console.error("Error fetching users:", err);
 }
-
 
 const rows = users.map((u) => ({
   username: u.nombre_usuario,

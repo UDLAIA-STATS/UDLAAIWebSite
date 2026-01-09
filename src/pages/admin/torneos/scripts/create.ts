@@ -37,6 +37,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     navigate(privateRoutesMap.VER_TORNEOS);
   });
 
+  form.addEventListener("submit", (e) => e.preventDefault());
+
   btnSubmit.addEventListener("click", async () => {
     btnSubmit.disabled = true;
     btnSubmit.classList.add("opacity-50", "cursor-not-allowed");

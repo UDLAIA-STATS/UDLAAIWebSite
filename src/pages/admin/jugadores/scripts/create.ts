@@ -1,12 +1,12 @@
 import { privateRoutesMap } from "@consts/index";
-import { fileToBase64 } from "@utils/index";
+import { activateButton, disableButton, fileToBase64 } from "@utils/index";
 import { validateJugador } from "@utils/validation/player/player-validation";
 import { actions } from "astro:actions";
 import { navigate } from "astro:transitions/client";
 import Swal from "sweetalert2";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const btnSubmit = document.getElementById("btnSubmit") as HTMLButtonElement;
+  const btnSubmit = document.getElementById("btn-submit") as HTMLButtonElement;
   const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
 
   btnCancel.addEventListener("click", () => {
@@ -14,43 +14,20 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   btnSubmit.addEventListener("click", async () => {
-    btnSubmit.disabled = true;
-    btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
+    disableButton(btnSubmit);
     const form = document.getElementById("formJugador") as HTMLFormElement;
     const formData = new FormData(form);
 
-    // Validar antes de enviar
+    console.log("Datos del formulario:", Array.from(formData.entries()));
+
     const validationErrors = validateJugador(formData);
-    if (validationErrors) {
-      Swal.fire({
+    if (validationErrors.length > 0) {
+      await Swal.fire({
         icon: "error",
         title: "Error de validación",
         html: validationErrors,
       });
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-      return;
-    }
-
-    const jugadoresData = await actions.getJugadores.orThrow({
-      pageSize: 1000,
-    });
-    const jugadores = jugadoresData.data;
-    const camisetaOcupada = jugadores.some((j) => {
-      return (
-        j.numerocamisetajugador.toString() ===
-          formData.get("numerocamisetajugador")?.toString() && j.jugadoractivo
-      );
-    });
-
-    if (camisetaOcupada) {
-      Swal.fire({
-        icon: "error",
-        title: "Número de camiseta no disponible",
-        text: "El número de camiseta ya está asignado a otro jugador activo.",
-      });
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+      activateButton(btnSubmit);
       return;
     }
 
@@ -70,23 +47,21 @@ document.addEventListener("DOMContentLoaded", () => {
         Swal.fire({
           icon: "error",
           title: "Error al crear el jugador",
-          text: "Los datos son incorrectos o el jugador ya existe.",
+          html: error.message,
         });
-        btnSubmit.disabled = false;
-        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+        activateButton(btnSubmit);
         return;
       }
 
       Swal.fire({
         icon: "success",
         title: "Jugador registrado",
-        text: "El jugador ha sido agregado exitosamente.",
+        text: data.mensaje,
         confirmButtonText: "Aceptar",
       }).then((result) => {
         if (result.isConfirmed) {
           navigate(privateRoutesMap.ADMIN_JUGADORES);
-          btnSubmit.disabled = false;
-          btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+          activateButton(btnSubmit);
         }
       });
 
@@ -99,9 +74,9 @@ document.addEventListener("DOMContentLoaded", () => {
         text:
           err instanceof Error ? err.message : "Ocurrió un error inesperado.",
       });
+      activateButton(btnSubmit);
     } finally {
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+      activateButton(btnSubmit);
     }
   });
 });

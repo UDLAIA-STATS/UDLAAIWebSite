@@ -1,10 +1,34 @@
 ---
 import Layout from "@layouts/Layout.astro";
 import VideoAnalysisView from "@components/templates/analisis-video/analisis-video.tsx";
+import type { LoggedUser } from "@interfaces/index";
+import NotAuthorized from "@components/organisms/NotAuthorized.astro";
+
+const user: LoggedUser | null = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
+
 ---
 
 <Layout>
-  <section id="container-video" class="flex h-svh w-svw p-0">
+  <section
+        class:list={[
+          "h-svh md:w-svw lg:w-shw w-shw flex flex-wrap justify-self-start flex-col mx-10 my-5",
+          user 
+            ? "hidden"
+            : "",
+        ]}
+      >
+        <NotAuthorized />
+      </section>
+  <section
+  id="container-video"
+  class:list={[
+          "flex h-svh w-svw p-0",
+          user
+            ? ""
+            : "hidden",
+        ]}>
     <VideoAnalysisView client:load />
   </section>
 </Layout>

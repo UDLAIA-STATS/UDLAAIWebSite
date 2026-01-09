@@ -20,7 +20,11 @@ export const deleteTorneo = defineAction({
 
       if (!res.ok) {
         const errorData = await res.json();
-        const errorMessage = torneoSerializer(errorData);
+        let errorMessage = torneoSerializer(errorData);
+        if (!errorMessage) {
+          const errorResults: string[] = errorResponseSerializer(errorData).data;
+          errorMessage = errorResults.join("\n");
+        }
         throw new Error(
           errorMessage ||
             errorResponseSerializer(errorData).error ||

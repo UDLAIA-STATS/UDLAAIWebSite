@@ -8,7 +8,7 @@ export const analyzeVideo = defineAction({
   }),
   handler: async (input) => {
     try {
-        const analysisApi = "127.0.0.1:6070/"
+        const analysisApi = import.meta.env.ANALYSIS_API_URL;
         const response = await fetch(`${analysisApi}/analyze/run`, {
             method: "POST",
             headers: {
@@ -21,7 +21,7 @@ export const analyzeVideo = defineAction({
         });
         const result = await response.json();
         if (!response.ok) {
-            const error = JSON.stringify(result.detail) || "Error desconocido al analizar el video.";
+            const error = JSON.stringify(result.detail) || "Error al analizar el video.";
             throw new Error(error);
         }
         return {

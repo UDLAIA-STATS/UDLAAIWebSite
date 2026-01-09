@@ -10,7 +10,7 @@ import { privateRoutesMap } from "@consts/routes";
 import { fileToBase64 } from "@utils/index";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const btnSubmit = document.getElementById("btnSubmit") as HTMLButtonElement;
+  const btnSubmit = document.getElementById("btn-submit") as HTMLButtonElement;
   const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
 
   btnCancel.addEventListener("click", () => {
@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const jugadoresData = await actions.getJugadores.orThrow({
       pageSize: 1000,
     });
-    const jugadores = jugadoresData.data;
+    const jugadores = jugadoresData.results as Player[];
     const camisetaOcupada = jugadores.some((j) => {
       return (
         j.numerocamisetajugador.toString() ===

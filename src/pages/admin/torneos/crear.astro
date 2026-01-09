@@ -7,6 +7,7 @@ import {
   FormButtons,
   TextArea,
 } from "@components/molecules/forms/index";
+import type { Temporada } from "@interfaces/index";
 
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
@@ -25,16 +26,16 @@ if (error) {
   throw new Error("No se pudo obtener la lista de temporadas.");
 }
 
-const temporadas = dataTemporadas?.data ?? [];
+const temporadas = dataTemporadas?.results as Temporada[] ?? [];
 ---
 
 <FormLayout formTitle="Agregar Torneo" pageTitle="Agregar Torneo" user={user}>
   <form id="form-torneo" class="flex flex-col w-full max-w-md">
     <!-- Nombre del torneo -->
-    <Input id="nombretorneo" label="Nombre del Torneo" required={true} />
+    <Input id="nombretorneo" label="Nombre del Torneo" />
 
     <!-- Temporada -->
-    <ComboBox id="idtemporada" label="Temporada" required={true}>
+    <ComboBox id="idtemporada" label="Temporada" >
       <option value="" disabled selected>Selecciona una temporada</option>
       {
         temporadas.map((temp) => (
@@ -49,7 +50,6 @@ const temporadas = dataTemporadas?.data ?? [];
       id="fechainiciotorneo"
       label="Fecha de Inicio"
       type="date"
-      required={true}
     />
 
     <!-- Fecha de fin -->
@@ -57,11 +57,10 @@ const temporadas = dataTemporadas?.data ?? [];
       id="fechafintorneo"
       label="Fecha de Fin"
       type="date"
-      required={true}
     />
 
     <!-- Torneo activo -->
-    <ComboBox id="torneoactivo" label="Activo" required={true}>
+    <ComboBox id="torneoactivo" label="Activo" >
       <option value="true" selected>Sí</option>
       <option value="false">No</option>
     </ComboBox>

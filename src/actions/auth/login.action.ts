@@ -1,6 +1,6 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import type { LoggedUser } from "@interfaces/user.interface";
+import type { LoggedUser, User } from "@interfaces/user.interface";
 import {
   errorResponseSerializer,
   successResponseSerializer,
@@ -43,15 +43,19 @@ export const login = defineAction({
 
       if (!response.ok) {
         const errorMessage = usuarioSerializer(details);
+        console.log("Error en login:", errorMessage);
+        console.log("Error en login:", errorResponseSerializer(details));
         throw new Error(
           errorMessage ||
             errorResponseSerializer(details).error ||
-            "Contraseña o usuario incorrectos"
+            `Error ${response.status}: ${response.statusText}`
         );
       }
 
       console.log("Login exitoso:", details);
       const json = successResponseSerializer(details);
+      const serverUser = json.data as User;
+      console.log("Datos del usuario:", serverUser);
       const user: LoggedUser = {
         email: json.data.email_usuario,
         nickname: json.data.nombre_usuario,

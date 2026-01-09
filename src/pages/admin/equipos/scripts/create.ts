@@ -3,21 +3,21 @@ import { actions } from "astro:actions";
 import { privateRoutesMap } from "@consts/routes";
 import { navigate } from "astro:transitions/client";
 import { validateEquipos } from "@utils/validation/partidos/equipos-validation";
-import { fileToBase64 } from "@utils/index";
-
-const form = document.querySelector("#form-equipo") as HTMLFormElement;
-const btnSubmit = document.querySelector("#btn-submit") as HTMLButtonElement;
-const btnCancel = document.querySelector("#btn-cancel") as HTMLButtonElement;
+import { fileToBase64, activateButton, disableButton } from "@utils/index";
 
 document.addEventListener("DOMContentLoaded", () => {
+  const form = document.querySelector("#form-equipo") as HTMLFormElement;
+  const btnSubmit = document.querySelector("#btn-submit") as HTMLButtonElement;
+  const btnCancel = document.querySelector("#btn-cancel") as HTMLButtonElement;
+
   btnCancel.addEventListener("click", () =>
     navigate(privateRoutesMap.VER_EQUIPOS)
   );
 
+  form.addEventListener("submit", (e) => e.preventDefault());
+
   btnSubmit.addEventListener("click", async (e) => {
-    e.preventDefault();
-    btnSubmit.disabled = true;
-    btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
+    disableButton(btnSubmit);
 
     const formData = new FormData(form);
     const errorMessage = validateEquipos(formData);
@@ -28,12 +28,10 @@ document.addEventListener("DOMContentLoaded", () => {
         title: "Error",
         html: errorMessage,
       });
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+      activateButton(btnSubmit);
       return;
     }
 
-    // Normalizar datos
     const activo = formData.get("equipoactivo") === "true";
     formData.set("equipoactivo", activo.toString());
 
@@ -51,18 +49,16 @@ document.addEventListener("DOMContentLoaded", () => {
       if (error) {
         await Swal.fire("Error", error.message, "error");
       } else {
-        await Swal.fire("Éxito", "Equipo creado correctamente", "success");
+        await Swal.fire("Éxito", data.mensaje, "success");
         navigate(privateRoutesMap.VER_EQUIPOS);
         form.reset();
       }
     } catch (err) {
       console.error("Error al crear equipo:", err);
-      Swal.fire("Error", "No se pudo crear el equipo", "error");
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+      await Swal.fire("Error", "No se pudo crear el equipo", "error");
+      activateButton(btnSubmit);
     } finally {
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+      activateButton(btnSubmit);
     }
   });
 });

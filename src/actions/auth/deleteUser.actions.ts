@@ -10,9 +10,8 @@ export const deleteUser = defineAction({
   accept: "form",
   input: z.object({
     nickname: z.string().min(2).max(100),
-    userCredential: z.string().min(8).max(100),
   }),
-  handler: async ({ nickname, userCredential }, { cookies }) => {
+  handler: async ({ nickname }, { cookies }) => {
     const authUrl = import.meta.env.AUTH_URL;
     const adminKey = import.meta.env.DEFAULT_ADMIN_PASSWORD;
     const loggedInUser = cookies.get("user")
@@ -50,7 +49,13 @@ export const deleteUser = defineAction({
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMessage = usuarioSerializer(data);
+        let errorMessage
+        errorMessage = usuarioSerializer(data);
+        if ( !errorMessage ) {
+          const errorResult = errorResponseSerializer(data);
+          const errorData: string[] = errorResult.data;
+          errorMessage = errorData ? errorData.join("\n") : errorResult.error;
+        }
         console.error("Error en DELETE:", errorMessage);
         throw new Error(
           errorMessage ||
@@ -64,7 +69,7 @@ export const deleteUser = defineAction({
     } catch (err) {
       console.error("Fallo en la acción deleteUser:", err);
       if (err instanceof Error) throw new Error(err.message);
-      throw new Error("Ocurrió un error al eliminar el usuario.");
+      throw err;
     }
   },
 });

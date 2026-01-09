@@ -25,8 +25,13 @@ export const createPartido = defineAction({
 
       if (!res.ok) {
         const errorData = await res.json();
-        const errorMessage = partidoSerializer(errorData);
-        throw new Error(errorMessage || errorResponseSerializer(errorData).error || `Error ${res.status}: ${res.statusText}`);
+        let errorMessage = partidoSerializer(errorData);
+
+        if (!errorMessage) {
+          const errorResults = errorResponseSerializer(errorData);
+          errorMessage = errorResults.data ? errorResults.data.join("\n") : errorResults.error;
+        }
+        throw new Error(errorMessage || `Error ${res.status}: ${res.statusText}`);
       }
 
       const data = successResponseSerializer(await res.json());

@@ -2,6 +2,7 @@ import { actions } from "astro:actions";
 import Swal from "sweetalert2";
 import { navigate } from "astro:transitions/client";
 import { privateRoutesMap } from "@consts/routes";
+import { deleteUser } from "@services/delete_user";
 
 document.addEventListener("DOMContentLoaded", () => {
   const searchBox = document.getElementById("search-box") as HTMLInputElement;
@@ -12,53 +13,42 @@ document.addEventListener("DOMContentLoaded", () => {
       const button = target.closest("[data-delete-user]") as HTMLButtonElement;
       const username = button.getAttribute("data-username");
       console.log("Eliminar usuario:", username);
-      const isActive = button.getAttribute("data-is-active");
 
-      if (username && isActive === "false") {
+      if (!username) {
         await Swal.fire({
           icon: "error",
-          title: "No se pudo eliminar el usuario",
-          text: "El usuario no está activo y no puede ser eliminado.",
+          title: "No se pudo desactivar el usuario",
+          text: "No se pudo obtener el nombre de usuario.",
         });
         return;
       }
 
-      if (username) {
-        const formData = new FormData();
-        formData.append("nickname", username);
-        formData.append(
-          "userCredential",
-          import.meta.env.DEFAULT_ADMIN_PASSWORD
-        );
-        Swal.fire({
-          title: `¿Estás seguro de eliminar al usuario ${username}?`,
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#d33",
-          cancelButtonColor: "#3085d6",
-          confirmButtonText: "Eliminar",
-          cancelButtonText: "Cancelar",
-        }).then(async (result) => {
-          if (result.isConfirmed) {
-            const { data, error } = await actions.deleteUser(formData);
-            if (error) {
-              Swal.fire({
-                icon: "error",
-                title: "Error al eliminar el usuario",
-                text: error.message,
-              });
-            } else {
-              Swal.fire(
-                "Éxito",
-                `Usuario ${username} eliminado`,
-                "success"
-              ).then(() => {
-                navigate(privateRoutesMap.ADMINS_USERS);
-              });
-            }
+      const formData = new FormData();
+      formData.append("nickname", username.trim());
+
+      Swal.fire({
+        title: `¿Estás seguro de desactivar al usuario ${username}?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Desactivar",
+        cancelButtonText: "Cancelar",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            await deleteUser(formData);
+          } catch (error) {
+            console.error("Error al desactivar el usuario:", error);
+            await Swal.fire(
+              "Error",
+              (error as Error).message || "Ocurrió un error al desactivar el usuario",
+              "error"
+            );
+            return;
           }
-        });
-      }
+        }
+      });
     }
   });
 

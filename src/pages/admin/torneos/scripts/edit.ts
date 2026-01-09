@@ -16,6 +16,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     "idtemporada"
   ) as HTMLSelectElement;
 
+  form.addEventListener("submit", (e) => e.preventDefault());
+
   temporadasSelect.addEventListener("change", async () => {
     const selectedValue = temporadasSelect.value;
     const data = await actions.getTemporadaById.orThrow({

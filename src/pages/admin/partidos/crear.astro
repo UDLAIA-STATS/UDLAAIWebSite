@@ -30,9 +30,9 @@ if (error || torneoError || temporadaError) {
   throw new Error("Error al recuperar datos necesarios para crear el partido.");
 }
 
-const equipos: Equipo[] = data?.data ?? [];
-const torneos: Torneo[] = torneoData?.data ?? [];
-const temporadas: Temporada[] = temporadaData?.data ?? [];
+const equipos: Equipo[] = data?.results as Equipo[] ?? [];
+const torneos: Torneo[] = torneoData?.results as Torneo[] ?? [];
+const temporadas: Temporada[] = temporadaData?.results as Temporada[] ?? [];
 ---
 
 <FormLayout formTitle="Agregar Partido" pageTitle="Agregar Partido" user={user}>

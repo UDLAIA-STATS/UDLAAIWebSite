@@ -42,8 +42,20 @@ export const registerUser = defineAction({
 
       console.log("Respuesta del servidor:", response);
       if (!response.ok) {
-        const errorMessage = usuarioSerializer(details);
-        throw new Error(errorMessage || errorResponseSerializer(details).error || "Error al registrar usuario");
+        let errorMessage = usuarioSerializer(details);
+
+        if (!errorMessage) {
+          const errorResults = errorResponseSerializer(details);
+          const errors: string[] | undefined = errorResults.data;
+
+          if (errors && Array.isArray(errors)) {
+            errorMessage = errors.join(" ");
+          } else {
+            const statusText = response.statusText;
+            errorMessage = errorResults.error ?? (statusText == "Forbidden" ? "Acceso denegado. Credenciales incorrectas." : "");
+          }
+        }
+        throw new Error(errorMessage || "Error al registrar usuario");
       }
 
       return successResponseSerializer(details);

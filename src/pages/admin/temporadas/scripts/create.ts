@@ -3,6 +3,7 @@ import { actions } from "astro:actions";
 import { navigate } from "astro:transitions/client";
 import { privateRoutesMap } from "@consts/routes";
 import { validateTemporadas } from "@utils/validation/partidos/temporadas-validation";
+import { activateButton, disableButton } from "@utils/index";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const btnSubmit = document.getElementById("btn-submit") as HTMLButtonElement;
@@ -14,16 +15,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   btnSubmit.addEventListener("click", async () => {
-    btnSubmit.disabled = true;
-    btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
+    disableButton(btnSubmit);
 
     const formData = new FormData(form);
     const errorMessage = validateTemporadas(formData);
 
     if (errorMessage) {
       Swal.fire("Error", errorMessage, "error").then(() => {
-        btnSubmit.disabled = false;
-        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+        activateButton(btnSubmit);
       });
       return;
     }
@@ -66,7 +65,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      Swal.fire("Éxito", "Temporada creada exitosamente", "success").then(
+      Swal.fire("Éxito", data.mensaje, "success").then(
         () => {
           navigate(privateRoutesMap.VER_TEMPORADAS);
         }

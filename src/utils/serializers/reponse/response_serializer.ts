@@ -16,10 +16,10 @@ export const errorResponseSerializer = (response: any) => {
 
 export const paginationResponseSerializer = (response: any) => {
     return {
-        count: response.count,
-        page: response.page,
-        offset: response.offset,
-        pages: response.pages,
+        count: response.count as number,
+        page: response.page as number,
+        offset: response.offset as number,
+        pages: response.pages as number,
         results: response.results
     }
 }

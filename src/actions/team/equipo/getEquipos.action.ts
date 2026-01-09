@@ -13,7 +13,14 @@ export const getEquipos = defineAction({
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
       const response = await fetch(`${baseUrl}/equipos/all/?page=${page}&offset=${pageSize}`);
-      if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        let errorMessage = equipoSerializer(errorData);
+        if (!errorMessage) {
+          errorMessage = errorResponseSerializer(errorData).error;
+        }
+        throw new Error(errorMessage || `Error ${response.status}: ${response.statusText}`);
+      };
       const paginationData = paginationResponseSerializer(await response.json());
       return paginationData;
     } catch (error) {

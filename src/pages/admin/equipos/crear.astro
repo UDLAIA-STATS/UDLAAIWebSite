@@ -1,8 +1,8 @@
 ---
-import "@styles/global.css";
 import FormLayout from "@layouts/FormLayout.astro";
 import { actions } from "astro:actions";
 import { Input, ComboBox, FormButtons } from "@components/molecules/forms/index";
+import type { Institucion } from "@interfaces/index";
 
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
@@ -16,17 +16,16 @@ if (institucionesError || !institucionesData) {
   throw new Error("No se pudo obtener la lista de instituciones.");
 }
 
-const instituciones = institucionesData.data;
+const instituciones = institucionesData.results as Institucion[] ?? [];
 ---
 
 <FormLayout formTitle="Agregar Equipo" pageTitle="Agregar Equipo" user={user}>
   <form
     id="form-equipo"
     class="flex flex-col w-full max-w-md"
-    enctype="multipart/form-data"
   >
     <!-- Nombre del equipo -->
-    <Input id="nombreequipo" label="Nombre del Equipo" required={true} />
+    <Input id="nombreequipo" label="Nombre del Equipo"/>
 
     <!-- Institución -->
     <ComboBox id="idinstitucion" label="Institución">
@@ -55,4 +54,4 @@ const instituciones = institucionesData.data;
   </form>
 </FormLayout>
 
-<script src="./scripts/create.ts" type="module" />
+<script src="./scripts/create.ts"/>

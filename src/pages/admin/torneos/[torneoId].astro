@@ -1,7 +1,7 @@
 ---
 import "@styles/global.css";
 import FormLayout from "@layouts/FormLayout.astro";
-import type { Torneo } from "@interfaces/torneos.interface";
+import type { Temporada, Torneo } from "@interfaces/torneos.interface";
 import { privateRoutesMap } from "@consts/index";
 import { actions } from "astro:actions";
 import Swal from "sweetalert2";
@@ -40,7 +40,7 @@ if (error || errorTemporadas) {
 }
 
 const torneo: Torneo = data?.data ?? null;
-const temporadas = dataTemporadas?.data ?? [];
+const temporadas = dataTemporadas?.results as Temporada[] ?? [];
 
 if (!torneo) {
   Swal.fire("Error", "No se encontró el torneo solicitado", "error");
@@ -57,11 +57,10 @@ if (!torneo) {
     label="Nombre del Torneo"
     type="text"
     value={torneo.nombretorneo ?? ""}
-    required
   />
 
   <!-- Temporada -->
-  <ComboBox id="idtemporada" label="Temporada" required>
+  <ComboBox id="idtemporada" label="Temporada" >
     <option value="" disabled>Selecciona una temporada</option>
     {
       temporadas.map((temp) => (
@@ -83,18 +82,16 @@ if (!torneo) {
     value={torneo.fechainiciotorneo
       ? torneo.fechainiciotorneo.split("T")[0]
       : ""}
-    required
   />
   <Input
     id="fechafintorneo"
     label="Fecha de Fin"
     type="date"
     value={torneo.fechafintorneo ? torneo.fechafintorneo.split("T")[0] : ""}
-    required
   />
 
   <!-- Estado activo -->
-  <ComboBox id="torneoactivo" label="Activo" required>
+  <ComboBox id="torneoactivo" label="Activo" >
     <option value="true" selected={torneo.torneoactivo}>Sí</option>
     <option value="false" selected={!torneo.torneoactivo}>No</option>
   </ComboBox>
@@ -106,7 +103,6 @@ if (!torneo) {
     value={torneo.descripciontorneo ?? ""}
     rows={3}
     maxlength={250}
-    required
   />
 
   <!-- Botones -->

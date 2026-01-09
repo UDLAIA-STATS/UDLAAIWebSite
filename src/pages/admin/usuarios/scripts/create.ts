@@ -1,7 +1,7 @@
 import { privateRoutesMap } from "@consts/routes";
-import { validateUsers } from "@utils/validation/admin/usuarios-validation";
 import { actions } from "astro:actions";
 import { navigate } from "astro:transitions/client";
+import { activateButton, disableButton, validateUsers } from "@utils/index"
 import Swal from "sweetalert2";
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -12,7 +12,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
 
   btnCancel.addEventListener("click", (e) => {
-    e.preventDefault();
     navigate(privateRoutesMap.ADMINS_USERS);
   });
 
@@ -20,17 +19,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   btnSubmit.addEventListener("click", async (e) => {
     e.preventDefault();
-    btnSubmit.disabled = true;
-    btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
+    disableButton(btnSubmit);
     const formData = new FormData(form);
-    // const errorMessage = validateUsers(formData);
 
-    // if (errorMessage.length > 0) {
-    //   Swal.fire("Error", errorMessage, "error");
-    //   btnSubmit.disabled = false;
-    //   btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-    //   return;
-    // }
+    // Validación
+    const validationErrors = validateUsers(formData);
+    if (validationErrors) {
+      await Swal.fire({
+        icon: "error",
+        title: "Error de validación",
+        html: validationErrors,
+      });
+      activateButton(btnSubmit);
+      return;
+    }
 
     const { value: userCredential } = await Swal.fire({
       title: "Ingrese su contraseña",
@@ -57,25 +59,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (error) {
         console.error("Error:", error);
-        if (error.message.toString().includes("validation")) {
           await Swal.fire({
             icon: "error",
             title: "Error al registrar el usuario",
-            text: "Uno de los campos no es válido. Por favor, verifica e intenta nuevamente.",
+            html: error.message,
           });
-          btnSubmit.disabled = false;
-          btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+          activateButton(btnSubmit);
           return;
-        }
-        // const nameError = error.
-        await Swal.fire({
-          icon: "error",
-          title: "Error al registrar el usuario",
-          text: error.message,
-        });
-        btnSubmit.disabled = false;
-        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-        return;
       }
 
       if (data) {
@@ -85,7 +75,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           title: "Registro de usuario exitoso",
         });
       }
-      btnSubmit.removeAttribute("disabled");
+      activateButton(btnSubmit);
       form.reset();
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
       navigate(privateRoutesMap.ADMINS_USERS);

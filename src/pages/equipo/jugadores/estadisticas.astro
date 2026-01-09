@@ -1,57 +1,175 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import SmallStatsCard from "@components/molecules/cards/SmallStatsCard.astro";
-import NotFoundImage from "@assets/not_found.svg";
-import { ToggleButton } from "@components/atoms/buttons/ToggleButton";
-import OutlinedButton from "@components/atoms/buttons/OutlinedButton.astro";
-import arrowNext from "@assets/arrow_next.svg";
-import { publicRoutesMap } from "@consts/routes"
+import Pagination from "@components/organisms/Pagination.astro";
+import { actions } from "astro:actions";
+import type { AnalyzedData, AnalyzedDataTable, ProcessDataValues } from "@interfaces/analyzedData.interface";
+import type { Partido } from "@interfaces/torneos.interface";
+import type { Player } from "@interfaces/player.interface";
+import DetailsIcon from "@assets/details_icon.svg";
+import { publicRoutesMap } from "@consts/index";
+import { getProcessedData } from "@services/index";
 
-const { PLAYER_DETAIL } = publicRoutesMap;
+const page = Number(Astro.url.searchParams.get("page") ?? 1);
+const search = Astro.url.searchParams.get("search") ?? "";
+const sortBy = Astro.url.searchParams.get("sortBy") ?? "";
+const orderBy = Astro.url.searchParams.get("orderBy") ?? "asc";
+let limit: number = search ? 1000 : 15;
+const detailsRoute = publicRoutesMap.PLAYER_DETAIL;
+
+let analyzedData: AnalyzedDataTable[] = [];
+let totalPages = 1;
+
+try {
+  if( search ) {
+    limit = 1000;
+  }
+  const [filterData, partidosData, playersData] = await Promise.all([
+      Astro.callAction(actions.getAnalyzedData.orThrow, { page: page, limit: limit }),
+      Astro.callAction(actions.getPartidos.orThrow, { page: 1, pageSize: 1000 }),
+      Astro.callAction(actions.getJugadores.orThrow, { page: 1, pageSize: 1000 }),
+    ]);
+
+  const processedValues: ProcessDataValues = {
+    players: playersData.results as Player[],
+    analyzedData: filterData.results as AnalyzedData[],
+    partidos: partidosData.results as Partido[],
+    page: page,
+    query: search,
+    sortBy: sortBy,
+    orderBy: orderBy
+  }
+
+  const data = await getProcessedData(
+    processedValues
+  );
+
+  totalPages = filterData.pages;
+  analyzedData = data;
+} catch (err) {
+  console.error("Error obteniendo datos:", err);
+}
 ---
 
-<Layout>
-  <section
-    class="h-fit md:w-svw lg:w-shw w-shw min-svh flex flex-wrap justify-self-center-safe mt-5 flex-col scroll-auto overflow-auto"
-  >
-    <div class="flex flex-col flex-wrap items-center justify-center gap-4">
-      <h1 class="font-bold text-3xl flex pb-2 flex-col text-center">
-        Estadísticas
-      </h1>
-      <!-- <ToggleButton firstLabel="Jugador" secondLabel="Partidos" id="selected" client:visible /> -->
+<Layout title="Partidos Analizados">
+  <section class="max-w-6xl mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-4">Partidos Analizados</h1>
+
+    <!-- controles -->
+    <div class="mb-4 flex flex-wrap gap-4 items-end">
+      <div>
+        <label for="search" class="block text-sm font-medium">Buscar</label>
+        <input
+          id="search"
+          type="text"
+          placeholder="Jugador, torneo o fecha..."
+          class="border border-gray-300 rounded px-3 py-2 w-64"
+          value={search}
+        />
+      </div>
+      <div>
+        <label for="sortBy" class="block text-sm font-medium">Ordenar por</label
+        >
+        <select id="sortBy" class="border border-gray-300 rounded px-3 py-2">
+          <option selected={sortBy === "player"} value="player">Jugador</option>
+          <option selected={sortBy === "shirt_number"} value="shirt_number">N° Camiseta</option>
+          <option selected={sortBy === "tournament"} value="tournament">Torneo</option>
+          <option selected={sortBy === "match_date"} value="match_date">Fecha de Partido</option>
+          <option selected={sortBy === "analysis_date"} value="analysis_date">Fecha de Análisis</option>
+        </select>
+      </div>
+      <div>
+        <label for="orderBy" class="block text-sm font-medium">Orden</label>
+        <select id="orderBy" class="border border-gray-300 rounded px-3 py-2">
+          <option selected={orderBy === "asc"} value="asc">Ascendente</option>
+          <option selected={orderBy === "desc"} value="desc">Descendente</option>
+        </select>
+      </div>
     </div>
-    <div
-      id="filters"
-      class="flex flex-row flex-wrap align-middle justify-center mt-5 gap-2"
-    >
-      <span class="text-base font-semibold align-middle self-center"
-        >Buscar:</span
+
+    <div class="overflow-x-auto min-h-1/2">
+      <table
+        class="min-w-full bg-white border border-gray-200 rounded-lg shadow"
       >
-      <input
-        type="text"
-        placeholder=""
-        class="mx-2 my-1 p-2 w-1/6 rounded-md align-middle border-solid border border-black"
-      />
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="px-4 py-2 text-left">Jugador</th>
+            <th class="px-4 py-2 text-left">N° Camiseta</th>
+            <th class="px-4 py-2 text-left">Torneo</th>
+            <th class="px-4 py-2 text-left">Resultado</th>
+            <th class="px-4 py-2 text-left">Fecha de Partido</th>
+            <th class="px-4 py-2 text-left">Fecha de Análisis</th>
+            <th class="px-4 py-2 text-left">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          {
+            analyzedData.map((data) => (
+              <tr
+                data-id={data.id}
+                data-match={data.match_id}
+                data-player={data.player_id}
+              >
+                <td class="px-4 py-2 name">
+                  {data.player_name}
+                </td>
+                <td class="px-4 py-2">{data.shirt_number}</td>
+                <td class="px-4 py-2 tournament">
+                  {data.tournament_name}
+                </td>
+                <td class="px-4 py-2 score">
+                  {data.score}
+                </td>
+                <td class="px-4 py-2 matchdate">
+                  {data.match_date}
+                </td>
+                <td class="px-4 py-2">
+                  {data.analysis_date}
+                </td>
+                <td class="px-4 py-2">
+                  <a href={`${detailsRoute}/${data.id}`}>
+                    <img src={DetailsIcon.src} alt="detalles" class="size-8" />
+                  </a>
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
     </div>
-    <div
-      id="stats-cards"
-      class="flex flex-row flex-wrap justify-start items-center gap-5 mx-5 mt-10"
-    >
-      {
-        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((_, __) => (
-          <SmallStatsCard
-            href={PLAYER_DETAIL + "/asd"}
-            imgSrc={NotFoundImage.src}
-            title="Estadística"
-            subtitle="Descripción"
-          />
-        ))
-      }
-    </div>
-    <div id="navigation" class="flex flex-row justify-center gap-5 my-10">
-        <OutlinedButton label="Anterior" iconSrc={arrowNext.src} iconPosition="left" />
-        <OutlinedButton label="Siguiente" iconSrc={arrowNext.src} iconRotation={180} />
-        
-    </div>
+
+    {totalPages > 1 && <Pagination totalPages={totalPages} />}
   </section>
 </Layout>
+
+<script>
+import { navigate } from "astro:transitions/client";
+
+  let timeout: number | undefined;
+
+  function updateURL() {
+    const currentUrl = new URL(window.location.href);
+    const search = (document.getElementById("search") as HTMLInputElement)
+      .value;
+    const sortBy = (document.getElementById("sortBy") as HTMLSelectElement)
+      .value;
+    const orderBy = (document.getElementById("orderBy") as HTMLSelectElement)
+      .value;
+
+    if (search) currentUrl.searchParams.set("search", search);
+    else currentUrl.searchParams.delete("search");
+    if (sortBy) currentUrl.searchParams.set("sortBy", sortBy);
+    else currentUrl.searchParams.delete("sortBy");
+    if (orderBy) currentUrl.searchParams.set("orderBy", orderBy);
+    else currentUrl.searchParams.delete("orderBy");
+    
+    navigate(currentUrl.toString());
+  }
+
+  document.getElementById("search")?.addEventListener("input", async () => {
+    clearTimeout(timeout);
+    timeout = window.setTimeout(updateURL, 1000);
+  });
+
+  document.getElementById("sortBy")?.addEventListener("change", updateURL);
+  document.getElementById("orderBy")?.addEventListener("change", updateURL);
+</script>

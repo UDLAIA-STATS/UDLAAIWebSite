@@ -15,11 +15,9 @@ export const updateUser = defineAction({
     rol: z.enum(["superuser", "profesor"]).optional(),
     is_active: z.boolean().optional(),
     password: z.string().min(8).optional(),
-    userCredential: z.string().min(8).max(100),
   }),
   handler: async (
-    { email, password, name, originalName, rol, is_active, userCredential },
-    { cookies }
+    { email, password, name, originalName, rol, is_active },
   ) => {
     try {
       console.log("Actualizando usuario:", { name, email, password });
@@ -46,10 +44,18 @@ export const updateUser = defineAction({
       const details = await response.json();
 
       if (!response.ok) {
-        const errorMessage = usuarioSerializer(details);
+        let errorMessage;
+        errorMessage = usuarioSerializer(details);
+        if (!errorMessage) {
+          const errorData = errorResponseSerializer(details);
+          const errorResponse: string[] = errorData.data;
+          errorMessage = errorResponse.join("\n");
+        }
+        console.log("Error en updateUser:", errorMessage);
+        console.log("Error en updateUser (serializado):", errorResponseSerializer(details));
+        
         throw new Error(
-          errorMessage ||
-            errorResponseSerializer(details).error ||
+          errorMessage  ||
             `Error ${response.status}: ${response.statusText}`
         );
       }

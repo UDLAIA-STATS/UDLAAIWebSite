@@ -4,6 +4,7 @@ import { navigate } from "astro:transitions/client";
 import { privateRoutesMap } from "@consts/index";
 import { validatePartidos } from "@utils/validation/partidos/partidos-validation";
 import type { Torneo } from "@interfaces/torneos.interface";
+import { activateButton, disableButton } from "@utils/index";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const form = document.querySelector("#form-partido") as HTMLFormElement;
@@ -13,7 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
 
   const data = await actions.getTorneos.orThrow({ pageSize: 1000 });
-  const torneos: Torneo[] = data.data ?? [];
+  const torneos: Torneo[] = (data.results as Torneo[]) ?? [];
 
   const selectTemporada = document.getElementById(
     "idtemporada"
@@ -90,15 +91,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   );
 
   btnSubmit.addEventListener("click", async () => {
-    btnSubmit.disabled = true;
-    btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
+    disableButton(btnSubmit);
     const formData = new FormData(form);
     const errorMessage = validatePartidos(formData);
 
     if (errorMessage) {
       Swal.fire("Error", errorMessage, "error");
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+      activateButton(btnSubmit);
       return;
     }
 
@@ -112,21 +111,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (error || !data) {
         Swal.fire("Error", error.message, "error");
-        btnSubmit.disabled = false;
-        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+        activateButton(btnSubmit);
         return;
       }
 
-      Swal.fire("Éxito", "Partido creado correctamente", "success").then(
-        (result) => {
-          if (result.isConfirmed) {
-            navigate(privateRoutesMap.VER_PARTIDOS);
-            form.reset();
-            btnSubmit.disabled = false;
-            btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-          }
+      Swal.fire("Éxito", data.mensaje, "success").then((result) => {
+        if (result.isConfirmed) {
+          navigate(privateRoutesMap.VER_PARTIDOS);
+          form.reset();
+          activateButton(btnSubmit);
         }
-      );
+      });
     } catch (err) {
       console.error(err);
       Swal.fire(
@@ -136,11 +131,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           : "Error inesperado al crear el partido",
         "error"
       );
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+      activateButton(btnSubmit);
     } finally {
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+      activateButton(btnSubmit);
     }
   });
 });

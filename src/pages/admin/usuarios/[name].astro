@@ -1,5 +1,4 @@
 ---
-import { roles } from "@consts/roles";
 import { actions } from "astro:actions";
 import { publicRoutesMap } from "@consts/routes";
 import type { User } from "@interfaces/index";
@@ -11,8 +10,7 @@ export const prerender = false;
 const { name } = Astro.params;
 
 const { data, error } = await Astro.callAction(actions.getUserByUsername, {
-  username: name ?? "",
-  userCredential: import.meta.env.DEFAULT_ADMIN_PASSWORD,
+  username: name ?? ""
 });
 const user = data?.data as User;
 const originalName = user.nombre_usuario;
@@ -22,15 +20,9 @@ if (error || !user) {
   Astro.redirect(publicRoutesMap[404]);
 }
 
-const inputClass =
-  "bg-white text-black rounded-md p-2 w-md focus:outline-none focus:ring-2 focus:ring-[#C10230]";
-const buttonClass =
-  "text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md flex items-center justify-center cursor-pointer transition";
-
 const loggedUser = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
-const { super: superRole } = roles;
 ---
 
 <FormLayout
@@ -95,4 +87,5 @@ const { super: superRole } = roles;
   </form>
 </FormLayout>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" />
 <script src="./scripts/edit.ts"/>

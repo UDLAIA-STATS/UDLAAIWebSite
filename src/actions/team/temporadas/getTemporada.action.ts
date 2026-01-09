@@ -22,13 +22,16 @@ export const getTemporadas = defineAction({
       );
       if (!res.ok) {
         const errorData = await res.json();
-        const errorMessage = errorData.error;
+        let errorMessage = temporadaSerializer(errorData);
+        if (!errorMessage) {
+          errorMessage = errorResponseSerializer(errorData).error;
+        }
         throw new Error(
-          errorMessage ||
-            errorResponseSerializer(errorData).error ||
-            `Error ${res.status}: ${res.statusText}`
+          errorMessage || `Error ${res.status}: ${res.statusText}`
         );
       }
+
+      
       const data = paginationResponseSerializer(await res.json());
       return data;
     } catch (err) {

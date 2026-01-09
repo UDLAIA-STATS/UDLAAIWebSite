@@ -80,9 +80,8 @@ export const getUserByUsername = defineAction({
   accept: "json",
   input: z.object({
     username: z.string().min(2).max(100),
-    userCredential: z.string().min(8).max(100),
   }),
-  handler: async ({ username, userCredential }, { locals, cookies }) => {
+  handler: async ({ username }, { locals, cookies }) => {
     console.log("getUserByUsername llamado con username:", username);
     const credential = import.meta.env.DEFAULT_ADMIN_PASSWORD;
     const baseUrl = import.meta.env.AUTH_URL;
@@ -95,7 +94,7 @@ export const getUserByUsername = defineAction({
     }
 
     const basicAuth = Buffer.from(
-      `${loggedInUser.nickname}:${userCredential}`
+      `${loggedInUser.nickname}:${credential}`
     ).toString("base64");
 
     try {

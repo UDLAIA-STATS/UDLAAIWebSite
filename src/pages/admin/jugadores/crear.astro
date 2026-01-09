@@ -23,47 +23,47 @@ const user = Astro.cookies.get("user")
     />
     <!-- Nombres -->
     <Input id="nombrejugador" label="Nombres" maxlength={100} required />
-  </form>
-
-  <!-- Apellidos -->
-  <Input id="apellidojugador" label="Apellidos" maxlength={100} required />
-
-  <!-- Número de camiseta -->
-  <Input
+    
+    <!-- Apellidos -->
+    <Input id="apellidojugador" label="Apellidos" maxlength={100} required />
+    
+    <!-- Número de camiseta -->
+    <Input
     id="numerocamisetajugador"
     label="Número de Camiseta"
     type="number"
     maxlength={2}
     minlength={1}
     required
-  />
-
-  <!-- Posición -->
-  <ComboBox id="posicionjugador" label="Posición" required>
-    <option value="">-- Selecciona --</option>
-    <option value="Portero">Portero</option>
-    <option value="Defensa">Defensa</option>
-    <option value="Mediocampista">Mediocampista</option>
-    <option value="Delantero">Delantero</option>
-  </ComboBox>
-
-  <!-- Jugador activo -->
-  <ComboBox id="jugadoractivo" label="Jugador Activo" required>
-    <option value="" disabled selected>-- Selecciona --</option>
-    <option value="true">Activo</option>
-    <option value="false">Inactivo</option>
-  </ComboBox>
-
-  <!-- Imagen del jugador -->
-  <Input
+    />
+    
+    <!-- Posición -->
+    <ComboBox id="posicionjugador" label="Posición" required>
+      <option value="">-- Selecciona --</option>
+      <option value="Portero">Portero</option>
+      <option value="Defensa">Defensa</option>
+      <option value="Mediocampista">Mediocampista</option>
+      <option value="Delantero">Delantero</option>
+    </ComboBox>
+    
+    <!-- Jugador activo -->
+    <ComboBox id="jugadoractivo" label="Jugador Activo" required>
+      <option value="" disabled selected>-- Selecciona --</option>
+      <option value="true">Activo</option>
+      <option value="false">Inactivo</option>
+    </ComboBox>
+    
+    <!-- Imagen del jugador -->
+    <!-- <Input
     id="imagenjugador"
     label="Foto de la camiseta (opcional)"
     type="file"
     accept="image/*"
-  />
-
-  <!-- Botón -->
-  <FormButtons label="Crear Jugador" />
-</FormLayout>
-
+    /> -->
+    
+    <!-- Botón -->
+    <FormButtons label="Crear Jugador" />
+  </form>
+  </FormLayout>
+  
 <script src="./scripts/create.ts"/>

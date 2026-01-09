@@ -7,6 +7,7 @@ import {
   isPartidoUpdated,
 } from "@utils/validation/partidos/partidos-validation";
 import type { Torneo } from "@interfaces/index";
+import { activateButton, disableButton } from "@utils/index";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const form = document.querySelector("#form-partido") as HTMLFormElement;
@@ -16,7 +17,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
 
   const torneosData = await actions.getTorneos.orThrow({ pageSize: 1000 });
-  const torneos: Torneo[] = torneosData.data ?? [];
+  const torneos: Torneo[] = torneosData.results as Torneo[] ?? [];
 
   const selectTemporada = document.getElementById(
     "idtemporada"
@@ -61,15 +62,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   btnSubmit.addEventListener("click", async () => {
-    btnSubmit.disabled = true;
-    btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
+    disableButton(btnSubmit);
     const formData = new FormData(form);
     const errorMessage = validatePartidos(formData);
 
     if (errorMessage) {
       Swal.fire("Error", errorMessage, "error");
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+      activateButton(btnSubmit);
       return;
     }
     const partidoData = await actions.getPartidoById.orThrow({
@@ -98,13 +97,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       const { data, error } = await actions.updatePartido(formData);
 
       if (error || !data) {
-        Swal.fire("Error", "No se pudo actualizar el partido", "error");
-        btnSubmit.disabled = false;
-        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+        Swal.fire("Error", error.message ?? "Error al actualizar el partido", "error");
+        activateButton(btnSubmit);
         return;
       }
 
-      Swal.fire("Éxito", "Partido actualizado correctamente", "success").then(
+      Swal.fire("Éxito", data.mensaje, "success").then(
         (result) => {
           if (result.isConfirmed) {
             navigate(privateRoutesMap.VER_PARTIDOS);
@@ -114,11 +112,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch (err) {
       console.error(err);
       Swal.fire("Error", "Error inesperado al actualizar el partido", "error");
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+      activateButton(btnSubmit);
     } finally {
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+      activateButton(btnSubmit);
     }
   });
 });

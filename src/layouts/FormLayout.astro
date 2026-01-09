@@ -49,12 +49,11 @@ const { super: superRole, profesor } = roles;
       >
         <div
           id="container"
-          class="flex flex-col items-center justify-center gap-5 bg-[#C10230] self-center w-shw px-10 pt-4 pb-8 rounded-lg shadow-lg"
+          class="flex flex-col items-center justify-center gap- bg-[#C10230] self-center w-shw px-10 pt-4 pb-8 rounded-lg shadow-lg"
         >
           <div class="font-bold text-3xl flex pb-3">
             <h1>{formTitle}</h1>
           </div>
-
           <slot />
         </div>
       </section>
@@ -62,6 +61,8 @@ const { super: superRole, profesor } = roles;
     <Footer />
   </body>
 </html>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" />
 
 <style>
   html,
