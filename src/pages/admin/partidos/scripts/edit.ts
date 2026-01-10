@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
 
   const torneosData = await actions.getTorneos.orThrow({ pageSize: 1000 });
-  const torneos: Torneo[] = torneosData.results as Torneo[] ?? [];
+  const torneos: Torneo[] = (torneosData.results as Torneo[]) ?? [];
 
   const selectTemporada = document.getElementById(
     "idtemporada"
@@ -67,7 +67,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const errorMessage = validatePartidos(formData);
 
     if (errorMessage) {
-      Swal.fire("Error", errorMessage, "error");
+      Swal.fire(
+        "Error",
+        "Se detectaron errores en el formulario, corrige los campos y vuelve a intentarlo",
+        "error"
+      );
       activateButton(btnSubmit);
       return;
     }
@@ -106,13 +110,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      Swal.fire("Éxito", data.mensaje, "success").then(
-        (result) => {
-          if (result.isConfirmed) {
-            navigate(privateRoutesMap.VER_PARTIDOS);
-          }
+      Swal.fire("Éxito", data.mensaje, "success").then((result) => {
+        if (result.isConfirmed) {
+          navigate(privateRoutesMap.VER_PARTIDOS);
         }
-      );
+      });
     } catch (err) {
       console.error(err);
       Swal.fire("Error", "Error inesperado al actualizar el partido", "error");

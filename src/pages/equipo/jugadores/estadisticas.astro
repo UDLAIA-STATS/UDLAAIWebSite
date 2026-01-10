@@ -13,7 +13,7 @@ const page = Number(Astro.url.searchParams.get("page") ?? 1);
 const search = Astro.url.searchParams.get("search") ?? "";
 const sortBy = Astro.url.searchParams.get("sortBy") ?? "";
 const orderBy = Astro.url.searchParams.get("orderBy") ?? "asc";
-let limit: number = search ? 1000 : 15;
+let limit: number = search ? 1000 : 10;
 const detailsRoute = publicRoutesMap.PLAYER_DETAIL;
 
 let analyzedData: AnalyzedDataTable[] = [];

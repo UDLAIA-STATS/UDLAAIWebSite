@@ -22,11 +22,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const formData = new FormData(form);
     const errorMessage = validateEquipos(formData);
 
-    if (errorMessage.length > 0) {
+    if (errorMessage) {
       await Swal.fire({
         icon: "error",
         title: "Error",
-        html: errorMessage,
+        text: "Se detectaron errores en el formulario, corrige los campos y vuelve a intentarlo",
       });
       activateButton(btnSubmit);
       return;

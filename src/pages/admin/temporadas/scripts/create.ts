@@ -21,7 +21,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const errorMessage = validateTemporadas(formData);
 
     if (errorMessage) {
-      Swal.fire("Error", errorMessage, "error").then(() => {
+      Swal.fire(
+        "Error",
+        "Se detectaron errores en el formulario, corrige los campos y vuelve a intentarlo",
+        "error"
+      ).then(() => {
         activateButton(btnSubmit);
       });
       return;
@@ -69,11 +73,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      Swal.fire("Éxito", data.mensaje, "success").then(
-        () => {
-          navigate(privateRoutesMap.VER_TEMPORADAS);
-        }
-      );
+      Swal.fire("Éxito", data.mensaje, "success").then(() => {
+        navigate(privateRoutesMap.VER_TEMPORADAS);
+      });
 
       form.reset();
     } catch (err) {

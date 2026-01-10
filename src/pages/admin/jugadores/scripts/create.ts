@@ -21,11 +21,11 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("Datos del formulario:", Array.from(formData.entries()));
 
     const validationErrors = validateJugador(formData);
-    if (validationErrors.length > 0) {
+    if (validationErrors) {
       await Swal.fire({
         icon: "error",
         title: "Error de validación",
-        html: validationErrors,
+        text: "Se detectaron errores en el formulario, corrige los campos y vuelve a intentarlo",
       });
       activateButton(btnSubmit);
       return;

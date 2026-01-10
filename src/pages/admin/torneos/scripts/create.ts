@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       Swal.fire({
         icon: "error",
         title: "Error de validación",
-        text: errorMessage,
+        text: "Se detectaron errores en el formulario, corrige los campos y vuelve a intentarlo",
       });
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");

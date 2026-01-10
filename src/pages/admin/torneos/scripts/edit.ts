@@ -40,7 +40,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const errorMessage = validateTorneo(formData);
 
     if (errorMessage) {
-      Swal.fire("Error", errorMessage, "error");
+      Swal.fire(
+        "Error",
+        "Se detectaron errores en el formulario, corrige los campos y vuelve a intentarlo",
+        "error"
+      );
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
       return;
@@ -86,11 +90,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      Swal.fire("Éxito", data.mensaje, "success").then(
-        () => {
-          navigate(privateRoutesMap.VER_TORNEOS);
-        }
-      );
+      Swal.fire("Éxito", data.mensaje, "success").then(() => {
+        navigate(privateRoutesMap.VER_TORNEOS);
+      });
     } catch (err) {
       console.error(err);
       Swal.fire(

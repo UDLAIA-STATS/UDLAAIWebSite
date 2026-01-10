@@ -96,7 +96,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const errorMessage = validatePartidos(formData);
 
     if (errorMessage) {
-      Swal.fire("Error", errorMessage, "error");
+      Swal.fire(
+        "Error",
+        "Se detectaron errores en el formulario, corrige los campos y vuelve a intentarlo",
+        "error"
+      );
       activateButton(btnSubmit);
       return;
     }

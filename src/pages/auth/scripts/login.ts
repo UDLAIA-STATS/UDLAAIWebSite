@@ -20,11 +20,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       const password = formData.get("password")?.toString().trim() ?? "";
 
       const errorMessages = validateLogin(formData);
-      if (errorMessages.length > 0) {
+      if (errorMessages) {
         Swal.fire({
           icon: "error",
           title: "Error de validación",
-          html: errorMessages,
+          text: "Se detectaron errores en el formulario, corrige los campos y vuelve a intentarlo",
         });
         btnSubmit.disabled = false;
         btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");

@@ -28,6 +28,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
     const temporadaActual = data.data as Temporada;
     const cambiosDetectados = isTemporadaUpdated(temporadaActual, formData);
+    
+    if (errorMessage) {
+      Swal.fire("Error", "Se detectaron errores en el formulario, corrige los campos y vuelve a intentarlo", "error").then(() => {
+        btnSubmit.disabled = false;
+        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
+      });
+      return;
+    }
 
     if (!cambiosDetectados) {
       Swal.fire(
@@ -41,13 +49,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    if (errorMessage) {
-      Swal.fire("Error", errorMessage, "error").then(() => {
-        btnSubmit.disabled = false;
-        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-      });
-      return;
-    }
 
     // 🧠 Normalización de datos (solo ajuste de formato)
     const tipo = formData.get("tipotemporada")?.toString().trim() ?? "";

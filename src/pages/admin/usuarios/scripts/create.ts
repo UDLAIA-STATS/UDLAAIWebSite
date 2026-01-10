@@ -22,13 +22,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     disableButton(btnSubmit);
     const formData = new FormData(form);
 
-    // Validación
     const validationErrors = validateUsers(formData);
     if (validationErrors) {
       await Swal.fire({
         icon: "error",
         title: "Error de validación",
-        html: validationErrors,
+        html: "Se detectaron errores en el formulario, corrige los campos y vuelve a intentarlo",
       });
       activateButton(btnSubmit);
       return;

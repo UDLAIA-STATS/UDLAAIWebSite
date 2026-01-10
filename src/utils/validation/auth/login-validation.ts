@@ -1,29 +1,33 @@
-const validateLogin = (formData: FormData): string => {
+import { setFieldError, clearFieldError } from "@utils/validation/validation-utils";
+
+const validateLogin = (formData: FormData): boolean => {
   const username = formData.get("name")?.toString().trim() ?? "";
   const password = formData.get("password")?.toString().trim() ?? "";
 
-  const validationErrors: Record<string, string> = {
-    username:
-      username.length === 0 && password.length > 0
-        ? "El nombre de usuario es obligatorio."
-        : "",
-    password:
-      password.length === 0 && username.length > 0
-        ? "La contraseña es obligatoria."
-        : "",
-    emptyFields:
-      username.length === 0 && password.length === 0
-        ? "Por favor, complete todos los campos requeridos."
-        : "",
-  };
+  // limpiar errores previos
+  clearFieldError("name");
+  clearFieldError("password");
+  clearFieldError("form");
 
-  if (Object.values(validationErrors).some((msg) => msg !== "")) {
-    const errorMessages = Object.values(validationErrors).filter(
-      (msg) => msg !== ""
-    );
-    return errorMessages.join("<br/>");
+  let hasErrors = false;
+
+  if (username.length === 0 && password.length > 0) {
+    setFieldError("name", "El nombre de usuario es obligatorio.");
+    hasErrors = true;
   }
-  return "";
+
+  if (password.length === 0 && username.length > 0) {
+    setFieldError("password", "La contraseña es obligatoria.");
+    hasErrors = true;
+  }
+
+  if (username.length === 0 && password.length === 0) {
+    // mensaje global del formulario (si existe un span con id 'form-error')
+    setFieldError("form", "Por favor, complete todos los campos requeridos.");
+    hasErrors = true;
+  }
+
+  return hasErrors;
 };
 
 export default validateLogin;

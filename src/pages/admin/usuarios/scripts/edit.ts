@@ -35,8 +35,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const errorMessage = validateUsers(formData, true);
 
-    if (errorMessage.length > 0) {
-      Swal.fire("Error", errorMessage, "error");
+    if (errorMessage) {
+      Swal.fire(
+        "Error",
+        "Se detectaron errores en el formulario, corrige los campos y vuelve a intentarlo",
+        "error"
+      );
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
       return;

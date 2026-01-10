@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
       Swal.fire({
         icon: "error",
         title: "Error de validación",
-        html: validationErrors,
+        html: "Se detectaron errores en el formulario, corrige los campos y vuelve a intentarlo",
       });
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
@@ -49,30 +49,6 @@ document.addEventListener("DOMContentLoaded", () => {
         icon: "info",
         title: "Sin cambios detectados",
         text: "No se han modificado los datos del jugador.",
-      });
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-      return;
-    }
-
-    const jugadoresData = await actions.getJugadores.orThrow({
-      pageSize: 1000,
-    });
-    const jugadores = jugadoresData.results as Player[];
-    const camisetaOcupada = jugadores.some((j) => {
-      return (
-        j.numerocamisetajugador.toString() ===
-          formData.get("numerocamisetajugador")?.toString() &&
-        j.jugadoractivo &&
-        j.idjugador !== idJugador
-      );
-    });
-
-    if (camisetaOcupada) {
-      Swal.fire({
-        icon: "error",
-        title: "Número de camiseta no disponible",
-        text: "El número de camiseta ya está asignado a otro jugador activo.",
       });
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
