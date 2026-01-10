@@ -95,11 +95,10 @@ const temporadas: Temporada[] = temporadaData?.results as Temporada[] ?? [];
       value={partido.fechapartido
         ? new Date(partido.fechapartido).toISOString().slice(0, 16)
         : ""}
-      required
     />
 
     <!-- Equipos -->
-    <ComboBox id="idequipolocal" label="Equipo Local" required>
+    <ComboBox id="idequipolocal" label="Equipo Local">
       <option value="" disabled>Selecciona un equipo</option>
       {
         equipos.map((equipo: Equipo) => (
@@ -113,7 +112,7 @@ const temporadas: Temporada[] = temporadaData?.results as Temporada[] ?? [];
       }
     </ComboBox>
 
-    <ComboBox id="idequipovisitante" label="Equipo Visitante" required>
+    <ComboBox id="idequipovisitante" label="Equipo Visitante">
       <option value="" disabled>Selecciona un equipo</option>
       {
         equipos.map((equipo: Equipo) => (

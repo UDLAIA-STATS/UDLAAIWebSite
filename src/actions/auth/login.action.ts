@@ -4,7 +4,6 @@ import type { LoggedUser, User } from "@interfaces/user.interface";
 import {
   errorResponseSerializer,
   successResponseSerializer,
-  usuarioSerializer,
 } from "@utils/serializers";
 
 export const login = defineAction({

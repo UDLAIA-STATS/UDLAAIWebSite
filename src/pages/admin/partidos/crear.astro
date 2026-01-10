@@ -53,7 +53,7 @@ const temporadas: Temporada[] = temporadaData?.results as Temporada[] ?? [];
     </ComboBox>
 
     <!-- Torneo -->
-    <ComboBox id="idtorneo" label="Torneo" required>
+    <ComboBox id="idtorneo" label="Torneo">
       <option value="" disabled selected>Selecciona un torneo</option>
       {
         torneos.length === 0 ? (
@@ -75,11 +75,10 @@ const temporadas: Temporada[] = temporadaData?.results as Temporada[] ?? [];
       id="fechapartido"
       label="Fecha del Partido"
       type="datetime-local"
-      required
     />
 
     <!-- Equipos -->
-    <ComboBox id="idequipolocal" label="Equipo Local" required>
+    <ComboBox id="idequipolocal" label="Equipo Local">
       <option value="" disabled selected>Selecciona un equipo</option>
       {
         equipos.map((equipo: Equipo) => (
@@ -90,7 +89,7 @@ const temporadas: Temporada[] = temporadaData?.results as Temporada[] ?? [];
       }
     </ComboBox>
 
-    <ComboBox id="idequipovisitante" label="Equipo Visitante" required>
+    <ComboBox id="idequipovisitante" label="Equipo Visitante">
       <option value="" disabled selected>Selecciona un equipo</option>
       {
         equipos.map((equipo: Equipo) => (
@@ -108,7 +107,6 @@ const temporadas: Temporada[] = temporadaData?.results as Temporada[] ?? [];
       type="number"
       min="0"
       max="100"
-      required
     />
 
     <Input
@@ -117,7 +115,6 @@ const temporadas: Temporada[] = temporadaData?.results as Temporada[] ?? [];
       type="number"
       min="0"
       max="100"
-      required
     />
 
     <FormButtons label="Crear Partido" />

@@ -1,9 +1,7 @@
-import type { Temporada } from "@interfaces/torneos.interface";
 import {
   errorResponseSerializer,
   paginationResponseSerializer,
   successResponseSerializer,
-  temporadaSerializer,
 } from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
@@ -47,13 +45,12 @@ export const getTemporadaById = defineAction({
     try {
       const res = await fetch(`${baseUrl}/temporadas/${id}/`);
       if (!res.ok) {
-        const errorData = await res.json();
-        const errorMessage = temporadaSerializer(errorData);
-        throw new Error(
-          errorMessage ||
-            errorResponseSerializer(errorData).error ||
-            `Error ${res.status}: ${res.statusText}`
-        );
+        const errorData = errorResponseSerializer(await res.json());
+        let errorMessage = errorData.error;
+        if (errorData.data) {
+          errorMessage = errorData.data;
+        }
+        throw new Error(errorMessage || `Error ${res.status}: ${res.statusText}`);
       }
       const data = successResponseSerializer(await res.json());
       return data;

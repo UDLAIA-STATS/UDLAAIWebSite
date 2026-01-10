@@ -47,27 +47,33 @@ export const Input: Component<Props> = ({
   hidden = false,
   min = "",
   max = "",
-  placecholder = ""
+  placecholder = "",
 }: Props) => {
+  const errorId = `${id}-error`;
+
   return (
-    <div class="flex gap-2 flex-col mb-2" hidden={hidden}>
-      <label for={id} class="text-base font-medium">
-        {label}
-      </label>
-      <input
-        id={id}
-        name={id}
-        maxlength={`${maxlength}`}
-        minlength={`${minlength}`}
-        min={min}
-        max={max}
-        type={type}
-        class={inputClass}
-        required={required}
-        accept={accept}
-        value={value}
-        placeholder={placecholder}
-      />
+    <div class="flex flex-col mb-2">
+      <div class="flex gap-2 flex-col" hidden={hidden}>
+        <label for={id} class="text-base font-medium">
+          {label}
+        </label>
+        <input
+          id={id}
+          name={id}
+          maxlength={`${maxlength}`}
+          minlength={`${minlength}`}
+          min={min}
+          max={max}
+          type={type}
+          class={inputClass}
+          required={required}
+          accept={accept}
+          value={value}
+          placeholder={placecholder}
+          aria-describedby={errorId}
+        />
+        <span id={errorId} class="text-white text-sm" aria-live="polite"></span>
+      </div>
     </div>
   );
 };

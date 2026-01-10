@@ -1,4 +1,4 @@
-import { errorResponseSerializer, paginationResponseSerializer, partidoSerializer, successResponseSerializer } from "@utils/serializers";
+import { errorResponseSerializer, paginationResponseSerializer, successResponseSerializer } from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 

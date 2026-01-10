@@ -1,7 +1,6 @@
 import {
   errorResponseSerializer,
   successResponseSerializer,
-  temporadaSerializer,
 } from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";

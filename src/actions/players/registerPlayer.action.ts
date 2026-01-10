@@ -3,7 +3,6 @@ import { defineAction } from "astro:actions";
 import { jugadorSchema } from "./playerSchemas";
 import {
   errorResponseSerializer,
-  jugadorSerializer,
   successResponseSerializer,
 } from "@utils/serializers";
 

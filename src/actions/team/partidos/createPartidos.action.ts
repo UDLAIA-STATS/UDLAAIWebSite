@@ -3,7 +3,6 @@ import { partidoSchema } from "./partidoSchemas";
 import type { Partido } from "@interfaces/index";
 import {
   errorResponseSerializer,
-  partidoSerializer,
   successResponseSerializer,
 } from "@utils/serializers";
 
@@ -40,7 +39,7 @@ export const createPartido = defineAction({
         let errorMessage = errorData.error;
 
         if (errorData.data) {
-          errorMessage = partidoSerializer(errorData.data);
+          errorMessage = errorData.data;
         }
         throw new Error(
           errorMessage || `Error ${res.status}: ${res.statusText}`

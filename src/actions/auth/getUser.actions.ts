@@ -6,7 +6,6 @@ import {
   errorResponseSerializer,
   paginationResponseSerializer,
   successResponseSerializer,
-  usuarioSerializer,
 } from "@utils/index";
 
 const sortableFields: (keyof User)[] = [
@@ -58,12 +57,12 @@ export const getUsers = defineAction({
       const details = await response.json();
 
       if (!response.ok) {
-        const errorMessage = usuarioSerializer(details);
-        throw new Error(
-          errorMessage ||
-            errorResponseSerializer(details).error ||
-            `Fallo al obtener usuarios: ${response.status} ${response.statusText}`
-        );
+        const errorData = errorResponseSerializer(details);
+        let errorMessage = errorData.error;
+        if (errorData.data) {
+          errorMessage = errorData.data;
+        }
+        throw new Error(errorMessage || `Error ${response.status}: ${response.statusText}`);
       }
 
       const result = paginationResponseSerializer(details);
@@ -109,12 +108,12 @@ export const getUserByUsername = defineAction({
       const details = await response.json();
 
       if (!response.ok) {
-        const errorMessage = usuarioSerializer(details);
-        throw new Error(
-          errorMessage ||
-            errorResponseSerializer(details).error ||
-            `Fallo al obtener el usuario: ${response.status} ${response.statusText}`
-        );
+        const errorData = errorResponseSerializer(details);
+        let errorMessage = errorData.error;
+        if (errorData.data) {
+          errorMessage = errorData.data;
+        }
+        throw new Error(errorMessage || `Error ${response.status}: ${response.statusText}`);
       }
       return successResponseSerializer(details);
     } catch (error) {

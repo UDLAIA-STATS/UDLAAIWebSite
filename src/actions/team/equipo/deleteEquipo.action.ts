@@ -1,4 +1,4 @@
-import { equipoSerializer, errorResponseSerializer, successResponseSerializer } from "@utils/serializers";
+import { errorResponseSerializer, successResponseSerializer } from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 

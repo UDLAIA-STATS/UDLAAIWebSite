@@ -1,6 +1,6 @@
 import { defineAction } from "astro:actions";
 import { equipoSchema } from "./equipoSchema";
-import { equipoSerializer, errorResponseSerializer, successResponseSerializer } from "@utils/serializers";
+import { errorResponseSerializer, successResponseSerializer } from "@utils/serializers";
 
 export const createEquipo = defineAction({
   accept: "form",

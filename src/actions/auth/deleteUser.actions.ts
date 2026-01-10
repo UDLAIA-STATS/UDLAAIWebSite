@@ -1,7 +1,6 @@
 import {
   errorResponseSerializer,
   successResponseSerializer,
-  usuarioSerializer,
 } from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
@@ -49,19 +48,12 @@ export const deleteUser = defineAction({
       const data = await response.json();
 
       if (!response.ok) {
-        let errorMessage
-        errorMessage = usuarioSerializer(data);
-        if ( !errorMessage ) {
-          const errorResult = errorResponseSerializer(data);
-          const errorData: string[] = errorResult.data;
-          errorMessage = errorData ? errorData.join("\n") : errorResult.error;
+        const errorData = errorResponseSerializer(data);
+        let errorMessage = errorData.error;
+        if (errorData.data) {
+          errorMessage = errorData.data;
         }
-        console.error("Error en DELETE:", errorMessage);
-        throw new Error(
-          errorMessage ||
-            errorResponseSerializer(data).error ||
-            `Error ${response.status}: ${response.statusText}`
-        );
+        throw new Error(errorMessage || "Error al eliminar el usuario.");
       }
 
       const result = successResponseSerializer(data);

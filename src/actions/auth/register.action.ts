@@ -2,7 +2,6 @@ import {
   errorResponseSerializer,
   successResponseSerializer,
 } from "@utils/serializers";
-import { usuarioSerializer } from "@utils/serializers/usuario/usuario_serializer";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import { log } from "console";

@@ -1,7 +1,6 @@
 import { defineAction } from "astro:actions";
 import { equipoUpdateSchema } from "./equipoSchema";
 import {
-  equipoSerializer,
   errorResponseSerializer,
   successResponseSerializer,
 } from "@utils/index";
@@ -40,11 +39,13 @@ export const updateEquipo = defineAction({
       if (!response.ok) {
         const errorData = errorResponseSerializer(await response.json());
         let errorMessage = errorData.error;
-        if ( errorData.data ) {
+        if (errorData.data) {
           errorMessage = errorData.data;
         }
 
-        throw new Error(errorMessage || `Error ${response.status}: ${response.statusText}`);
+        throw new Error(
+          errorMessage || `Error ${response.status}: ${response.statusText}`
+        );
       }
 
       const data = successResponseSerializer(await response.json());

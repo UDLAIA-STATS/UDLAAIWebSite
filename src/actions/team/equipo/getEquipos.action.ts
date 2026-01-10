@@ -1,4 +1,3 @@
-import type { Equipo } from "@interfaces/index";
 import {
   errorResponseSerializer,
   paginationResponseSerializer,
