@@ -9,16 +9,14 @@ import { z } from "astro:schema";
 export const updateUser = defineAction({
   accept: "form",
   input: z.object({
-    originalName: z.string().min(2).max(100),
-    name: z.string().min(2).max(100).optional(),
-    email: z.string().email().optional(),
+    originalName: z.string(),
+    name: z.string().optional(),
+    email: z.string().optional(),
     rol: z.enum(["superuser", "profesor"]).optional(),
     is_active: z.boolean().optional(),
-    password: z.string().min(8).optional(),
+    password: z.string().optional(),
   }),
-  handler: async (
-    { email, password, name, originalName, rol, is_active },
-  ) => {
+  handler: async ({ email, password, name, originalName, rol, is_active }) => {
     try {
       console.log("Actualizando usuario:", { name, email, password });
       const authUrl = import.meta.env.AUTH_URL;
@@ -44,20 +42,12 @@ export const updateUser = defineAction({
       const details = await response.json();
 
       if (!response.ok) {
-        let errorMessage;
-        errorMessage = usuarioSerializer(details);
-        if (!errorMessage) {
-          const errorData = errorResponseSerializer(details);
-          const errorResponse: string[] = errorData.data;
-          errorMessage = errorResponse.join("\n");
+        const errorData = errorResponseSerializer(details);
+        let errorMessage = errorData.error;
+        if (errorData.data) {
+          errorMessage = errorData.data;
         }
-        console.log("Error en updateUser:", errorMessage);
-        console.log("Error en updateUser (serializado):", errorResponseSerializer(details));
-        
-        throw new Error(
-          errorMessage  ||
-            `Error ${response.status}: ${response.statusText}`
-        );
+        throw new Error(errorMessage || "Error al registrar usuario");
       }
 
       return successResponseSerializer(details);

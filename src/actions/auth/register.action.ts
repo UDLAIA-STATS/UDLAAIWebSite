@@ -1,4 +1,7 @@
-import { errorResponseSerializer, successResponseSerializer } from "@utils/serializers";
+import {
+  errorResponseSerializer,
+  successResponseSerializer,
+} from "@utils/serializers";
 import { usuarioSerializer } from "@utils/serializers/usuario/usuario_serializer";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
@@ -7,13 +10,16 @@ import { log } from "console";
 export const registerUser = defineAction({
   accept: "form",
   input: z.object({
-    name: z.string().min(2).max(100),
-    email: z.string().email(),
+    name: z.string(),
+    email: z.string(),
     rol: z.enum(["superuser", "profesor"]),
-    password: z.string().min(8),
-    userCredential: z.string().min(8).max(100),
+    password: z.string(),
+    userCredential: z.string(),
   }),
-  handler: async ({ email, password, name, rol, userCredential }, { cookies }) => {
+  handler: async (
+    { email, password, name, rol, userCredential },
+    { cookies }
+  ) => {
     try {
       console.log("Registrando usuario:", { name, email, password });
       const loggedInUser = cookies.get("user")
@@ -23,7 +29,7 @@ export const registerUser = defineAction({
       const basicAuth = Buffer.from(
         `${loggedInUser?.nickname}:${userCredential}`
       ).toString("base64");
-      
+
       const response = await fetch(`${authUrl}/register/`, {
         method: "POST",
         headers: {
@@ -37,23 +43,16 @@ export const registerUser = defineAction({
           contrasenia_usuario: password,
         }),
       });
-      
+
       const details = await response.json();
 
       console.log("Respuesta del servidor:", response);
+
       if (!response.ok) {
-        let errorMessage = usuarioSerializer(details);
-
-        if (!errorMessage) {
-          const errorResults = errorResponseSerializer(details);
-          const errors: string[] | undefined = errorResults.data;
-
-          if (errors && Array.isArray(errors)) {
-            errorMessage = errors.join(" ");
-          } else {
-            const statusText = response.statusText;
-            errorMessage = errorResults.error ?? (statusText == "Forbidden" ? "Acceso denegado. Credenciales incorrectas." : "");
-          }
+        const errorData = errorResponseSerializer(details);
+        let errorMessage = errorData.error;
+        if (errorData.data) {
+          errorMessage = errorData.data;
         }
         throw new Error(errorMessage || "Error al registrar usuario");
       }

@@ -40,7 +40,7 @@ if (error || errorTemporadas) {
 }
 
 const torneo: Torneo = data?.data ?? null;
-const temporadas = dataTemporadas?.results as Temporada[] ?? [];
+const temporadas = (dataTemporadas?.results as Temporada[]) ?? [];
 
 if (!torneo) {
   Swal.fire("Error", "No se encontró el torneo solicitado", "error");
@@ -49,64 +49,66 @@ if (!torneo) {
 ---
 
 <FormLayout formTitle="Editar Torneo" pageTitle="Editar Torneo" user={user}>
-  <Input id="idtorneo" label="ID Torneo" value={torneo.idtorneo} hidden />
+  <form id="form-torneo">
+    <Input id="idtorneo" label="ID Torneo" value={torneo.idtorneo} hidden />
 
-  <!-- Nombre -->
-  <Input
-    id="nombretorneo"
-    label="Nombre del Torneo"
-    type="text"
-    value={torneo.nombretorneo ?? ""}
-  />
+    <!-- Nombre -->
+    <Input
+      id="nombretorneo"
+      label="Nombre del Torneo"
+      type="text"
+      value={torneo.nombretorneo ?? ""}
+    />
 
-  <!-- Temporada -->
-  <ComboBox id="idtemporada" label="Temporada" >
-    <option value="" disabled>Selecciona una temporada</option>
-    {
-      temporadas.map((temp) => (
-        <option
-          value={temp.idtemporada}
-          selected={temp.idtemporada === torneo.idtemporada}
-        >
-          {temp.nombretemporada}
-        </option>
-      ))
-    }
-  </ComboBox>
+    <!-- Temporada -->
+    <ComboBox id="idtemporada" label="Temporada">
+      <option value="" disabled>Selecciona una temporada</option>
+      {
+        temporadas.map((temp) => (
+          <option
+            value={temp.idtemporada}
+            selected={temp.idtemporada === torneo.idtemporada}
+          >
+            {temp.nombretemporada}
+          </option>
+        ))
+      }
+    </ComboBox>
 
-  <!-- Fechas -->
-  <Input
-    id="fechainiciotorneo"
-    label="Fecha de Inicio"
-    type="date"
-    value={torneo.fechainiciotorneo
-      ? torneo.fechainiciotorneo.split("T")[0]
-      : ""}
-  />
-  <Input
-    id="fechafintorneo"
-    label="Fecha de Fin"
-    type="date"
-    value={torneo.fechafintorneo ? torneo.fechafintorneo.split("T")[0] : ""}
-  />
+    <!-- Fechas -->
+    <Input
+      id="fechainiciotorneo"
+      label="Fecha de Inicio"
+      type="date"
+      value={torneo.fechainiciotorneo
+        ? torneo.fechainiciotorneo.split("T")[0]
+        : ""}
+    />
+    <Input
+      id="fechafintorneo"
+      label="Fecha de Fin"
+      type="date"
+      value={torneo.fechafintorneo ? torneo.fechafintorneo.split("T")[0] : ""}
+    />
 
-  <!-- Estado activo -->
-  <ComboBox id="torneoactivo" label="Activo" >
-    <option value="true" selected={torneo.torneoactivo}>Sí</option>
-    <option value="false" selected={!torneo.torneoactivo}>No</option>
-  </ComboBox>
+    <!-- Estado activo -->
+    <ComboBox id="torneoactivo" label="Activo">
+      <option value="true" selected={torneo.torneoactivo}>Sí</option>
+      <option value="false" selected={!torneo.torneoactivo}>No</option>
+    </ComboBox>
 
-  <!-- Descripción -->
-  <TextArea
-    id="descripciontorneo"
-    label="Descripción"
-    value={torneo.descripciontorneo ?? ""}
-    rows={3}
-    maxlength={250}
-  />
+    <!-- Descripción -->
+    <TextArea
+      id="descripciontorneo"
+      label="Descripción"
+      value={torneo.descripciontorneo ?? ""}
+      rows={3}
+      maxlength={250}
+    />
 
-  <!-- Botones -->
-  <FormButtons label="Actualizar Torneo" />
+    <!-- Botones -->
+    <FormButtons label="Actualizar Torneo" />
+  </form>
 </FormLayout>
 
-<script src="./scripts/edit.ts"/>
+<script src="./scripts/edit.ts"></script>

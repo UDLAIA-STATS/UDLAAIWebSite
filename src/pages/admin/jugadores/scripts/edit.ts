@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
         Swal.fire({
           icon: "error",
           title: "Error al actualizar",
-          text: error.message,
+          html: error.message,
         });
         btnSubmit.disabled = false;
         btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
       Swal.fire({
         icon: "success",
         title: "Jugador actualizado",
-        text: "Los datos del jugador se han actualizado correctamente.",
+        text: data.mensaje,
         confirmButtonText: "Aceptar",
       }).then((result) => {
         if (result.isConfirmed) {

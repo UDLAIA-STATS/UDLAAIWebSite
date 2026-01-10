@@ -26,6 +26,12 @@ const instituciones = institucionesData.results as Institucion[] ?? [];
   >
     <!-- Nombre del equipo -->
     <Input id="nombreequipo" label="Nombre del Equipo"/>
+    
+    <!-- Estado activo -->
+    <ComboBox id="equipoactivo" label="Activo">
+      <option value="true" selected>Sí</option>
+      <option value="false">No</option>
+    </ComboBox>
 
     <!-- Institución -->
     <ComboBox id="idinstitucion" label="Institución">
@@ -44,11 +50,6 @@ const instituciones = institucionesData.results as Institucion[] ?? [];
       accept="image/*"
     />
 
-    <!-- Estado activo -->
-    <ComboBox id="equipoactivo" label="Activo">
-      <option value="true" selected>Sí</option>
-      <option value="false">No</option>
-    </ComboBox>
 
     <FormButtons label="Crear Equipo" />
   </form>

@@ -9,11 +9,10 @@ export const deleteEquipo = defineAction({
     try {
       const response = await fetch(`${baseUrl}/equipos/${idequipo}/delete/`, { method: "DELETE" });
       if (!response.ok) {
-        const errorData = await response.json();
-        let errorMessage = equipoSerializer(errorData);
-        if (!errorMessage) {
-          const errorResults = errorResponseSerializer(errorData);
-          errorMessage = errorResults.data ? errorResults.data.join("\n") : errorResults.error;
+        const errorData = errorResponseSerializer(await response.json());
+        let errorMessage = errorData.error;
+        if (errorData.data) {
+          errorMessage = errorData.data;
         }
         throw new Error(errorMessage || `Error ${response.status}: ${response.statusText}`);
       }

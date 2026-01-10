@@ -42,13 +42,13 @@ export const login = defineAction({
       const details = await response.json();
 
       if (!response.ok) {
-        const errorMessage = usuarioSerializer(details);
-        console.log("Error en login:", errorMessage);
-        console.log("Error en login:", errorResponseSerializer(details));
+        const errorData = errorResponseSerializer(details);
+        let errorMessage = errorData.error;
+        if (errorData.data) {
+          errorMessage = errorData.data;
+        }
         throw new Error(
-          errorMessage ||
-            errorResponseSerializer(details).error ||
-            `Error ${response.status}: ${response.statusText}`
+          errorMessage || `Error ${response.status}: ${response.statusText}`
         );
       }
 

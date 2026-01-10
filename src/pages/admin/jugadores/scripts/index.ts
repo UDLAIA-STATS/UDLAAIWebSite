@@ -49,10 +49,10 @@ document.addEventListener("DOMContentLoaded", () => {
               idJugador: banner,
             });
             if (error) {
-              console.error("Error al desactivar el jugador:", error);
+              console.error(error.message, error);
               Swal.fire("Error", error.message, "error");
             } else {
-              Swal.fire("Éxito", "Jugador desactivado correctamente", "success").then(
+              Swal.fire("Éxito", data.mensaje, "success").then(
                 async (result) => {
                   if (result.isConfirmed) {
                     window.location.reload();

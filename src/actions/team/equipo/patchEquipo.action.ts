@@ -1,6 +1,5 @@
 import { defineAction } from "astro:actions";
 import { equipoUpdateSchema } from "./equipoSchema";
-import type { Equipo } from "@interfaces/index";
 import {
   equipoSerializer,
   errorResponseSerializer,
@@ -19,7 +18,7 @@ export const updateEquipo = defineAction({
   }) => {
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
-      const payload = !!imagenequipo
+      const payload = !!!imagenequipo
         ? {
             idinstitucion: idinstitucion,
             nombreequipo: nombreequipo,
@@ -39,13 +38,13 @@ export const updateEquipo = defineAction({
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        const errorMessage = equipoSerializer(errorData);
-        throw new Error(
-          errorMessage ||
-            errorResponseSerializer(errorData).error ||
-            `Error ${response.status}: ${response.statusText}`
-        );
+        const errorData = errorResponseSerializer(await response.json());
+        let errorMessage = errorData.error;
+        if ( errorData.data ) {
+          errorMessage = errorData.data;
+        }
+
+        throw new Error(errorMessage || `Error ${response.status}: ${response.statusText}`);
       }
 
       const data = successResponseSerializer(await response.json());

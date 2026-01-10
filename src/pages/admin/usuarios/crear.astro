@@ -18,21 +18,20 @@ const { super: superRole } = roles;
   pageTitle="Registro de Usuario"
 >
   <form autocomplete="on" method="post">
-    <Input id="name" label="Nombre" maxlength={100} minlength={3} required />
+    <Input id="name" label="Nombre" maxlength={100} minlength={3}/>
 
     <ComboBox id="rol" label="Rol">
       <option value="superuser" selected={superRole}>Administrador</option>
       <option value="profesor">Profesor</option>
     </ComboBox>
 
-    <Input id="email" label="Correo Electrónico" type="email" required />
+    <Input id="email" label="Correo Electrónico" type="email"/>
     <Input
       id="password"
       label="Contraseña"
       type="password"
       maxlength={30}
       minlength={8}
-      required
     />
 
     <FormButtons label="Registrar Usuario" />

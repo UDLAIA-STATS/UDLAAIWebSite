@@ -1,12 +1,22 @@
 import { defineAction } from "astro:actions";
 import { torneoUpdateSchema } from "./torneoSchema";
-import type { Torneo } from "@interfaces/torneos.interface";
-import { errorResponseSerializer, successResponseSerializer, torneoSerializer } from "@utils/serializers";
+import {
+  errorResponseSerializer,
+  successResponseSerializer,
+} from "@utils/serializers";
 
 export const updateTorneo = defineAction({
   accept: "form",
   input: torneoUpdateSchema,
-  handler: async ({ descripciontorneo, fechafintorneo, fechainiciotorneo, idtorneo, nombretorneo, torneoactivo, idtemporada}) => {
+  handler: async ({
+    descripciontorneo,
+    fechafintorneo,
+    fechainiciotorneo,
+    idtorneo,
+    nombretorneo,
+    torneoactivo,
+    idtemporada,
+  }) => {
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
       const res = await fetch(`${baseUrl}/torneos/${idtorneo}/update/`, {
@@ -18,14 +28,20 @@ export const updateTorneo = defineAction({
           fechainiciotorneo: fechainiciotorneo,
           nombretorneo: nombretorneo,
           torneoactivo: torneoactivo,
-          idtemporada: idtemporada
+          idtemporada: idtemporada,
         }),
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
-        const errorMessage = torneoSerializer(errorData);
-        throw new Error(errorMessage || errorResponseSerializer(errorData).error || `Error ${res.status}: ${res.statusText}`);
+        const errorData = errorResponseSerializer(await res.json());
+        let errorMessage = errorData.error;
+
+        if (errorData.data) {
+          errorMessage = errorData.data;
+        }
+        throw new Error(
+          errorMessage || `Error ${res.status}: ${res.statusText}`
+        );
       }
 
       const data = successResponseSerializer(await res.json());

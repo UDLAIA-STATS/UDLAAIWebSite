@@ -17,13 +17,12 @@ export const deleteTemporada = defineAction({
         method: "DELETE",
       });
       if (!res.ok) {
-        const errorData = await res.json();
-        const errorMessage = temporadaSerializer(errorData);
-        throw new Error(
-          errorMessage ||
-            errorResponseSerializer(errorData).error ||
-            `Error ${res.status}: ${res.statusText}`
-        );
+        const errorData = errorResponseSerializer(await res.json());
+        let errorMessage = errorData.error;
+        if (errorData.data) {
+          errorMessage = errorData.data;
+        }
+        throw new Error(errorMessage || `Error ${res.status}: ${res.statusText}`);
       }
       const response = successResponseSerializer(await res.json());
       return response;

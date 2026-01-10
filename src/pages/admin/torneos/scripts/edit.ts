@@ -5,6 +5,7 @@ import { privateRoutesMap } from "@consts/routes";
 import {
   validateTorneo,
   isTorneoUpdated,
+  setLimitDatesTorneo,
 } from "@utils/validation/partidos/torneo-validation";
 import type { Torneo } from "@interfaces/index";
 
@@ -16,27 +17,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     "idtemporada"
   ) as HTMLSelectElement;
 
+  const selectedValue = temporadasSelect.value;
+  await setLimitDatesTorneo(Number(selectedValue));
+
   form.addEventListener("submit", (e) => e.preventDefault());
 
   temporadasSelect.addEventListener("change", async () => {
     const selectedValue = temporadasSelect.value;
-    const data = await actions.getTemporadaById.orThrow({
-      id: Number(selectedValue),
-    });
-    const temporada = data.data;
-    const fechaInicioInput = document.getElementById(
-      "fechainiciotorneo"
-    ) as HTMLInputElement;
-    const fechaFinInput = document.getElementById(
-      "fechafintorneo"
-    ) as HTMLInputElement;
-
-    fechaInicioInput.value = temporada.fechainiciotemporada.split("T")[0];
-    fechaInicioInput.min = temporada.fechainiciotemporada.split("T")[0];
-    fechaInicioInput.max = temporada.fechafintemporada.split("T")[0];
-    fechaFinInput.value = temporada.fechafintemporada.split("T")[0];
-    fechaFinInput.min = temporada.fechainiciotemporada.split("T")[0];
-    fechaFinInput.max = temporada.fechafintemporada.split("T")[0];
+    await setLimitDatesTorneo(Number(selectedValue));
   });
   btnCancel.addEventListener("click", (e) => {
     e.preventDefault();
@@ -88,17 +76,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       const { data, error } = await actions.updateTorneo(formData);
 
       if (error) {
-        Swal.fire(
-          "Error",
-          error.message || "No se pudo actualizar el torneo",
-          "error"
-        );
+        Swal.fire({
+          icon: "error",
+          title: "Error al actualizar torneo",
+          html: error.message,
+        });
         btnSubmit.disabled = false;
         btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
         return;
       }
 
-      Swal.fire("Éxito", "Torneo actualizado correctamente", "success").then(
+      Swal.fire("Éxito", data.mensaje, "success").then(
         () => {
           navigate(privateRoutesMap.VER_TORNEOS);
         }

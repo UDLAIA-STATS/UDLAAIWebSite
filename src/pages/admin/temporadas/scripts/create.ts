@@ -59,7 +59,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       const { data, error } = await actions.createTemporada(formData);
 
       if (error) {
-        Swal.fire("Error", error.message, "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error al crear temporada",
+          html: error.message,
+        });
         btnSubmit.disabled = false;
         btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
         return;

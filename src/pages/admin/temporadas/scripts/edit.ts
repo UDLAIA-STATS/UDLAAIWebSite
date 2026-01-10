@@ -80,7 +80,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       const { data, error } = await actions.updateTemporada(formData);
 
       if (error) {
-        Swal.fire("Error", error.message, "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error al actualizar temporada",
+          html: error.message,
+        });
       } else {
         Swal.fire(
           "Éxito",

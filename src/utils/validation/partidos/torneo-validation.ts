@@ -1,4 +1,5 @@
 import type { Torneo } from "@interfaces/index";
+import { actions } from "astro:actions";
 
 export const validateTorneo = (formData: FormData): string => {
   const nombreTorneo = (formData.get("nombretorneo") as string)?.trim() ?? "";
@@ -75,3 +76,24 @@ export const isTorneoUpdated = (torneo: Torneo, formData: FormData): boolean => 
 
   return cambiosDetectados;
 };
+
+export const setLimitDatesTorneo = async (temporalidadId: number) => {
+    const data = await actions.getTemporadaById.orThrow({
+      id: Number(temporalidadId),
+    });
+    const temporada = data.data;
+    const fechaInicioInput = document.getElementById(
+      "fechainiciotorneo"
+    ) as HTMLInputElement;
+    const fechaFinInput = document.getElementById(
+      "fechafintorneo"
+    ) as HTMLInputElement;
+
+    fechaInicioInput.value = temporada.fechainiciotemporada.split("T")[0];
+    fechaInicioInput.min = temporada.fechainiciotemporada.split("T")[0];
+    fechaInicioInput.max = temporada.fechafintemporada.split("T")[0];
+    fechaFinInput.value = temporada.fechafintemporada.split("T")[0];
+    fechaFinInput.min = temporada.fechainiciotemporada.split("T")[0];
+    fechaFinInput.max = temporada.fechafintemporada.split("T")[0];
+
+}

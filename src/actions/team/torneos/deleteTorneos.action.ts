@@ -1,4 +1,3 @@
-import type { Torneo } from "@interfaces/index";
 import {
   errorResponseSerializer,
   successResponseSerializer,
@@ -19,17 +18,12 @@ export const deleteTorneo = defineAction({
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
-        let errorMessage = torneoSerializer(errorData);
-        if (!errorMessage) {
-          const errorResults: string[] = errorResponseSerializer(errorData).data;
-          errorMessage = errorResults.join("\n");
+        const errorData = errorResponseSerializer(await res.json());
+        let errorMessage = errorData.error;
+        if (errorData.data) {
+          errorMessage = errorData.data;
         }
-        throw new Error(
-          errorMessage ||
-            errorResponseSerializer(errorData).error ||
-            `Error ${res.status}: ${res.statusText}`
-        );
+        throw new Error(errorMessage || `Error ${res.status}: ${res.statusText}`);
       }
 
       const data = successResponseSerializer(await res.json());

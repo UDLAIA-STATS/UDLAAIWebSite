@@ -1,8 +1,10 @@
 import type { Temporada } from "@interfaces/torneos.interface";
 import { defineAction } from "astro:actions";
 import { temporadaSchema } from "./temporadasSchema";
-import { errorResponseSerializer, successResponseSerializer, temporadaSerializer } from "@utils/serializers";
-
+import {
+  errorResponseSerializer,
+  successResponseSerializer,
+} from "@utils/serializers";
 
 export const createTemporada = defineAction({
   accept: "form",
@@ -27,18 +29,19 @@ export const createTemporada = defineAction({
           fechafintemporada: fechafintemporada,
         }),
       });
+
       if (!res.ok) {
-        const errorData = await res.json();
-        let errorMessage;
-        errorMessage = temporadaSerializer(errorData);
+        const errorData = errorResponseSerializer(await res.json());
+        let errorMessage = errorData.error;
 
-        if (!errorMessage) {
-          const errorResults: string[] = errorResponseSerializer(errorData).data;
-          errorMessage = errorResults.join("\n");
+        if (errorData.data) {
+          errorMessage = errorData.data;
         }
-
-        throw new Error(errorMessage || `Error ${res.status}: ${res.statusText}`);
+        throw new Error(
+          errorMessage || `Error ${res.status}: ${res.statusText}`
+        );
       }
+
       const data = successResponseSerializer(await res.json());
       return data;
     } catch (err) {

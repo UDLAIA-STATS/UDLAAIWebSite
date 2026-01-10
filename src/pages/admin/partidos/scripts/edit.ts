@@ -97,7 +97,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       const { data, error } = await actions.updatePartido(formData);
 
       if (error || !data) {
-        Swal.fire("Error", error.message ?? "Error al actualizar el partido", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error al actualizar",
+          html: error.message,
+        });
         activateButton(btnSubmit);
         return;
       }

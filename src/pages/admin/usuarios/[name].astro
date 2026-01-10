@@ -49,7 +49,6 @@ const loggedUser = Astro.cookies.get("user")
       value={user.nombre_usuario}
       maxlength={100}
       minlength={3}
-      required
     />
 
     <ComboBox id="rol" label="Rol">
@@ -72,7 +71,6 @@ const loggedUser = Astro.cookies.get("user")
       type="email"
       value={user.email_usuario}
       maxlength={70}
-      required
     />
     <Input
       id="password"

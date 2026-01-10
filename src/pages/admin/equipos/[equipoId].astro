@@ -38,7 +38,6 @@ const equipo = equipoData.data;
 // Convertir el logo binario a base64 si existe
 const logoEquipo = equipo.imagenequipo ?? null;
 ---
-
 <FormLayout formTitle="Editar Equipo" pageTitle="Editar Equipo" user={user}>
   <form id="form-equipo" class="flex flex-col w-full max-w-md">
     <Input id="idequipo" label="ID del Equipo" value={equipo.idequipo} hidden />
@@ -59,7 +58,11 @@ const logoEquipo = equipo.imagenequipo ?? null;
         ))
       }
     </ComboBox>
-    <!-- Nuevo logo -->
+
+    <ComboBox id="equipoactivo" label="Activo">
+      <option value="true" selected={equipo.equipoactivo}>Sí</option>
+      <option value="false" selected={!equipo.equipoactivo}>No</option>
+    </ComboBox>
     
      <Input id="imagenequipo" label="Cambiar logo (opcional)" type="file" accept="image/*" />
 
@@ -76,15 +79,11 @@ const logoEquipo = equipo.imagenequipo ?? null;
       )
     }
 
-    <!-- Estado activo -->
-    <ComboBox id="equipoactivo" label="Activo">
-      <option value="true" selected={equipo.equipoactivo}>Sí</option>
-      <option value="false" selected={!equipo.equipoactivo}>No</option>
-    </ComboBox>
     </div>
 
     <!-- Botones -->
      <FormButtons label="Actualizar Equipo" />
+     </form>
 </FormLayout>
 
 <script src="./scripts/edit.ts"/>

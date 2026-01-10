@@ -21,14 +21,12 @@ export const getTemporadas = defineAction({
         `${baseUrl}/temporadas/all/?page=${page}&offset=${pageSize}`
       );
       if (!res.ok) {
-        const errorData = await res.json();
-        let errorMessage = temporadaSerializer(errorData);
-        if (!errorMessage) {
-          errorMessage = errorResponseSerializer(errorData).error;
+        const errorData = errorResponseSerializer(await res.json());
+        let errorMessage = errorData.error;
+        if (errorData.data) {
+          errorMessage = errorData.data;
         }
-        throw new Error(
-          errorMessage || `Error ${res.status}: ${res.statusText}`
-        );
+        throw new Error(errorMessage || `Error ${res.status}: ${res.statusText}`);
       }
 
       

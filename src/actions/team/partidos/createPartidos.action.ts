@@ -1,12 +1,24 @@
 import { defineAction } from "astro:actions";
 import { partidoSchema } from "./partidoSchemas";
 import type { Partido } from "@interfaces/index";
-import { errorResponseSerializer, partidoSerializer, successResponseSerializer } from "@utils/serializers";
+import {
+  errorResponseSerializer,
+  partidoSerializer,
+  successResponseSerializer,
+} from "@utils/serializers";
 
 export const createPartido = defineAction({
   accept: "form",
   input: partidoSchema,
-  handler: async ({ fechapartido, idequipolocal, idequipovisitante, idtorneo, idtemporada, marcadorequipolocal, marcadorequipovisitante }) => {
+  handler: async ({
+    fechapartido,
+    idequipolocal,
+    idequipovisitante,
+    idtorneo,
+    idtemporada,
+    marcadorequipolocal,
+    marcadorequipovisitante,
+  }) => {
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
       const res = await fetch(`${baseUrl}/partidos/`, {
@@ -24,21 +36,24 @@ export const createPartido = defineAction({
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
-        let errorMessage = partidoSerializer(errorData);
+        const errorData = errorResponseSerializer(await res.json());
+        let errorMessage = errorData.error;
 
-        if (!errorMessage) {
-          const errorResults = errorResponseSerializer(errorData);
-          errorMessage = errorResults.data ? errorResults.data.join("\n") : errorResults.error;
+        if (errorData.data) {
+          errorMessage = partidoSerializer(errorData.data);
         }
-        throw new Error(errorMessage || `Error ${res.status}: ${res.statusText}`);
+        throw new Error(
+          errorMessage || `Error ${res.status}: ${res.statusText}`
+        );
       }
 
       const data = successResponseSerializer(await res.json());
       return data;
     } catch (err) {
       console.error("Error al crear partido:", err);
-      throw new Error(err instanceof Error ? err.message : "No se pudo crear el partido");
+      throw new Error(
+        err instanceof Error ? err.message : "No se pudo crear el partido"
+      );
     }
   },
 });

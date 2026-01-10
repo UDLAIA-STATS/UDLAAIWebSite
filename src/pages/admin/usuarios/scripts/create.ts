@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       confirmButtonText: "Aceptar",
       cancelButtonText: "Cancelar",
       showLoaderOnConfirm: true,
-      preConfirm: async (userCredential) => {
+      preConfirm: async ( userCredential) => {
         if (!userCredential) {
           Swal.showValidationMessage("La contraseña es requerida");
           return;
@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.log("Success:", data);
         await Swal.fire({
           icon: "success",
-          title: "Registro de usuario exitoso",
+          title: data.mensaje,
         });
       }
       activateButton(btnSubmit);

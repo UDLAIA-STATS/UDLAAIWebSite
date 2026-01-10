@@ -1,7 +1,6 @@
-import type { Equipo } from "@interfaces/index";
 import { defineAction } from "astro:actions";
 import { equipoSchema } from "./equipoSchema";
-import { successResponseSerializer } from "@utils/serializers";
+import { equipoSerializer, errorResponseSerializer, successResponseSerializer } from "@utils/serializers";
 
 export const createEquipo = defineAction({
   accept: "form",
@@ -9,7 +8,7 @@ export const createEquipo = defineAction({
   handler: async ( { idinstitucion, nombreequipo, imagenequipo, equipoactivo } ) => {
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
-      const payload = !!imagenequipo ? {
+      const payload = !!!imagenequipo ? {
         idinstitucion: idinstitucion,
         nombreequipo: nombreequipo,
         equipoactivo: equipoactivo
@@ -19,6 +18,7 @@ export const createEquipo = defineAction({
         imagenequipo: imagenequipo,
         equipoactivo: equipoactivo
       }
+      console.log("Payload to send:", payload);
 
       const response = await fetch(`${baseUrl}/equipos/`, {
         method: "POST",
@@ -28,8 +28,13 @@ export const createEquipo = defineAction({
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.non_field_errors || `Error ${response.status}: ${response.statusText}`);
+        const errorData = errorResponseSerializer(await response.json());
+        let errorMessage = errorData.error;
+        if ( errorData.data ) {
+          errorMessage = errorData.data;
+        }
+
+        throw new Error(errorMessage || `Error ${response.status}: ${response.statusText}`);
       }
 
       const data = successResponseSerializer(await response.json());

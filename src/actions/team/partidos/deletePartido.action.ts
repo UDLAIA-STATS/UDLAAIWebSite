@@ -12,11 +12,10 @@ export const deletePartido = defineAction({
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
-        let errorMessage = partidoSerializer(errorData);
-        if (!errorMessage) {
-          const errorResults: string[] = errorResponseSerializer(errorData).data;
-          errorMessage = errorResults.join("\n");
+        const errorData = errorResponseSerializer(await res.json());
+        let errorMessage = errorData.error;
+        if (errorData.data) {
+          errorMessage = errorData.data;
         }
         throw new Error(errorMessage || `Error ${res.status}: ${res.statusText}`);
       }

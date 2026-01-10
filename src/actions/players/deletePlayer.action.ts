@@ -1,3 +1,7 @@
+import {
+  errorResponseSerializer,
+  successResponseSerializer,
+} from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 
@@ -12,11 +16,18 @@ export const deleteJugador = defineAction({
           method: "DELETE",
         }
       );
-      if (!response.ok)
+      if (!response.ok) {
+        const errorData = errorResponseSerializer(await response.json());
+        let errorMessage = errorData.error;
+        if (errorData.data) {
+          errorMessage = errorData.data;
+        }
         throw new Error(
-          "Error al eliminar jugador (puede estar asociado a un equipo)"
+          errorMessage || `Error ${response.status}: ${response.statusText}`
         );
-      return { success: true };
+      }
+      const data = successResponseSerializer(await response.json());
+      return data;
     } catch (error) {
       console.error(`Error al eliminar el jugador:`, error);
       throw new Error(

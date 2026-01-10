@@ -1,14 +1,14 @@
 import { z } from "astro:schema";
 
 export const temporadaSchema = z.object({
-  nombretemporada: z.string().min(2).max(250),
-  descripciontemporada: z.string().min(2).max(250),
+  nombretemporada: z.string(),
+  descripciontemporada: z.string(),
   tipotemporada: z.enum(["Oficial", "Amistosa"]),
-  fechainiciotemporada: z.string().datetime(),
-  fechafintemporada: z.string().datetime(),
+  fechainiciotemporada: z.string(),
+  fechafintemporada: z.string(),
   temporadaactiva: z.boolean().optional(),
 });
 
 export const temporadaUpdateSchema = temporadaSchema.extend({
-  idtemporada: z.number().int().positive(),
+  idtemporada: z.number(),
 });

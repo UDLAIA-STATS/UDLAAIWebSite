@@ -1,4 +1,4 @@
-import { paginationResponseSerializer } from "@utils/serializers";
+import { errorResponseSerializer, paginationResponseSerializer } from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 
@@ -22,7 +22,12 @@ export const getDataByFilter = defineAction({
     try {
       const response = await fetch(endpoint);
       if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+        const errorData = errorResponseSerializer(await response.json());
+        let errorMessage = errorData.error;
+        if (errorData.data) {
+          errorMessage = errorData.data;
+        }
+        throw new Error(errorMessage || `Error ${response.status}: ${response.statusText}`);
       }
 
       const data = await response.json();

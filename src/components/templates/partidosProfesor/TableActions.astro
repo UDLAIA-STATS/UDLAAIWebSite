@@ -43,7 +43,7 @@ const orderParam = searchParams.get("orderBy") ?? "asc";
           <button class={buttonClass} id="limpiar-filtros">Limpiar filtros</button>
           <div class="flex flex-col text-sm font-medium">
             <label for="sortBySelect" class="text-gray-700 mb-1">
-              Filtrar por
+              Ordenar por
             </label>
             <select
               id="sortBySelect"
@@ -67,7 +67,7 @@ const orderParam = searchParams.get("orderBy") ?? "asc";
           </div>
           <div class="flex flex-col text-sm font-medium">
             <label for="orderBySelect" class="text-gray-700 mb-1">
-              Ordenar por
+              Ordenar
             </label>
             <select
               id="orderBySelect"
@@ -80,10 +80,10 @@ const orderParam = searchParams.get("orderBy") ?? "asc";
                 -- Selecciona --
               </option>
               <option value="asc" selected={orderParam === "asc"}>
-                Asc
+                Ascendente
               </option>
               <option value="desc" selected={orderParam === "desc"}>
-                Desc
+                Descendente
               </option>
             </select>
           </div>

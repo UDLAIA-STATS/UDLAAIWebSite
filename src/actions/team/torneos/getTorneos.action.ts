@@ -1,9 +1,7 @@
-import type { Torneo } from "@interfaces/index";
 import {
   errorResponseSerializer,
   paginationResponseSerializer,
   successResponseSerializer,
-  torneoSerializer,
 } from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
@@ -21,12 +19,13 @@ export const getTorneos = defineAction({
         `${baseUrl}/torneos/all/?page=${page}&offset=${pageSize}`
       );
       if (!res.ok) {
-        const errorData = await res.json();
-        const errorMessage = torneoSerializer(errorData);
+        const errorData = errorResponseSerializer(await res.json());
+        let errorMessage = errorData.error;
+        if (errorData.data) {
+          errorMessage = errorData.data;
+        }
         throw new Error(
-          errorMessage ||
-            errorResponseSerializer(errorData).error ||
-            `Error ${res.status}: ${res.statusText}`
+          errorMessage || `Error ${res.status}: ${res.statusText}`
         );
       }
       const data = paginationResponseSerializer(await res.json());
@@ -45,12 +44,13 @@ export const getTorneoById = defineAction({
     try {
       const res = await fetch(`${baseUrl}/torneos/${id}/`);
       if (!res.ok) {
-        const errorData = await res.json();
-        const errorMessage = torneoSerializer(errorData);
+        const errorData = errorResponseSerializer(await res.json());
+        let errorMessage = errorData.error;
+        if (errorData.data) {
+          errorMessage = errorData.data;
+        }
         throw new Error(
-          errorMessage ||
-            errorResponseSerializer(errorData).error ||
-            `Error ${res.status}: ${res.statusText}`
+          errorMessage || `Error ${res.status}: ${res.statusText}`
         );
       }
       const data = successResponseSerializer(await res.json());

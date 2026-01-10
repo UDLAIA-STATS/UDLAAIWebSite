@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           await Swal.fire({
             icon: "error",
             title: "Error al actualizar el usuario",
-            text: error.message,
+            html: error.message,
           });
           activateButton(btnSubmit);
           return;

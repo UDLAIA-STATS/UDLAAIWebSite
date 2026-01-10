@@ -2,7 +2,7 @@ import Swal from "sweetalert2";
 import { actions } from "astro:actions";
 import { navigate } from "astro:transitions/client";
 import { privateRoutesMap } from "@consts/routes";
-import { validateTorneo } from "@utils/validation/partidos/torneo-validation";
+import { setLimitDatesTorneo, validateTorneo } from "@utils/validation/partidos/torneo-validation";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const btnSubmit = document.getElementById("btn-submit") as HTMLButtonElement;
@@ -14,23 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   temporadasSelect.addEventListener("change", async () => {
     const selectedValue = temporadasSelect.value;
-    const data = await actions.getTemporadaById.orThrow({
-      id: Number(selectedValue),
-    });
-    const temporada = data.data;
-    const fechaInicioInput = document.getElementById(
-      "fechainiciotorneo"
-    ) as HTMLInputElement;
-    const fechaFinInput = document.getElementById(
-      "fechafintorneo"
-    ) as HTMLInputElement;
-
-    fechaInicioInput.value = temporada.fechainiciotemporada.split("T")[0];
-    fechaInicioInput.min = temporada.fechainiciotemporada.split("T")[0];
-    fechaInicioInput.max = temporada.fechafintemporada.split("T")[0];
-    fechaFinInput.value = temporada.fechafintemporada.split("T")[0];
-    fechaFinInput.min = temporada.fechainiciotemporada.split("T")[0];
-    fechaFinInput.max = temporada.fechafintemporada.split("T")[0];
+    await setLimitDatesTorneo(Number(selectedValue));
   });
 
   btnCancel.addEventListener("click", () => {
@@ -47,7 +31,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const errorMessage = validateTorneo(formData);
 
     if (errorMessage) {
-      Swal.fire("Error", errorMessage, "error");
+      Swal.fire({
+        icon: "error",
+        title: "Error de validación",
+        text: errorMessage,
+      });
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
       return;
@@ -68,13 +56,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       const { data, error } = await actions.createTorneo(formData);
 
       if (error) {
-        Swal.fire("Error", error.message, "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error al crear torneo",
+          html: error.message,
+        });
         btnSubmit.disabled = false;
         btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
         return;
       }
 
-      Swal.fire("Éxito", "Torneo creado exitosamente", "success").then(() => {
+      Swal.fire("Éxito", data.mensaje, "success").then(() => {
         navigate(privateRoutesMap.VER_TORNEOS);
       });
 

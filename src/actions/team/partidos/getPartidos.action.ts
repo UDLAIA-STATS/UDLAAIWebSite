@@ -1,8 +1,6 @@
-import type { Partido } from "@interfaces/index";
 import { errorResponseSerializer, paginationResponseSerializer, partidoSerializer, successResponseSerializer } from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import debug from "debug";
 
 export const getPartidos = defineAction({
   accept: "json",
@@ -15,9 +13,12 @@ export const getPartidos = defineAction({
     try {
       const res = await fetch(`${baseUrl}/partidos/all/?page=${page}&offset=${pageSize}`);
       if (!res.ok) {
-        const errorData = await res.json();
-        const errorMessage = partidoSerializer(errorData);
-        throw new Error(errorMessage || errorResponseSerializer(errorData).error || `Error ${res.status}: ${res.statusText}`);
+        const errorData = errorResponseSerializer(await res.json());
+        let errorMessage = errorData.error;
+        if (errorData.data) {
+          errorMessage = errorData.data;
+        }
+        throw new Error(errorMessage || `Error ${res.status}: ${res.statusText}`);
       };
       const data = paginationResponseSerializer(await res.json());
       console.log('Datos obtenidos de partido' + data)
@@ -38,9 +39,12 @@ export const getPartidoById = defineAction({
     try {
       const res = await fetch(`${baseUrl}/partidos/${id}/`);
       if (!res.ok) {
-        const errorData = await res.json();
-        const errorMessage = partidoSerializer(errorData);
-        throw new Error(errorMessage || errorResponseSerializer(errorData).error || `Error ${res.status}: ${res.statusText}`);
+        const errorData = errorResponseSerializer(await res.json());
+        let errorMessage = errorData.error;
+        if (errorData.data) {
+          errorMessage = errorData.data;
+        }
+        throw new Error(errorMessage || `Error ${res.status}: ${res.statusText}`);
       }
       const data = successResponseSerializer(await res.json());
       return data;

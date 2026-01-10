@@ -110,7 +110,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       const { data, error } = await actions.createPartido(formData);
 
       if (error || !data) {
-        Swal.fire("Error", error.message, "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error al actualizar",
+          html: error.message,
+        });
         activateButton(btnSubmit);
         return;
       }

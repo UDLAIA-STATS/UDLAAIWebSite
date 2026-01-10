@@ -1,10 +1,8 @@
 import { defineAction } from "astro:actions";
 import { torneoSchema } from "./torneoSchema";
-import type { Torneo } from "@interfaces/torneos.interface";
 import {
   errorResponseSerializer,
   successResponseSerializer,
-  torneoSerializer,
 } from "@utils/serializers";
 
 export const createTorneo = defineAction({
@@ -34,12 +32,14 @@ export const createTorneo = defineAction({
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
-        const errorMessage = torneoSerializer(errorData);
+        const errorData = errorResponseSerializer(await res.json());
+        let errorMessage = errorData.error;
+
+        if (errorData.data) {
+          errorMessage = errorData.data;
+        }
         throw new Error(
-          errorMessage ||
-            errorResponseSerializer(errorData).error ||
-            `Error ${res.status}: ${res.statusText}`
+          errorMessage || `Error ${res.status}: ${res.statusText}`
         );
       }
 
