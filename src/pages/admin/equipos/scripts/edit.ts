@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (error) {
         await Swal.fire("Error", error.message, "error");
       } else {
-        await Swal.fire("Éxito", "Equipo actualizado correctamente", "success");
+        await Swal.fire("Equipo actualizado", "Equipo actualizado correctamente", "success");
         navigate(privateRoutesMap.VER_EQUIPOS);
       }
     } catch (err) {

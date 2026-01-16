@@ -1,6 +1,5 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import debug from "debug";
 import axios from "axios";
 
 export const uploadVideo = defineAction({

@@ -93,7 +93,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           activateButton(btnSubmit);
           return;
         }
-        Swal.fire("Éxito", data.mensaje, "success").then((result) => {
+        Swal.fire("Usuario actualizado", data.mensaje, "success").then((result) => {
           if (result.isConfirmed) {
             navigate(privateRoutesMap.ADMINS_USERS);
           }

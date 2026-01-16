@@ -88,8 +88,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
       } else {
         Swal.fire(
-          "Éxito",
-          "Temporada actualizada correctamente",
+          "Temporada Actualizada",
+          data.mensaje ?? "Temporada actualizada correctamente",
           "success"
         ).then(() => {
           navigate(privateRoutesMap.VER_TEMPORADAS);

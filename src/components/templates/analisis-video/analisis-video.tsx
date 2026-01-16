@@ -114,7 +114,7 @@ export default function VideoContainer() {
       console.error("Error enviando video:", error);
       Swal.fire({
         icon: "error",
-        title: "Error al subir",
+        title: "Error al subir el video",
         text:
           error instanceof Error
             ? error.message

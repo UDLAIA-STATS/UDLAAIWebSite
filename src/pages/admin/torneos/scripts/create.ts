@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      Swal.fire("Éxito", data.mensaje, "success").then(() => {
+      Swal.fire("Torneo creado", data.mensaje, "success").then(() => {
         navigate(privateRoutesMap.VER_TORNEOS);
       });
 

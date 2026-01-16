@@ -13,10 +13,9 @@ export const registerUser = defineAction({
     email: z.string(),
     rol: z.enum(["superuser", "profesor"]),
     password: z.string(),
-    userCredential: z.string(),
   }),
   handler: async (
-    { email, password, name, rol, userCredential },
+    { email, password, name, rol },
     { cookies }
   ) => {
     try {
@@ -25,15 +24,12 @@ export const registerUser = defineAction({
         ? (JSON.parse(cookies.get("user")?.value as string) as LoggedUser)
         : null;
       const authUrl = import.meta.env.AUTH_URL;
-      const basicAuth = Buffer.from(
-        `${loggedInUser?.nickname}:${userCredential}`
-      ).toString("base64");
+
 
       const response = await fetch(`${authUrl}/register/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Basic ${basicAuth}`,
         },
         body: JSON.stringify({
           nombre_usuario: name,

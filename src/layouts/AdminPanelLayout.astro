@@ -4,6 +4,7 @@ import Navbar from "@components/organisms/Navbar.astro";
 import Footer from "@components/organisms/Footer.astro";
 import { roles } from "@consts/index";
 import NotAuthorized from "@components/organisms/NotAuthorized.astro";
+import { navigate } from "astro:transitions/client";
 
 interface Props {
   title: string;
@@ -16,6 +17,10 @@ const user: LoggedUser | null = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
 const { super: superRole, profesor } = roles;
+
+if (!user || (user.rol !== superRole && user.rol !== profesor)) {
+  navigate("/");
+}
 ---
 
 <!doctype html>

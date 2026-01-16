@@ -123,7 +123,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      Swal.fire("Éxito", data.mensaje, "success").then((result) => {
+      Swal.fire("Partido creado", data.mensaje, "success").then((result) => {
         if (result.isConfirmed) {
           navigate(privateRoutesMap.VER_PARTIDOS);
           form.reset();

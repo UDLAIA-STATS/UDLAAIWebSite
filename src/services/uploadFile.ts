@@ -8,12 +8,14 @@ export const uploadFile = async (
 ): Promise<{ ok: true; key: string }> => {
   try {
     const uploadApi = import.meta.env.PUBLIC_UPLOAD_SERVICE_URL;
-
+    const workerUrl = import.meta.env.PUBLIC_WORKER_URL;
+//`${uploadApi}/generate-key/`
     const generatedKey = await axios.post(`${uploadApi}/generate-key/`, {
       video_name: file.name,
     });
 
     const videoKey = generatedKey.data.video_key;
+    console.log("Generated video key:", videoKey);
 
     suscribeVideoUpload(videoKey, onProgress);
 
@@ -21,6 +23,7 @@ export const uploadFile = async (
     formData.append("video", file);
     formData.append("id_partido", String(partidoId));
     formData.append("video_key", videoKey);
+    console.log("Form data: ", Array.from(formData.entries()));
 
     const res = await axios.post(`${uploadApi}/upload/`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
@@ -36,7 +39,7 @@ export const uploadFile = async (
         err.response?.data.error ||
         err.message ||
         "Error desconocido del servidor";
-      throw new Error(`Error del backend: ${backendMessage}`);
+      throw new Error(`Error al subir el video: ${backendMessage}`);
     }
 
     throw new Error("Error inesperado al subir el video.");

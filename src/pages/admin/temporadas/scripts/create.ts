@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      Swal.fire("Éxito", data.mensaje, "success").then(() => {
+      Swal.fire("Temporada creada", data.mensaje, "success").then(() => {
         navigate(privateRoutesMap.VER_TEMPORADAS);
       });
 

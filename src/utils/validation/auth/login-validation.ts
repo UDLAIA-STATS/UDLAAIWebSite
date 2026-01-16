@@ -23,7 +23,8 @@ const validateLogin = (formData: FormData): boolean => {
 
   if (username.length === 0 && password.length === 0) {
     // mensaje global del formulario (si existe un span con id 'form-error')
-    setFieldError("form", "Por favor, complete todos los campos requeridos.");
+    setFieldError("name", "Por favor, ingrese el nombre de usuario.");
+    setFieldError("password", "Por favor, ingrese la contraseña.");
     hasErrors = true;
   }
 

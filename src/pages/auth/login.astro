@@ -27,13 +27,12 @@ const loggedInUser = Astro.cookies.get("user")
       </div>
       <div id="register-form" class="flex flex-col gap-5">
         <form autocomplete="on" data-astro-reload>
-          <Input id="name" label="Usuario" required maxlength={70} />
+          <Input id="name" label="Usuario" maxlength={70} />
 
           <Input
             type="password"
             id="password"
             label="Contraseña"
-            required
             maxlength={30}
           />
           <div class="flex flex-row gap-2 mb-4 px-5 justify-between" hidden>

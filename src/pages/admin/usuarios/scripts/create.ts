@@ -33,26 +33,25 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    const { value: userCredential } = await Swal.fire({
-      title: "Ingrese su contraseña",
-      input: "password",
-      inputAttributes: {
-        autocapitalize: "off",
-      },
-      showCancelButton: true,
-      confirmButtonText: "Aceptar",
-      cancelButtonText: "Cancelar",
-      showLoaderOnConfirm: true,
-      preConfirm: async ( userCredential) => {
-        if (!userCredential) {
-          Swal.showValidationMessage("La contraseña es requerida");
-          return;
-        }
-        return userCredential;
-      },
-    });
+    // const { value: userCredential } = await Swal.fire({
+    //   title: "Ingrese su contraseña",
+    //   input: "password",
+    //   inputAttributes: {
+    //     autocapitalize: "off",
+    //   },
+    //   showCancelButton: true,
+    //   confirmButtonText: "Aceptar",
+    //   cancelButtonText: "Cancelar",
+    //   showLoaderOnConfirm: true,
+    //   preConfirm: async ( userCredential) => {
+    //     if (!userCredential) {
+    //       Swal.showValidationMessage("La contraseña es requerida");
+    //       return;
+    //     }
+    //     return userCredential;
+    //   },
+    // });
 
-    formData.append("userCredential", userCredential);
     try {
       const { data, error } = await actions.registerUser(formData);
 
@@ -71,7 +70,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.log("Success:", data);
         await Swal.fire({
           icon: "success",
-          title: data.mensaje,
+          title: "Registro exitoso",
+          text: data.mensaje,
         });
       }
       activateButton(btnSubmit);

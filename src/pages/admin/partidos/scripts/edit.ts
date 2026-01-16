@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      Swal.fire("Éxito", data.mensaje, "success").then((result) => {
+      Swal.fire("Partido actualizado", data.mensaje, "success").then((result) => {
         if (result.isConfirmed) {
           navigate(privateRoutesMap.VER_PARTIDOS);
         }

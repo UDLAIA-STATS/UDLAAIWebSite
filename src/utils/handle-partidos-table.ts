@@ -36,6 +36,7 @@ export const getHeaders = (filter: matchOptions): TableContent[] => {
         { data: "Fecha" },
         { data: "Local" },
         { data: "Visitante" },
+        { data: "Subido" },
         { data: "Marcador" },
         { data: "Torneo" },
         { data: "Temporada" },
@@ -110,6 +111,7 @@ export const getRows = (
         },
         { data: p.equipo_local_nombre ?? "-" },
         { data: p.equipo_visitante_nombre ?? "-" },
+        { data: p.partidosubido ? 'Sí' : "No" },
         {
           data: `${p.marcadorequipolocal ?? 0} - ${p.marcadorequipovisitante ?? 0}`,
         },

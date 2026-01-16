@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (error) {
         await Swal.fire("Error", error.message, "error");
       } else {
-        await Swal.fire("Éxito", data.mensaje, "success");
+        await Swal.fire("Equipo registrado", data.mensaje, "success");
         navigate(privateRoutesMap.VER_EQUIPOS);
         form.reset();
       }

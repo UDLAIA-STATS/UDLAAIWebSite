@@ -90,7 +90,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      Swal.fire("Éxito", data.mensaje, "success").then(() => {
+      Swal.fire("Torneo actualizado", data.mensaje, "success").then(() => {
         navigate(privateRoutesMap.VER_TORNEOS);
       });
     } catch (err) {
