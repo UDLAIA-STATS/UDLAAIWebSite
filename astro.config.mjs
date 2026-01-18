@@ -1,21 +1,26 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 
 import solidJs from "@astrojs/solid-js";
-import netlify from "@astrojs/netlify";
 
 
-// https://astro.build/config
+import cloudflare from "@astrojs/cloudflare";
+
 export default defineConfig({
   vite: {
-      plugins: [tailwindcss()],
+    plugins: [tailwindcss()],
+    ssr: {
+    },
   },
-
   integrations: [solidJs()],
-  site: 'https://udlaia-stats.netlify.app',
-  base: '/',
-  trailingSlash: 'always',
-  output: 'static',
-  adapter: netlify()
+  site: "http://localhost:4321", 
+  base: "/",
+  trailingSlash: "ignore",
+  output: "server",
+  adapter: cloudflare(),
+  outDir: "./dist",
+  security: {
+    checkOrigin: true,
+  }
 });

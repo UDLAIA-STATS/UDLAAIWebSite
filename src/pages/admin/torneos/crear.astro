@@ -1,0 +1,82 @@
+---
+import FormLayout from "@layouts/FormLayout.astro";
+import { actions } from "astro:actions";
+import {
+  Input,
+  ComboBox,
+  FormButtons,
+  TextArea,
+} from "@components/molecules/forms/index";
+import type { Temporada } from "@interfaces/index";
+
+const user = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
+
+const { data: dataTemporadas, error } = await Astro.callAction(
+  actions.getTemporadas,
+  {
+    page: 1,
+    pageSize: 1000,
+  }
+);
+
+if (error) {
+  console.error("Error fetching temporadas:", error);
+  throw new Error("No se pudo obtener la lista de temporadas.");
+}
+
+const temporadas = dataTemporadas?.results as Temporada[] ?? [];
+---
+
+<FormLayout formTitle="Agregar Torneo" pageTitle="Agregar Torneo" user={user}>
+  <form id="form-torneo" class="flex flex-col w-full max-w-md">
+    <!-- Nombre del torneo -->
+    <Input id="nombretorneo" label="Nombre del Torneo" />
+
+    <!-- Temporada -->
+    <ComboBox id="idtemporada" label="Temporada" >
+      <option value="" disabled selected>Selecciona una temporada</option>
+      {
+        temporadas.map((temp) => (
+          <option value={temp.idtemporada}>{temp.nombretemporada}</option>
+        ))
+      }
+    </ComboBox>
+
+    <!-- Fechas -->
+
+    <Input
+      id="fechainiciotorneo"
+      label="Fecha de Inicio"
+      type="date"
+    />
+
+    <!-- Fecha de fin -->
+    <Input
+      id="fechafintorneo"
+      label="Fecha de Fin"
+      type="date"
+    />
+
+    <!-- Torneo activo -->
+    <ComboBox id="torneoactivo" label="Activo" >
+      <option value="true" selected>Sí</option>
+      <option value="false">No</option>
+    </ComboBox>
+
+    <!-- Descripción -->
+
+    <TextArea
+      id="descripciontorneo"
+      label="Descripción"
+      maxlength={250}
+      rows={3}
+    />
+
+    <!-- Botones -->
+    <FormButtons label="Guardar Torneo" />
+  </form>
+</FormLayout>
+
+<script src="./scripts/create.ts"/>

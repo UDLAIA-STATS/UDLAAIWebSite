@@ -1,0 +1,28 @@
+---
+import type { Link } from "@interfaces/index";
+
+interface Props {
+  items: Link[];
+  selectedItem?: string;
+}
+
+const { items, selectedItem }: Props = Astro.props;
+---
+
+<div class="rounded bg-white h-fit w-fit">
+  <aside>
+    {
+      items.map((item) => (
+        <a
+          href={item.href}
+          class:list={[
+            "block px-4 py-2 rounded hover:bg-gray-200",
+            selectedItem === item.name ? "bg-gray-300 font-bold" : "",
+          ]}
+        >
+          {item.name}
+        </a>
+      ))
+    }
+  </aside>
+</div>

@@ -1,0 +1,89 @@
+---
+import "@styles/global.css";
+import FormLayout from "@layouts/FormLayout.astro";
+import { actions } from "astro:actions";
+import { Input, ComboBox, FormButtons } from "@components/molecules/forms/index";
+import NotFoundImage from "@assets/not_found.svg";
+import type { Institucion } from "@interfaces/index";
+
+const user = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
+
+// Obtener id desde la URL
+const { equipoId } = Astro.params;
+
+// Obtener lista de instituciones
+const { data: institucionesData, error: institucionesError } =
+  await Astro.callAction(actions.getInstituciones, { pageSize: 1000 });
+if (institucionesError || !institucionesData) {
+  console.error("Error fetching instituciones:", institucionesError);
+  throw new Error("No se pudo obtener la lista de instituciones.");
+}
+const instituciones = institucionesData.results as Institucion[] ?? [];
+
+// Obtener datos del equipo actual
+const { data: equipoData, error: equipoError } = await Astro.callAction(
+  actions.getEquipoById,
+  { id: Number(equipoId) }
+);
+
+if (equipoError || !equipoData) {
+  console.error("Error obteniendo equipo:", equipoError);
+  throw equipoError;
+}
+
+const equipo = equipoData.data;
+
+// Convertir el logo binario a base64 si existe
+const logoEquipo = equipo.imagenequipo ?? null;
+---
+<FormLayout formTitle="Editar Equipo" pageTitle="Editar Equipo" user={user}>
+  <form id="form-equipo" class="flex flex-col w-full max-w-md">
+    <Input id="idequipo" label="ID del Equipo" value={equipo.idequipo} hidden />
+    <!-- Nombre del equipo -->
+     <Input id="nombreequipo" label="Nombre del Equipo" value={equipo.nombreequipo} required />
+
+    <!-- Institución -->
+     <ComboBox id="idinstitucion" label="Institución">
+      <option value="" disabled>Selecciona una institución</option>
+      {
+        instituciones.map((inst) => (
+          <option
+            value={inst.idinstitucion}
+            selected={inst.idinstitucion === equipo.idinstitucion}
+          >
+            {inst.nombreinstitucion}
+          </option>
+        ))
+      }
+    </ComboBox>
+
+    <ComboBox id="equipoactivo" label="Activo">
+      <option value="true" selected={equipo.equipoactivo}>Sí</option>
+      <option value="false" selected={!equipo.equipoactivo}>No</option>
+    </ComboBox>
+    
+     <Input id="imagenequipo" label="Cambiar logo (opcional)" type="file" accept="image/*" />
+
+    {
+      logoEquipo && (
+        <div class="flex flex-col items-start mb-4">
+          <label class="text-base font-medium mb-2">Logo actual</label>
+          <img
+            src={logoEquipo ?? NotFoundImage.src }
+            alt="Logo del equipo"
+            class="w-fit h-fit object-cover rounded-lg shadow-md border"
+          />
+        </div>
+      )
+    }
+
+    </div>
+
+    <!-- Botones -->
+     <FormButtons label="Actualizar Equipo" />
+     </form>
+</FormLayout>
+
+<script src="./scripts/edit.ts"/>

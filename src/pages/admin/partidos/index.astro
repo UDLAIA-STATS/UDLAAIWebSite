@@ -1,0 +1,114 @@
+---
+import { getAddHref, matchOptions } from "@utils/handle-partidos-table";
+import { actions } from "astro:actions";
+import AdminPanelLayout from "@layouts/AdminPanelLayout.astro";
+import PartidosSideBar from "@components/templates/partidosProfesor/PartidosSideBar.astro";
+import NotAuthorized from "@components/organisms/NotAuthorized.astro";
+import type { Link } from "@interfaces/link.interface";
+import PartidosProfesorTable from "@components/templates/partidosProfesor/PartidosProfesorTable.astro";
+import Pagination from "@components/organisms/Pagination.astro";
+import PartidosProfesorActions from "@components/templates/partidosProfesor/TableActions.astro";
+import type { SortOptions } from "@interfaces/table-actions.interface";
+import { matchSidebarLinks } from "@consts/navbar-links";
+import debug from "debug";
+
+const user: LoggedUser | null = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
+
+const searchParams = Astro.url.searchParams;
+const pageParam = Number(searchParams.get("page") ?? 1);
+
+const { data, error } = await Astro.callAction(actions.getPartidos, {
+  page: pageParam,
+});
+
+debug.log(error?.message)
+
+if (error) {
+  console.error("Error fetching torneos data:", error.message);
+  throw new Error(error.message);
+  //return Astro.redirect("/");
+}
+
+const pages = data.pages;
+
+const sidebarLinks: Link[] = matchSidebarLinks;
+
+
+const sortOptions: SortOptions[] = [
+  { searchParam: "fechapartido", displayName: "Fecha" },
+  { searchParam: "equipo_local", displayName: "Equipo Local" },
+  { searchParam: "equipo_visitante", displayName: "Equipo Visitante" },
+  { searchParam: "torneo_nombre", displayName: "Torneo" },
+  { searchParam: "temporada_nombre", displayName: "Temporada" },
+];
+---
+
+<AdminPanelLayout title="Gestión de Torneos y Partidos">
+  <div id="GestionTorneosPartidos" class="my-5 h-svh w-full max-w-7xl">
+    {
+      user ? (
+        <div class="flex flex-col justify-center align-center w-full">
+          <div class="flex flex-row justify-between gap-10 w-full">
+            <div class="w-fit">
+              <PartidosSideBar
+                items={sidebarLinks}
+                selectedItem={matchOptions.partidos}
+              />
+            </div>
+            <div class="flex flex-col items-start self-start justify-start w-full">
+              <PartidosProfesorActions
+                canSort={true}
+                sortByOptions={sortOptions}
+                buttonLabel="Crear Partido"
+                placeholderText="Buscar partido..."
+                buttonHref={getAddHref(matchOptions.partidos)}
+              />
+              <PartidosProfesorTable filter={matchOptions.partidos} />
+            </div>
+          </div>
+          <div class={`${pages <= 1 ? "hidden" : "block"} w-full`}>
+            <Pagination totalPages={pages} />
+          </div>
+        </div>
+      ) : (
+        <div class="md:w-svw lg:w-shw w-shw flex flex-wrap justify-self-start flex-col">
+          <NotAuthorized />
+        </div>
+      )
+    }
+  </div>
+</AdminPanelLayout>
+
+<script>
+  const searchBox = document.getElementById("search-box") as HTMLInputElement;
+
+  searchBox.addEventListener("input", async () => {
+    const search = searchBox.value;
+    const rows = document.querySelectorAll("tr[id^='match-partidos-']");
+    rows.forEach((row) => {
+      const equipoLocalCell = row.querySelector("td:nth-child(2)");
+      const equipoVisitanteCell = row.querySelector("td:nth-child(3)");
+      const torneoCell = row.querySelector("td:nth-child(5)");
+      const temporadaCell = row.querySelector("td:nth-child(6)");
+      if (equipoLocalCell && equipoVisitanteCell) {
+        const localText = equipoLocalCell?.textContent || "";
+        const visitanteText = equipoVisitanteCell?.textContent || "";
+        const torneoText = torneoCell?.textContent || "";
+        const temporadaText = temporadaCell?.textContent || "";
+
+        if (
+          localText.toLowerCase().includes(search.toLowerCase()) ||
+          visitanteText.toLowerCase().includes(search.toLowerCase()) ||
+          torneoText.toLowerCase().includes(search.toLowerCase()) ||
+          temporadaText.toLowerCase().includes(search.toLowerCase())
+        ) {
+          row.classList.remove("hidden");
+        } else {
+          row.classList.add("hidden");
+        }
+      }
+    });
+  });
+</script>

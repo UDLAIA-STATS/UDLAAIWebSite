@@ -1,0 +1,31 @@
+---
+import Logout from "@assets/logout.svg";
+
+interface Props {
+  user?: LoggedUser | null;
+}
+
+const { user } = Astro.props;
+---
+
+<button class="flex no-underline cursor-pointer" id="logout">
+  <img
+    src={Logout.src}
+    alt="Cerrar Sesión"
+    class=`h-6 w-6 ${user ? "" : "hidden"}`
+  />
+</button>
+
+<script>
+  import { actions } from "astro:actions";
+  import { publicRoutesMap } from "@consts/routes";
+  import { navigate } from "astro:transitions/client";
+
+  document.addEventListener("astro:page-load", () => {
+    const btnLogout = document.getElementById("logout") as HTMLButtonElement;
+    btnLogout.addEventListener("click", async () => {
+      await actions.logout();
+      navigate(publicRoutesMap.HOME);
+    });
+  });
+</script>

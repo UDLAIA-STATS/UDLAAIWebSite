@@ -1,0 +1,151 @@
+---
+import "@styles/global.css";
+import FormLayout from "@layouts/FormLayout.astro";
+import { actions } from "astro:actions";
+import type {
+  Equipo,
+  Partido,
+  Temporada,
+  Torneo,
+} from "@interfaces/torneos.interface";
+import { Input, ComboBox, FormButtons } from "@components/molecules/forms/index";
+
+const { partidoId } = Astro.params;
+
+const user = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
+
+// === Fetch de datos base ===
+const { data: partidoData, error: errorPartido } = await Astro.callAction(
+  actions.getPartidoById,
+  { id: Number.parseInt(partidoId ?? "0") }
+);
+const { data: equiposData, error: errorEquipos } = await Astro.callAction(
+  actions.getEquipos,
+  { pageSize: 1000 }
+);
+const { data: torneoData, error: errorTorneos } = await Astro.callAction(
+  actions.getTorneos,
+  { pageSize: 1000 }
+);
+const { data: temporadaData, error: errorTemporadas } = await Astro.callAction(
+  actions.getTemporadas,
+  { pageSize: 1000 }
+);
+
+if (errorPartido || errorEquipos || errorTorneos || errorTemporadas) {
+  console.error("Error al recuperar datos necesarios:", {
+    errorPartido,
+    errorEquipos,
+    errorTorneos,
+    errorTemporadas,
+  });
+  throw new Error("Error al recuperar datos para editar el partido.");
+}
+
+const partido: Partido = partidoData?.data as Partido;
+const equipos: Equipo[] = equiposData?.results as Equipo[] ?? [];
+const torneos: Torneo[] = torneoData?.results as Torneo[] ?? [];
+const temporadas: Temporada[] = temporadaData?.results as Temporada[] ?? [];
+---
+
+<FormLayout formTitle="Editar Partido" pageTitle="Editar Partido" user={user}>
+  <form id="form-partido" class="flex flex-col w-full max-w-md">
+    <Input
+      id="idpartido"
+      label="ID del Partido"
+      value={partido.idpartido}
+      hidden
+    />
+
+    <!-- Temporada -->
+    <ComboBox id="idtemporada" label="Temporada">
+      <option value="" disabled>Selecciona una temporada</option>
+      {
+        temporadas.map((temporada: Temporada) => (
+          <option
+            value={temporada.idtemporada}
+            selected={temporada.idtemporada === partido.idtemporada}
+          >
+            {temporada.nombretemporada}
+          </option>
+        ))
+      }
+    </ComboBox>
+    <!-- Torneo -->
+    <ComboBox id="idtorneo" label="Torneo">
+      <option value="" disabled>Selecciona un torneo</option>
+      {
+        torneos.map((torneo: Torneo) => (
+          <option
+            value={torneo.idtorneo}
+            selected={torneo.idtorneo === partido.idtorneo}
+          >
+            {torneo.nombretorneo}
+          </option>
+        ))
+      }
+    </ComboBox>
+
+    <Input
+      id="fechapartido"
+      label="Fecha del Partido"
+      type="datetime-local"
+      value={partido.fechapartido
+        ? new Date(partido.fechapartido).toISOString().slice(0, 16)
+        : ""}
+    />
+
+    <!-- Equipos -->
+    <ComboBox id="idequipolocal" label="Equipo Local">
+      <option value="" disabled>Selecciona un equipo</option>
+      {
+        equipos.map((equipo: Equipo) => (
+          <option
+            value={equipo.idequipo}
+            selected={equipo.idequipo === partido.idequipolocal}
+          >
+            {equipo.nombreequipo}
+          </option>
+        ))
+      }
+    </ComboBox>
+
+    <ComboBox id="idequipovisitante" label="Equipo Visitante">
+      <option value="" disabled>Selecciona un equipo</option>
+      {
+        equipos.map((equipo: Equipo) => (
+          <option
+            value={equipo.idequipo}
+            selected={equipo.idequipo === partido.idequipovisitante}
+          >
+            {equipo.nombreequipo}
+          </option>
+        ))
+      }
+    </ComboBox>
+
+    <!-- Marcadores -->
+    <Input
+      id="marcadorequipolocal"
+      label="Marcador Equipo Local"
+      type="number"
+      min="0"
+      max="100"
+      value={partido.marcadorequipolocal ?? ""}
+    />
+    <Input
+      id="marcadorequipovisitante"
+      label="Marcador Equipo Visitante"
+      type="number"
+      min="0"
+      max="100"
+      value={partido.marcadorequipovisitante ?? ""}
+    />
+
+    <FormButtons label="Actualizar Partido" />
+  </form>
+</FormLayout>
+
+<script src="./scripts/edit.ts"/>

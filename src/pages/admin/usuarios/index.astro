@@ -1,0 +1,196 @@
+---
+import { privateRoutesMap } from "@consts/routes";
+import { Table } from "@components/templates/tables/Table";
+import type {
+  SortOptions,
+  TableActions,
+  TableContent,
+} from "@interfaces/table-actions.interface";
+import type { User } from "@interfaces/user.interface";
+import type { Pagination } from "@interfaces/pagination.interface";
+import EditIcon from "@assets/edit_icon_black.svg";
+import DeleteIcon from "@assets/delete_icon_black.svg";
+import { actions } from "astro:actions";
+import TableActionsComponent from "@components/templates/partidosProfesor/TableActions.astro";
+import AdminPanelLayout from "@layouts/AdminPanelLayout.astro";
+import PaginationComponent from "@components/organisms/Pagination.astro";
+
+const { AUTH_REGISTER, EDIT_USER } = privateRoutesMap;
+
+const getNumberParam = (param: string | null, fallback = 1): number => {
+  const value = Number(param);
+  return Number.isFinite(value) && value > 0 ? value : fallback;
+};
+
+const safeJsonParse = <T,>(value?: string): T | null => {
+  try {
+    return value ? (JSON.parse(value) as T) : null;
+  } catch {
+    return null;
+  }
+};
+
+const searchParams = Astro.url.searchParams;
+
+const page = getNumberParam(searchParams.get("page"));
+const sortBy = searchParams.get("sortBy") ?? "";
+const orderBy = searchParams.get("orderBy") === "desc" ? "desc" : "asc";
+
+const loggedUser = safeJsonParse<LoggedUser>(Astro.cookies.get("user")?.value);
+
+const headers: TableContent[] = [
+  { data: "Nombre de usuario" },
+  { data: "Email" },
+  { data: "Rol" },
+  { data: "Activo" },
+  { data: "Editar" },
+  { data: "Desactivar" },
+];
+
+const sortOptions: SortOptions[] = [
+  { searchParam: "nombre_usuario", displayName: "Nombre de usuario" },
+  { searchParam: "email_usuario", displayName: "Email" },
+  { searchParam: "rol", displayName: "Rol" },
+  { searchParam: "is_active", displayName: "Activo" },
+];
+
+let users: User[] = [];
+let paginationData: Pagination | null = null;
+
+try {
+  const { data } = await Astro.callAction(actions.getUsers, {
+    userCredential: import.meta.env.DEFAULT_ADMIN_PASSWORD,
+    page,
+    pageSize: 20,
+    sortBy,
+    orderBy,
+  });
+
+  if (!data) {
+    throw new Error("Respuesta inválida del servicio");
+  }
+
+  users =
+    data.results.filter(
+      (u: User) => u.nombre_usuario !== loggedUser?.nickname
+    ) ?? [];
+
+  paginationData = {
+    current_page: data.page,
+    total_pages: data.pages,
+    total_items: data.count,
+    offset: data.offset,
+  };
+} catch (err) {
+  console.error("Error fetching users:", err);
+}
+
+const rows = users.map((u) => ({
+  username: u.nombre_usuario,
+  isActive: u.is_active,
+  cells: [u.nombre_usuario, u.email_usuario, u.rol, u.is_active ? "Sí" : "No"],
+}));
+
+const handleDelete = (username: string) => {
+  if (!username) return;
+  console.log(`Usuario eliminado: ${username}`);
+};
+
+const tableActions: TableActions[] = [
+  {
+    href: `${EDIT_USER}/`,
+    icon: EditIcon.src,
+    alt: "Editar usuario",
+    type: "link",
+  },
+  {
+    action: handleDelete,
+    icon: DeleteIcon.src,
+    alt: "Eliminar usuario",
+    type: "button",
+  },
+];
+---
+
+<AdminPanelLayout title="Panel de Administración" user={loggedUser}>
+  <div class="flex flex-col w-full">
+    <div class="flex justify-between items-baseline gap-4">
+      <h1 class="font-bold text-2xl">Usuarios</h1>
+      <TableActionsComponent
+        canSort
+        sortByOptions={sortOptions}
+        buttonLabel="Crear Usuario"
+        buttonHref={AUTH_REGISTER}
+        placeholderText="Buscar usuario..."
+      />
+    </div>
+
+    {
+      users.length === 0 ? (
+        <div class="mt-5 text-center font-medium">
+          No se encontraron usuarios
+        </div>
+      ) : (
+        <div class="relative overflow-x-auto mt-5 flex justify-center">
+          <Table headers={headers}>
+            {rows.map(({ username, isActive, cells }) => (
+              <tr class="border-b" id={`user-row-${username}`}>
+                {cells.map((cell) => (
+                  <td class="px-6 py-4">{cell}</td>
+                ))}
+                {tableActions &&
+                  tableActions.length > 0 &&
+                  tableActions.map((action) =>
+                    action.type === "link" ? (
+                      <td class="px-6 py-4">
+                        <a
+                          class="cursor-pointer no-underline"
+                          href={action.href?.toString() + username}
+                        >
+                          <img
+                            class="size-8"
+                            src={action.icon}
+                            alt={action.alt}
+                          />
+                        </a>
+                      </td>
+                    ) : (
+                      action.action && (
+                        <td class="px-6 py-4">
+                          <button
+                            type="button"
+                            id="delete-button"
+                            value={username}
+                            data-delete-user
+                            data-username={username}
+                            data-is-active={isActive}
+                            class="cursor-pointer"
+                          >
+                            <img
+                              class="size-8"
+                              src={action.icon}
+                              alt={action.alt}
+                            />
+                          </button>
+                        </td>
+                      )
+                    )
+                  )}
+              </tr>
+            ))}
+          </Table>
+        </div>
+      )
+    }
+
+    {
+      paginationData && paginationData.total_pages > 1 && (
+        <div class="flex justify-center my-5">
+          <PaginationComponent totalPages={paginationData.total_pages} />
+        </div>
+      )
+    }
+  </div>
+</AdminPanelLayout>
+
+<script src="./scripts/index.ts"></script>

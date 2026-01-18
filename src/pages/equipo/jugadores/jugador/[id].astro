@@ -1,48 +1,110 @@
 ---
-import type { GetStaticPaths } from "astro";
-import Layout from "@layouts/Layout.astro"
-import "@styles/global.css";
-import LargeStatsCard from "@components/cards/LargeStatsCard.astro";
-import type { Player } from "@interfaces/player.interface";
-import NotFoundImage from "@assets/not_found.svg"
+import type { AnalyzedData, Equipo } from "@interfaces/index";
+import Layout from "@layouts/Layout.astro";
+import { Image } from "astro:assets";
+import { actions } from "astro:actions";
 
-const player = {
-  id: 1,
-  name: "Lionel",
-  lastname: "Messi",
-  position: "Delantero",
-  team: "Paris Saint-Germain",
-  shirtNumber: 30,
-  minutesPlayed: 2700,
-  goalsNumber: 30,
-  goalAverage: 0.5,
-  soccerGoalShotsPercentage: 0.75,
-  soccerGoalShots: 22,
-  shotsNumber: 40,
-  coveredDistance: 30000,
-  playerImageUrl: NotFoundImage.src,
-  heatmapUrl: NotFoundImage.src,
-};
+const { id } = Astro.params;
 
-export const getStaticPaths = (() => {
-    return [
-        { params: { id: '1' } },
-        { params: { id: '2' } },
-        { params: { id: '3' } },
-    ];
-}) satisfies GetStaticPaths;
-
+let data: AnalyzedData | null = null;
+let equipo: Equipo | null = null;
+try {
+  const res = await Astro.callAction(actions.getAnalyzedDetails, {
+    id: Number(id),
+  });
+  data = res.data?.data ?? null;
+  const teamId = parseInt(data?.team ?? "0");
+  if (teamId > 0) {
+    const equipoRes = await Astro.callAction(actions.getEquipoById.orThrow, {
+      id: teamId,
+    });
+    equipo = equipoRes.data;
+  }
+} catch (err) {
+  console.error("Error obteniendo detalle del jugador:", err);
+}
 ---
 
-<Layout>    
-    <section class="flex flex-col mx-5 my-10 justify-start items-center h-svh w-full">
-        <div>
-    <div id="title" class="flex">
-      <h1 class="text-3xl font-bold">Estadísticas de { `${player.name} ${player.lastname}` }</h1>
-    </div>
-    <div class="my-3">
-      <LargeStatsCard player={player} />
-    </div>
-</div>
-</section>
+<Layout title={`Detalle del Jugador ${data?.player_id}`}>
+  <section class="max-w-4xl mx-auto p-4 md:p-6">
+    {
+      data ? (
+        <>
+          {/* Encabezado */}
+          <div
+            class={`bg-linear-to-r from-[#C10230] to-[#a10127] text-white rounded-xl p-6 mb-6 shadow-lg text-center`}
+          >
+            <h1 class="text-2xl md:text-3xl font-bold">
+              Jugador #{data.shirt_number}
+            </h1>
+            <p class="text-sm md:text-base mt-1">
+              Partido #{data.match_id} · Equipo:{" "}
+              {equipo?.nombreequipo ?? "Desconocido"}
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="bg-white rounded-xl shadow p-4">
+              <p class="text-sm text-gray-500">Camiseta</p>
+              <p class="text-2xl font-bold">#{data.shirt_number}</p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow p-4">
+              <p class="text-sm text-gray-500">Pases</p>
+              <p class="text-2xl font-bold text-gray-800">{data.passes}</p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow p-4">
+              <p class="text-sm text-gray-500">Tiros al arco</p>
+              <p class="text-2xl font-bold text-gray-800">
+                {data.shots_on_target}
+              </p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow p-4">
+              <p class="text-sm text-gray-500">Velocidad promedio</p>
+              <p class="text-2xl font-bold text-gray-800">
+                {parseFloat(data.avg_speed_kmh).toFixed(2)} km/h
+              </p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow p-4">
+              <p class="text-sm text-gray-500">Distancia recorrida</p>
+              <p class="text-2xl font-bold text-gray-800">
+                {parseFloat(data.distance_km).toFixed(2)} km
+              </p>
+            </div>
+
+              <div class="bg-white rounded-xl shadow p-4">
+                <p class="text-sm text-gray-500">Tiempo de posesión de balón promedio</p>
+                <p class="text-2xl font-bold text-gray-800">
+                  {parseFloat(data.avg_possession_time_s).toFixed(2)}s
+                </p>
+              </div>
+          </div>
+
+          <div class="mb-6 mt-3">
+            <h2 class="text-xl font-semibold text-gray-800 mb-3">
+              Mapa de Calor
+            </h2>
+            <div class="bg-white rounded-xl shadow p-4">
+              <Image
+                src={data.heatmap_image_path}
+                alt="Mapa de calor"
+                class="w-full h-auto rounded"
+                width={800}
+                height={600}
+              />
+            </div>
+          </div>
+        </>
+      ) : (
+        <div class="text-center py-10">
+          <p class="text-red-600 text-lg">
+            No se encontró el detalle del jugador.
+          </p>
+        </div>
+      )
+    }
+  </section>
 </Layout>
