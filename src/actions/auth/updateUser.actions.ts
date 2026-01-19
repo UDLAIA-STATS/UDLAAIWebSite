@@ -19,15 +19,11 @@ export const updateUser = defineAction({
     try {
       console.log("Actualizando usuario:", { name, email, password });
       const authUrl = import.meta.env.AUTH_URL;
-      const basicAuth = Buffer.from(
-        `admin:${import.meta.env.DEFAULT_ADMIN_PASSWORD}`
-      ).toString("base64");
 
       const response = await fetch(`${authUrl}/users/${originalName}/update/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Basic ${basicAuth}`,
         },
         body: JSON.stringify({
           nombre_usuario: name,

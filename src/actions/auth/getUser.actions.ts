@@ -18,14 +18,13 @@ const sortableFields: (keyof User)[] = [
 export const getUsers = defineAction({
   accept: "json",
   input: z.object({
-    userCredential: z.string().min(8).max(100),
     page: z.number().int().positive().optional().default(1),
     pageSize: z.number().int().positive().optional().default(10),
     sortBy: z.string().optional(),
     orderBy: z.enum(["asc", "desc"]).optional(),
   }),
   handler: async (
-    { userCredential, page, pageSize, sortBy, orderBy },
+    { page, pageSize, sortBy, orderBy },
     { cookies }
   ) => {
     const baseUrl = import.meta.env.AUTH_URL;
@@ -39,9 +38,7 @@ export const getUsers = defineAction({
     }
 
     try {
-      const basicAuth = Buffer.from(
-        `${loggedInUser.nickname}:${userCredential}`
-      ).toString("base64");
+
 
       const response = await fetch(
         `${baseUrl}/users/?page=${page}&offset=${pageSize}`,
@@ -49,7 +46,6 @@ export const getUsers = defineAction({
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Basic ${basicAuth}`,
           },
         }
       );

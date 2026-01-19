@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const selectedValue = temporadasSelect.value;
   await setLimitDatesTorneo(Number(selectedValue));
 
-  form.addEventListener("submit", (e) => e.preventDefault());
+  // form.addEventListener("submit", (e) => e.preventDefault());
 
   temporadasSelect.addEventListener("change", async () => {
     const selectedValue = temporadasSelect.value;

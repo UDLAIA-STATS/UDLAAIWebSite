@@ -31,17 +31,12 @@ export const deleteUser = defineAction({
     try {
       console.log("Eliminando usuario:", { nickname });
 
-      const basicAuth = Buffer.from(`${loggedInUser}:${adminKey}`).toString(
-        "base64"
-      );
-
       const url = `${authUrl}/users/${nickname}/delete/`;
 
       const response = await fetch(url, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Basic ${basicAuth}`,
         },
       });
 

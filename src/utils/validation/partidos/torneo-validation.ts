@@ -120,7 +120,7 @@ export const setLimitDatesTorneo = async (temporalidadId: number) => {
     "fechainiciotorneo",
   ) as HTMLInputElement;
   const fechaFinInput = document.getElementById(
-    "fechafintemporada",
+    "fechafintorneo",
   ) as HTMLInputElement;
 
   fechaInicioInput.value = temporada.fechainiciotemporada.split("T")[0];

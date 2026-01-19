@@ -20,9 +20,6 @@ export const registerUser = defineAction({
   ) => {
     try {
       console.log("Registrando usuario:", { name, email, password });
-      const loggedInUser = cookies.get("user")
-        ? (JSON.parse(cookies.get("user")?.value as string) as LoggedUser)
-        : null;
       const authUrl = import.meta.env.AUTH_URL;
 
 

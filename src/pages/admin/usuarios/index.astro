@@ -59,7 +59,6 @@ let paginationData: Pagination | null = null;
 
 try {
   const { data } = await Astro.callAction(actions.getUsers, {
-    userCredential: import.meta.env.DEFAULT_ADMIN_PASSWORD,
     page,
     pageSize: 20,
     sortBy,

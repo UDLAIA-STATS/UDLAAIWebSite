@@ -18,8 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("formJugador") as HTMLFormElement;
     const formData = new FormData(form);
 
-    console.log("Datos del formulario:", Array.from(formData.entries()));
-
     const validationErrors = validateJugador(formData);
     if (validationErrors) {
       await Swal.fire({

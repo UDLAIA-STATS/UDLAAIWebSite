@@ -8,8 +8,6 @@ export const uploadFile = async (
 ): Promise<{ ok: true; key: string }> => {
   try {
     const uploadApi = import.meta.env.PUBLIC_UPLOAD_SERVICE_URL;
-    const workerUrl = import.meta.env.PUBLIC_WORKER_URL;
-//`${uploadApi}/generate-key/`
     const generatedKey = await axios.post(`${uploadApi}/generate-key/`, {
       video_name: file.name,
     });
@@ -23,7 +21,6 @@ export const uploadFile = async (
     formData.append("video", file);
     formData.append("id_partido", String(partidoId));
     formData.append("video_key", videoKey);
-    console.log("Form data: ", Array.from(formData.entries()));
 
     const res = await axios.post(`${uploadApi}/upload/`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
