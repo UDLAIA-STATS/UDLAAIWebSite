@@ -5,7 +5,21 @@ import type {
   Player,
   ProcessDataValues,
 } from "@interfaces/index";
-import { actions } from "astro:actions";
+
+export const getSeasonsOnData = (
+  data: AnalyzedDataTable[]
+): Set<{ id: number; name: string }> => {
+  const seasonsSet: Set<{ id: number; name: string }> = new Set();
+  for (const item of data) {
+    seasonsSet.add({ id: item.temporada_id, name: item.temporada_nombre });
+  }
+  return seasonsSet;
+}
+
+export const filterDataOnSeason = (
+  data: AnalyzedDataTable[],
+  seasonId: number
+) => data.filter((item) => item.temporada_id === seasonId);
 
 export const getProcessedData = async (
   dataValues: ProcessDataValues
@@ -17,7 +31,6 @@ export const getProcessedData = async (
     const players: Player[] = dataValues.players;
 
     const partidosMap = new Map(partidos.map((p) => [p.idpartido, p]));
-    const playersMap = new Map(players.map((p) => [p.idjugador, p]));
 
     let rows: AnalyzedDataTable[] = [];
 
@@ -32,6 +45,8 @@ export const getProcessedData = async (
       rows.push({
         id: item.id,
         match_id: item.match_id,
+        temporada_nombre: partido?.temporada_nombre || "No encontrado",
+        temporada_id: partido?.idtemporada || 0,
         player_id: item.player_id,
         player_name: player
           ? `${player.nombrejugador} ${player.apellidojugador}`

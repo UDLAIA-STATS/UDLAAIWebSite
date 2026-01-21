@@ -1,0 +1,114 @@
+---
+import { ToggleButton } from "@components/atoms/buttons/ToggleButton";
+import Pagination from "@components/organisms/Pagination.astro";
+import EstadisticasPartidos from "@components/templates/estadisticas/EstadisticasPartidos.astro";
+import EstadisticasPartidosFilters from "@components/templates/estadisticas/EstadisticasPartidosFilters.astro";
+import { publicRoutesMap } from "@consts/routes";
+import type {
+  AnalyzedDataTable,
+  ProcessDataValues,
+  AnalyzedData,
+} from "@interfaces/analyzedData.interface";
+import type { Player } from "@interfaces/player.interface";
+import type { Partido } from "@interfaces/torneos.interface";
+import Layout from "@layouts/Layout.astro";
+import {
+    filterDataOnSeason,
+  getProcessedData,
+  getSeasonsOnData,
+} from "@services/analyzeDataProcess";
+import { actions } from "astro:actions";
+
+const page = Number(Astro.url.searchParams.get("page") ?? 1);
+const search = Astro.url.searchParams.get("search") ?? "";
+const sortBy = Astro.url.searchParams.get("sortBy") ?? "";
+const orderBy = Astro.url.searchParams.get("orderBy") ?? "asc";
+const groupBy = Astro.url.searchParams.get("groupBy") ?? "";
+let limit: number = search ? 1000 : 15;
+const { PLAYER_STATS, PLAYER_STATS_SEASONS } = publicRoutesMap;
+let analyzedData: AnalyzedDataTable[] = [];
+let temporadasData: Set<{ id: number; name: string }> = new Set();
+let totalPages = 1;
+
+try {
+  if (search) {
+    limit = 1000;
+  }
+  const [filterData, partidosData, playersData] = await Promise.all([
+    Astro.callAction(actions.getAnalyzedData.orThrow, {
+      page: page,
+      limit: limit,
+    }),
+    Astro.callAction(actions.getPartidos.orThrow, { page: 1, pageSize: 1000 }),
+    Astro.callAction(actions.getJugadores.orThrow, { page: 1, pageSize: 1000 }),
+  ]);
+
+  const processedValues: ProcessDataValues = {
+    players: playersData.results as Player[],
+    analyzedData: filterData.results as AnalyzedData[],
+    partidos: partidosData.results as Partido[],
+    page: page,
+    query: search,
+    sortBy: sortBy,
+    orderBy: orderBy,
+    groupBy: groupBy,
+  };
+
+  let data = await getProcessedData(processedValues);
+  data = filterDataOnSeason(data, Number(groupBy));
+
+  temporadasData = getSeasonsOnData(data);
+
+  totalPages = filterData.pages;
+  analyzedData = data;
+} catch (err) {
+  console.error("Error obteniendo datos:", err);
+}
+---
+
+<Layout>
+  <section class="max-w-6xl mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-4">Partidos Analizados</h1>
+
+    <div
+      class="flex flex-row flex-wrap justify-center self-center-safe px-5 py-4 gap-5"
+    >
+      <ToggleButton label="Jugador" active={false} href={PLAYER_STATS} />
+      <ToggleButton
+        label="Temporadas"
+        active={true}
+        href={PLAYER_STATS_SEASONS}
+      />
+    </div>
+
+    <EstadisticasPartidosFilters
+      search={search}
+      sortBy={sortBy}
+      orderBy={orderBy}
+      groupBy={groupBy}
+      temporadasData={temporadasData}
+      canGroupBySeason={true}
+    />
+
+    <div class="overflow-x-auto min-h-1/2">
+      <EstadisticasPartidos data={analyzedData} />
+    </div>
+
+    {totalPages > 1 && <Pagination totalPages={totalPages} />}
+  </section>
+</Layout>
+
+<script>
+  import { updateURL } from "@utils/index";
+
+  let timeout: number | undefined;
+
+  document.getElementById("search")?.addEventListener("input", async () => {
+    clearTimeout(timeout);
+    timeout = window.setTimeout(updateURL, 1000);
+  });
+
+  document.getElementById("sortBy")?.addEventListener("change", updateURL);
+  document.getElementById("orderBy")?.addEventListener("change", updateURL);
+  document.getElementById("groupBySeason")?.addEventListener("change", updateURL);
+</script>

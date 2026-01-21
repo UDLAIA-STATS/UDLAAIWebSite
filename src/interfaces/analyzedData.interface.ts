@@ -31,6 +31,9 @@ export interface AnalyzedDataTable {
   match_date: string;
   analysis_date: string;
 
+  temporada_nombre: string;
+  temporada_id: number;
+
   detail_route: string;
 }
 
@@ -42,4 +45,5 @@ export interface ProcessDataValues {
   query?: string;
   sortBy?: string;
   orderBy?: string;
+  groupBy?: string;
 }

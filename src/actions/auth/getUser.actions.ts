@@ -77,9 +77,8 @@ export const getUserByUsername = defineAction({
   input: z.object({
     username: z.string().min(2).max(100),
   }),
-  handler: async ({ username }, { locals, cookies }) => {
+  handler: async ({ username }, { cookies }) => {
     console.log("getUserByUsername llamado con username:", username);
-    const credential = import.meta.env.DEFAULT_ADMIN_PASSWORD;
     const baseUrl = import.meta.env.AUTH_URL;
     const loggedInUser = cookies.get("user")
       ? (JSON.parse(cookies.get("user")?.value as string) as LoggedUser)
@@ -89,16 +88,11 @@ export const getUserByUsername = defineAction({
       throw new Error("Usuario autenticado no encontrado en las cookies");
     }
 
-    const basicAuth = Buffer.from(
-      `${loggedInUser.nickname}:${credential}`
-    ).toString("base64");
-
     try {
       const response = await fetch(`${baseUrl}/users/${username}/`, {
         method: "GET",
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Basic ${basicAuth}`,
+          "Content-Type": "application/json"
         },
       });
 

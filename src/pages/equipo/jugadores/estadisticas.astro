@@ -60,9 +60,7 @@ try {
       <ToggleButton label="Temporadas" active={false} href={PLAYER_STATS_SEASONS} />
     </div>
 
-    <div class="mb-4 flex flex-wrap gap-4 items-end">
       <EstadisticasPartidosFilters search={search} sortBy={sortBy} orderBy={orderBy} />
-    </div>
 
     <div class="overflow-x-auto min-h-1/2">
       <EstadisticasPartidos data={analyzedData} />
@@ -73,28 +71,9 @@ try {
 </Layout>
 
 <script>
-import { navigate } from "astro:transitions/client";
+import { updateURL } from "@utils/index";
 
-  let timeout: number | undefined;
-
-  function updateURL() {
-    const currentUrl = new URL(window.location.href);
-    const search = (document.getElementById("search") as HTMLInputElement)
-      .value;
-    const sortBy = (document.getElementById("sortBy") as HTMLSelectElement)
-      .value;
-    const orderBy = (document.getElementById("orderBy") as HTMLSelectElement)
-      .value;
-
-    if (search) currentUrl.searchParams.set("search", search);
-    else currentUrl.searchParams.delete("search");
-    if (sortBy) currentUrl.searchParams.set("sortBy", sortBy);
-    else currentUrl.searchParams.delete("sortBy");
-    if (orderBy) currentUrl.searchParams.set("orderBy", orderBy);
-    else currentUrl.searchParams.delete("orderBy");
-    
-    navigate(currentUrl.toString());
-  }
+  let timeout: number | undefined
 
   document.getElementById("search")?.addEventListener("input", async () => {
     clearTimeout(timeout);

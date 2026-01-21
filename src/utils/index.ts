@@ -7,3 +7,4 @@ export * from "./validation/index"
 export * from "./serializers/index";
 export * from "./forms/index";
 export * from './color_to_rgb';
+export * from './page_url_manage';

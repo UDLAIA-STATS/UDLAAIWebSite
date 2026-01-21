@@ -1,15 +1,14 @@
 ---
-import { publicRoutesMap } from '@consts/routes';
-import type { AnalyzedDataTable } from '@interfaces/analyzedData.interface'
-import DetailsIcon from '@assets/details_icon.svg';
+import { publicRoutesMap } from "@consts/routes";
+import type { AnalyzedDataTable } from "@interfaces/analyzedData.interface";
+import DetailsIcon from "@assets/details_icon.svg";
 
 interface Props {
-    data: AnalyzedDataTable[];
+  data: AnalyzedDataTable[];
 }
 
 const { data: analyzedData } = Astro.props;
 const detailsRoute = publicRoutesMap.PLAYER_DETAIL;
-
 ---
 
 <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow">
