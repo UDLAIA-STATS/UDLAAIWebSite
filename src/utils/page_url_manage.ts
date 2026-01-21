@@ -23,7 +23,7 @@ const fetchUrlParameters = () => {
 };
 
 const updateUrl = (currentUrl: URL, key: string, value: string) => {
-  if (value || value.trim().length > 0) {
+  if (value && value.trim().length > 0) {
     currentUrl.searchParams.set(key, value);
     return currentUrl;
   }
