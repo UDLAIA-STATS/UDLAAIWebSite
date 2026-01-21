@@ -30,11 +30,11 @@ const componentClass = "flex flex-col flex-wrap gap-1";
     />
   </div>
   <div class:list={[componentClass, canGroupBySeason ? "" : "hidden"]}>
-    <label for="groupBySeason" class="block text-sm font-medium"
+    <label for="groupBy" class="block text-sm font-medium"
       >Agrupar por Temporada</label
     >
     <select
-      id="groupBySeason"
+      id="groupBy"
       class="bg-white text-black rounded-md p-2 w-4xs focus:outline-none focus:ring-1 focus:ring-black"
     >
       <option selected={groupBy === ""} value="" disabled

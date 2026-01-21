@@ -55,8 +55,10 @@ try {
   };
 
   let data = await getProcessedData(processedValues);
+  
   temporadasData = getSeasonsOnData(data);
   data = filterDataOnSeason(data, Number(groupBy));
+  
   totalPages = filterData.pages;
   analyzedData = data;
 } catch (err) {
@@ -108,5 +110,5 @@ try {
 
   document.getElementById("sortBy")?.addEventListener("change", updateURL);
   document.getElementById("orderBy")?.addEventListener("change", updateURL);
-  document.getElementById("groupBySeason")?.addEventListener("change", updateURL);
+  document.getElementById("groupBy")?.addEventListener("change", updateURL);
 </script>

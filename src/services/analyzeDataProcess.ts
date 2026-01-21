@@ -7,25 +7,30 @@ import type {
 } from "@interfaces/index";
 
 export const getSeasonsOnData = (
-  data: AnalyzedDataTable[]
+  data: AnalyzedDataTable[],
 ): Set<{ id: number; name: string }> => {
   const seasonsSet: Set<{ id: number; name: string }> = new Set();
   for (const item of data) {
+    if (
+      seasonsSet.has({ id: item.temporada_id, name: item.temporada_nombre })
+    ) {
+      continue;
+    }
     seasonsSet.add({ id: item.temporada_id, name: item.temporada_nombre });
   }
+
   return seasonsSet;
-}
+};
 
 export const filterDataOnSeason = (
   data: AnalyzedDataTable[],
-  seasonId: number
+  seasonId: number,
 ) => data.filter((item) => item.temporada_id === seasonId);
 
 export const getProcessedData = async (
-  dataValues: ProcessDataValues
+  dataValues: ProcessDataValues,
 ): Promise<AnalyzedDataTable[]> => {
   try {
-
     const analyzedData: AnalyzedData[] = dataValues.analyzedData;
     const partidos: Partido[] = dataValues.partidos;
     const players: Player[] = dataValues.players;
@@ -37,10 +42,11 @@ export const getProcessedData = async (
     for (const item of analyzedData) {
       const partido = partidosMap.get(item.match_id);
       const player = players.find(
-        (p) => p.jugadoractivo && p.numerocamisetajugador === item.shirt_number
+        (p) => p.jugadoractivo && p.numerocamisetajugador === item.shirt_number,
       );
 
-      if (dataValues.query && !matchesSearch(partido, player, dataValues.query)) continue;
+      if (dataValues.query && !matchesSearch(partido, player, dataValues.query))
+        continue;
 
       rows.push({
         id: item.id,
@@ -115,7 +121,7 @@ export const getProcessedData = async (
 const matchesSearch = (
   partido: Partido | undefined,
   jugador: Player | undefined,
-  search: string
+  search: string,
 ): boolean => {
   const s = search.toLowerCase();
 
