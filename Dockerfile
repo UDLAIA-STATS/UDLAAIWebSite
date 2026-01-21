@@ -8,7 +8,7 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Copiar archivos de configuración de dependencias
-COPY package.json yarn.lock* ./
+COPY package.json ./
 
 # Etapa de dependencias
 FROM base AS deps
@@ -56,9 +56,9 @@ RUN adduser --system --uid 1001 astro
 WORKDIR /app
 
 # Copiar archivos necesarios para producción
-COPY --from=builder --chown=astro:astrojs /app/dist ./dist
-COPY --from=builder --chown=astro:astrojs /app/package.json ./package.json
-COPY --from=builder --chown=astro:astrojs /app/.env* ./
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/.env* ./
 
 # Argumento para determinar el entorno de ejecución
 ARG RUN_ENV=production
