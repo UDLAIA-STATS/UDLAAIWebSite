@@ -1,0 +1,43 @@
+---
+import type { PlayerStatistic } from "@interfaces/player.interface";
+import CardDetail from "@components/molecules/cards/CardDetail.astro";
+import CardContainer from "@components/molecules/cards/CardContainer.astro";
+import LazyImage from "@components/atoms/image/LazyImage.astro";
+
+
+interface Props {
+  player: PlayerStatistic;
+}
+
+const { player } = Astro.props;
+---
+
+<CardContainer className="h-fit w-full">
+  <div id="card-image" class="w-fit h-fit self-center rounded-sm bg-white">
+    <LazyImage  
+    height={200}
+    width={200}
+    className="flex self-center flex-wrap p-5 object-cover" />
+  </div>
+    <div
+      id="card-details"
+      class="grid grid-cols-3 gap-5 w-max h-fit p-5 bg-white text-black rounded-sm"
+    >
+      <CardDetail title="Posición" detail={player.position} />
+      <CardDetail title="Equipo" detail={player.team} />
+      <CardDetail title="Número de camiseta" detail={player.shirtNumber} />
+      <CardDetail title="Minutos jugados" detail={player.minutesPlayed} />
+      <CardDetail title="Número de goles" detail={player.goalsNumber} />
+      <CardDetail title="Promedio de goles" detail={player.goalAverage} />
+      <CardDetail
+        title="Porcentaje de tiros a puerta"
+        detail={player.soccerGoalShotsPercentage}
+      />
+      <CardDetail title="Tiros a puerta" detail={player.soccerGoalShots} />
+      <CardDetail title="Número de tiros" detail={player.shotsNumber} />
+      <CardDetail
+        title="Distancia recorrida (m)"
+        detail={player.coveredDistance}
+      />
+    </div>
+</CardContainer>

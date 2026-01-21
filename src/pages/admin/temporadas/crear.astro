@@ -1,0 +1,57 @@
+---
+import "@styles/global.css";
+import FormLayout from "@layouts/FormLayout.astro";
+import {
+  Input,
+  ComboBox,
+  FormButtons,
+  TextArea,
+} from "@components/molecules/forms/index";
+
+const user = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
+---
+
+<FormLayout
+  formTitle={"Agregar Temporada"}
+  pageTitle={"Agregar Temporada"}
+  user={user}
+>
+  <form id="form-temporada" class="flex flex-col w-full max-w-md">
+    <!-- Nombre de temporada -->
+    <Input id="nombretemporada" label="Nombre de la Temporada" type="text" />
+
+    <!-- Temporada activa -->
+    <ComboBox id="temporadaactiva" label="Temporada Activa">
+      <option value="true" selected>Sí</option>
+      <option value="false">No</option>
+    </ComboBox>
+
+    <!-- Tipo de temporada -->
+    <ComboBox id="tipotemporada" label="Tipo de Temporada">
+      <option value="" disabled selected>Selecciona un tipo</option>
+      <option value="Oficial">Oficial</option>
+      <option value="Amistosa">Amistosa</option>
+    </ComboBox>
+
+    <!-- Fecha de inicio -->
+    <Input id="fechainiciotemporada" label="Fecha de Inicio" type="date" />
+
+    <!-- Fecha de fin -->
+    <Input id="fechafintemporada" label="Fecha de Fin" type="date" />
+
+    <!-- Descripción de temporada -->
+    <TextArea
+      id="descripciontemporada"
+      label="Descripción"
+      maxlength={250}
+      rows={3}
+    />
+
+    <!-- Botones -->
+    <FormButtons label="Agregar Temporada" />
+  </form>
+</FormLayout>
+
+<script src="./scripts/create.ts"/>

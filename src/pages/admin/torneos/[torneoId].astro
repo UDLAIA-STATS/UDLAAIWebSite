@@ -1,0 +1,114 @@
+---
+import "@styles/global.css";
+import FormLayout from "@layouts/FormLayout.astro";
+import type { Temporada, Torneo } from "@interfaces/torneos.interface";
+import { privateRoutesMap } from "@consts/index";
+import { actions } from "astro:actions";
+import Swal from "sweetalert2";
+import {
+  Input,
+  ComboBox,
+  FormButtons,
+  TextArea,
+} from "@components/molecules/forms/index";
+
+const user = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
+
+const { torneoId } = Astro.params;
+
+// Obtener datos del torneo
+const { data, error } = await Astro.callAction(actions.getTorneoById, {
+  id: Number.parseInt(torneoId ?? "0"),
+});
+
+// Obtener temporadas disponibles
+const { data: dataTemporadas, error: errorTemporadas } = await Astro.callAction(
+  actions.getTemporadas,
+  {
+    page: 1,
+    pageSize: 1000,
+  }
+);
+
+if (error || errorTemporadas) {
+  console.error("Error al cargar datos:", error, errorTemporadas);
+  throw new Error(
+    "No se pudieron cargar los datos necesarios para editar el torneo."
+  );
+}
+
+const torneo: Torneo = data?.data ?? null;
+const temporadas = (dataTemporadas?.results as Temporada[]) ?? [];
+
+if (!torneo) {
+  Swal.fire("Error", "No se encontró el torneo solicitado", "error");
+  Astro.redirect(privateRoutesMap.VER_TORNEOS);
+}
+---
+
+<FormLayout formTitle="Editar Torneo" pageTitle="Editar Torneo" user={user}>
+  <form id="form-torneo">
+    <Input id="idtorneo" label="ID Torneo" value={torneo.idtorneo} hidden />
+
+    <!-- Nombre -->
+    <Input
+      id="nombretorneo"
+      label="Nombre del Torneo"
+      type="text"
+      value={torneo.nombretorneo ?? ""}
+    />
+
+    <!-- Temporada -->
+    <ComboBox id="idtemporada" label="Temporada">
+      <option value="" disabled>Selecciona una temporada</option>
+      {
+        temporadas.map((temp) => (
+          <option
+            value={temp.idtemporada}
+            selected={temp.idtemporada === torneo.idtemporada}
+          >
+            {temp.nombretemporada}
+          </option>
+        ))
+      }
+    </ComboBox>
+
+    <!-- Fechas -->
+    <Input
+      id="fechainiciotorneo"
+      label="Fecha de Inicio"
+      type="date"
+      value={torneo.fechainiciotorneo
+        ? torneo.fechainiciotorneo.split("T")[0]
+        : ""}
+    />
+    <Input
+      id="fechafintorneo"
+      label="Fecha de Fin"
+      type="date"
+      value={torneo.fechafintorneo ? torneo.fechafintorneo.split("T")[0] : ""}
+    />
+
+    <!-- Estado activo -->
+    <ComboBox id="torneoactivo" label="Activo">
+      <option value="true" selected={torneo.torneoactivo}>Sí</option>
+      <option value="false" selected={!torneo.torneoactivo}>No</option>
+    </ComboBox>
+
+    <!-- Descripción -->
+    <TextArea
+      id="descripciontorneo"
+      label="Descripción"
+      value={torneo.descripciontorneo ?? ""}
+      rows={3}
+      maxlength={250}
+    />
+
+    <!-- Botones -->
+    <FormButtons label="Actualizar Torneo" />
+  </form>
+</FormLayout>
+
+<script src="./scripts/edit.ts"></script>

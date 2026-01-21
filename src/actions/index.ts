@@ -1,15 +1,13 @@
-import { defineAction } from "astro:actions";
-import { z } from "astro:schema";
+import * as auth from "./auth";
+import * as players from "./players";
+import * as team from "./team";
+import * as videoUpload from "./video";
+import * as analyzedData from "./analysis_data";
 
 export const server = {
-    myAction: defineAction({
-        input: z.object({
-            name: z.string(),
-            age: z.number().min(0).optional(),
-        }),
-        handler: async ( input ) => {
-            // Your action logic here
-            return { message: `Hello, ${input.name}!` };
-        },
-    })
-}
+  ...auth,
+  ...players,
+  ...team,
+  ...videoUpload,
+  ...analyzedData,
+};

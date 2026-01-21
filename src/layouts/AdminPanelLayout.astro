@@ -1,0 +1,80 @@
+---
+import "@styles/global.css";
+import Navbar from "@components/organisms/Navbar.astro";
+import Footer from "@components/organisms/Footer.astro";
+import { roles } from "@consts/index";
+import NotAuthorized from "@components/organisms/NotAuthorized.astro";
+import { navigate } from "astro:transitions/client";
+
+interface Props {
+  title: string;
+  user?: LoggedUser | null;
+}
+
+const { title }: Props = Astro.props;
+
+const user: LoggedUser | null = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
+const { super: superRole, profesor } = roles;
+
+if (!user || (user.rol !== superRole && user.rol !== profesor)) {
+  navigate("/");
+}
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Admin Panel</title>
+    <!-- <ClientRouter /> -->
+  </head>
+  <body class="min-h-full w-full h-full min-w-full">
+    <Navbar />
+    <main aria-hidden="false">
+      <section
+        class:list={[
+          "h-svh md:w-svw lg:w-shw w-shw flex flex-wrap justify-self-start flex-col mx-10 my-5",
+          user && (user.rol === superRole || user.rol === profesor)
+            ? "hidden"
+            : "",
+        ]}
+      >
+        <NotAuthorized />
+      </section>
+      <section 
+      class:list={[
+          "mx-10 my-5 h-svh",
+          user && (user.rol === superRole || user.rol === profesor)
+            ? ""
+            : "hidden",
+        ]}>
+        <div class="text-2xl font-bold" id="title">
+          <h1>{title}</h1>
+        </div>
+        <div class="text-lg py-4" id="subtitle">
+          <span>
+            Bienvenido, {user?.nickname}.
+          </span>
+        </div>
+        <div class="py-3 flex flex-col gap-3 w-full">
+          <slot />
+        </div>
+      </section>
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" />
+
+<style>
+  html,
+  body {
+    margin: 0;
+  }
+</style>

@@ -1,0 +1,45 @@
+---
+import { getNavbarLinks } from "@consts/navbar-links";
+import LogoUdla from "@assets/logo_udla_corto.png";
+import type { LoggedUser } from "@interfaces/user.interface";
+import LogoutButton from "@components/atoms/buttons/LogOutButton.astro"
+import SideBarMenu from "@components/organisms/SideBarMenu";
+const currentPath = Astro.url.pathname;
+const user = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
+const links = getNavbarLinks(user as LoggedUser);
+console.log({ user });
+console.log({ links });
+---
+
+<section class="w-full relative top-0 right-0 left-0">
+  <nav class="bg-[#C10230] px-1 py-4 flex w-full">
+    <div class="flex flex-row justify-between w-full">
+      <div class="flex justify-start gap-5 align-middle ml-10 w-fit items-center">
+        <SideBarMenu user={user} client:load />
+        <a href="/" class="flex items-center no-underline w-fit flex-wrap line-clamp-2">
+          <img src={LogoUdla.src} alt="Logo UDLA" class="h-8" />
+        </a>
+      </div>
+      <div class="flex flex-row mr-10 gap-5 justify-center align-middle">
+        <div class="flex flex-col justify-end w-fit">
+          <div
+          class="flex flex-row text-white justify-center align-middle items-center pb-1"
+          >
+          <span class="flex">{user ? `${user.nickname}` : "Bienvenido"}</span>
+        </div>
+        <div
+        class="flex flex-row items-center text-white align-middle justify-center"
+        >
+        <span class="flex">[{user ? user.rol : "Invitado"}]</span>
+      </div>
+    </div>
+    <div class:list={["flex items-center align-middle justify-center"]}>
+      <LogoutButton user={user} />
+    </div>
+  </div>
+</div>
+  </nav>
+</section>
+

@@ -2,12 +2,25 @@
   "extends": "astro/tsconfigs/strict",
   "include": [
     ".astro/types.d.ts",
-    "**/*"
+    "**/*",
+    "./tailwind.config.ts"
   ],
   "exclude": [
-    "dist"
+    "dist",
+    "node_modules"
   ],
   "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "target": "es6",
+    "removeComments": true,
+    "stripInternal": true,
+    "noEmitHelpers": true,
+    "strict": true,
+    "declaration": false,
+    "sourceMap": false,
+    "downlevelIteration": false,
+    "lib": ["ES6", "DOM"],
     "paths": {
       "@components/*": [
         "./src/components/*"
@@ -35,6 +48,12 @@
       ],
       "@actions/*": [
         "./src/actions/*"
+      ],
+      "@views/*": [
+        "./src/views/*"
+      ],
+      "@utils/*": [
+        "./src/utils/*"
       ]
     },
     "jsx": "preserve",

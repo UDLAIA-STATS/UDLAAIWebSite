@@ -3,9 +3,11 @@ dist/
 
 # generated types
 .astro/
-
+*.temp
 # dependencies
 node_modules/
+
+yarn.lock
 
 # logs
 npm-debug.log*
@@ -25,3 +27,11 @@ pnpm-debug.log*
 
 # Local Netlify folder
 .netlify
+.env.*
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

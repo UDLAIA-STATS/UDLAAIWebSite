@@ -1,0 +1,77 @@
+---
+import "@styles/global.css";
+import Navbar from "@components/organisms/Navbar.astro";
+import Footer from "@components/organisms/Footer.astro";
+import { roles } from "@consts/roles";
+import NotAuthorized from "@components/organisms/NotAuthorized.astro";
+import { navigate } from "astro:transitions/client";
+
+interface Props {
+  user?: LoggedUser | null;
+  formTitle: string;
+  pageTitle: string;
+}
+
+const { user, formTitle, pageTitle } = Astro.props;
+const { super: superRole, profesor } = roles;
+
+if (!user || (user.rol !== superRole && user.rol !== profesor)) {
+  navigate("/");
+}
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{pageTitle}</title>
+    <!-- <ClientRouter /> -->
+  </head>
+  <body class="min-h-full w-full h-full min-w-full">
+    <Navbar />
+    <main aria-hidden="false">
+      <section
+        class:list={[
+          "h-svh md:w-svw lg:w-shw w-shw flex flex-wrap justify-self-start flex-col mx-10 my-5",
+          user && (user.rol === superRole || user.rol === profesor)
+            ? "hidden"
+            : "",
+        ]}
+      >
+        <NotAuthorized />
+      </section>
+
+      <section
+        class:list={[
+          "h-svh md:w-svw lg:w-shw w-shw text-white flex flex-wrap justify-self-center-safe self-center flex-col mt-16",
+          user && (user.rol === superRole || user.rol === profesor)
+            ? ""
+            : "hidden",
+        ]}
+      >
+        <div
+          id="container"
+          class="flex flex-col items-center justify-center gap- bg-[#C10230] self-center w-shw px-10 pt-4 pb-8 rounded-lg shadow-lg"
+        >
+          <div class="font-bold text-3xl flex pb-3">
+            <h1>{formTitle}</h1>
+          </div>
+          <slot />
+        </div>
+      </section>
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" />
+
+<style>
+  html,
+  body {
+    margin: 0;
+  }
+</style>

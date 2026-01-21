@@ -1,48 +1,165 @@
 ---
-import type { GetStaticPaths } from "astro";
-import Layout from "@layouts/Layout.astro"
-import "@styles/global.css";
-import LargeStatsCard from "@components/cards/LargeStatsCard.astro";
-import type { Player } from "@interfaces/player.interface";
-import NotFoundImage from "@assets/not_found.svg"
+import type { AnalyzedData, Equipo, Partido, Player } from "@interfaces/index";
+import Layout from "@layouts/Layout.astro";
+import { Image } from "astro:assets";
+import { actions } from "astro:actions";
+import { parseColor } from "@utils/index";
 
-const player = {
-  id: 1,
-  name: "Lionel",
-  lastname: "Messi",
-  position: "Delantero",
-  team: "Paris Saint-Germain",
-  shirtNumber: 30,
-  minutesPlayed: 2700,
-  goalsNumber: 30,
-  goalAverage: 0.5,
-  soccerGoalShotsPercentage: 0.75,
-  soccerGoalShots: 22,
-  shotsNumber: 40,
-  coveredDistance: 30000,
-  playerImageUrl: NotFoundImage.src,
-  heatmapUrl: NotFoundImage.src,
-};
+const { id } = Astro.params;
 
-export const getStaticPaths = (() => {
-    return [
-        { params: { id: '1' } },
-        { params: { id: '2' } },
-        { params: { id: '3' } },
-    ];
-}) satisfies GetStaticPaths;
+let data: AnalyzedData | null = null;
+let equipo: Equipo | null = null;
+let partido: Partido | null = null;
+let jugador: Player | null = null;
+try {
+  const res = await Astro.callAction(actions.getAnalyzedDetails, {
+    id: Number(id),
+  });
+  data = res.data?.data ?? null;
+  const teamId = parseInt(data?.team ?? "0");
+  if (teamId > 0) {
+    const equipoRes = await Astro.callAction(actions.getEquipoById.orThrow, {
+      id: teamId,
+    });
+    equipo = equipoRes.data;
+  }
 
+  const playerId = data?.player_id ?? 0;
+  if (playerId > 0) {
+    const jugadorRes = await Astro.callAction(actions.getJugadorById.orThrow, {
+      idjugador: playerId,
+    });
+    jugador = jugadorRes.data as Player;
+  }
+
+  const partidoId = data?.match_id ?? 0;
+  if (partidoId > 0) {
+    const partidoRes = await Astro.callAction(actions.getPartidoById.orThrow, {
+      id: partidoId,
+    });
+    partido = partidoRes.data as Partido;
+  }
+
+} catch (err) {
+  console.error("Error obteniendo detalle del jugador:", err);
+}
+let rgbColor;
+console.log("DATA DEL JUGADOR:", data);
+if (data?.team_color != null && typeof data.team_color === "string") {
+  rgbColor =  parseColor(data.team_color);
+}
 ---
 
-<Layout>    
-    <section class="flex flex-col mx-5 my-10 justify-start items-center h-svh w-full">
+<Layout title={`Detalle del Jugador ${jugador?.nombrejugador ?? "Desconocido"} (${data?.shirt_number ?? "N/A"})`}>
+  <section class="max-w-5xl mx-auto px-4 py-6 md:py-8">
+
+    {data ? (
+      <>
+        <!-- ENCABEZADO -->
+        <div class="bg-linear-to-r from-[#C10230] to-[#a10127] text-white rounded-2xl p-5 md:p-6 mb-6 shadow-lg">
+          <div class="flex flex-col gap-2 text-center">
+            <h1 class="text-xl sm:text-2xl md:text-3xl font-bold leading-tight">
+              {jugador?.nombrejugador ?? "Desconocido"}
+              <span class="opacity-80"> #{data?.shirt_number ?? "N/A"}</span>
+            </h1>
+
+            <p class="text-xs sm:text-sm opacity-90">
+              {equipo?.nombreequipo ?? "Equipo desconocido"} ·{" "}
+              {new Date(partido?.fechapartido ?? "").toLocaleDateString("es-ES", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </p>
+          </div>
+        </div>
+
+        <!-- ESTADÍSTICAS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <p class="text-xs text-gray-500 uppercase">Camiseta</p>
+            <p class="text-2xl font-semibold text-gray-800">#{data.shirt_number}</p>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-xs text-gray-500">Color</span>
+              <input
+                type="color"
+                value={rgbColor}
+                disabled
+                class="h-6 w-15 border rounded"
+              />
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <p class="text-xs text-gray-500 uppercase">Pases</p>
+            <p class="text-2xl font-semibold text-gray-800">{data.passes}</p>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <p class="text-xs text-gray-500 uppercase">Tiros al arco</p>
+            <p class="text-2xl font-semibold text-gray-800">
+              {data.shots_on_target}
+            </p>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <p class="text-xs text-gray-500 uppercase">Velocidad promedio</p>
+            <p class="text-2xl font-semibold text-gray-800">
+              {parseFloat(data.avg_speed_kmh).toFixed(2)} km/h
+            </p>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <p class="text-xs text-gray-500 uppercase">Distancia recorrida</p>
+            <p class="text-2xl font-semibold text-gray-800">
+              {parseFloat(data.distance_km).toFixed(2)} km
+            </p>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <p class="text-xs text-gray-500 uppercase">
+              Tiempo promedio de posesión
+            </p>
+            <p class="text-2xl font-semibold text-gray-800">
+              {parseFloat(data.avg_possession_time_s).toFixed(2)} s
+            </p>
+          </div>
+
+        </div>
+
+        <!-- MAPA DE CALOR -->
         <div>
-    <div id="title" class="flex">
-      <h1 class="text-3xl font-bold">Estadísticas de { `${player.name} ${player.lastname}` }</h1>
-    </div>
-    <div class="my-3">
-      <LargeStatsCard player={player} />
-    </div>
-</div>
-</section>
+          <h2 class="text-lg md:text-xl font-semibold text-gray-800 mb-3">
+            Mapa de calor
+          </h2>
+
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            {data.heatmap_image_path ? (
+              <Image
+                src={data.heatmap_image_path}
+                alt="Mapa de calor del jugador"
+                class="w-full h-auto rounded-lg object-contain"
+                width={800}
+                height={600}
+              />
+            ) : (
+              <p class="text-sm text-gray-500 text-center py-6">
+                No hay mapa de calor disponible.  
+                No se reunieron suficientes datos para generarlo.
+              </p>
+            )}
+          </div>
+        </div>
+      </>
+    ) : (
+      <div class="text-center py-16">
+        <p class="text-gray-600 text-base md:text-lg">
+          No se encontró información para este jugador.
+        </p>
+      </div>
+    )}
+  </section>
 </Layout>

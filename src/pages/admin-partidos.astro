@@ -1,0 +1,52 @@
+---
+import AdminPanelLayout from "@layouts/AdminPanelLayout.astro";
+import NotAuthorized from "@components/organisms/NotAuthorized.astro";
+import PartidosSideBar from "@components/templates/partidosProfesor/PartidosSideBar.astro";
+import type { Link } from "@interfaces/index";
+import { matchSidebarLinks } from "@consts/navbar-links";
+import { navigate } from "astro:transitions/client";
+
+const user: LoggedUser | null = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
+
+const sidebarLinks: Link[] = matchSidebarLinks;
+
+if (!user) {
+  navigate("/");
+}
+---
+
+<AdminPanelLayout title="Gestión de Torneos y Partidos">
+  <div id="GestionTorneosPartidos" class="my-5 h-svh w-fit max-w-7xl">
+    {
+      user ? (
+        <div class="flex flex-row justify-between gap-5 w-full">
+          <div class="w-fit">
+            <PartidosSideBar items={sidebarLinks} />
+          </div>
+          <div class="flex flex-col items-center justify-end self-center w-6xl">
+            <h3 class="flex font-semibold text-xl">Ninguna opción seleccionada</h3>
+          </div>
+        </div>
+      ) : (
+        <div class="md:w-svw lg:w-shw w-shw flex flex-wrap justify-self-start flex-col">
+          <NotAuthorized />
+        </div>
+      )
+    }
+  </div>
+</AdminPanelLayout>
+
+<script>
+  import { MatchOptionClient } from "@utils/match-option-cookies";
+
+  // Limpia las cookies al salir o cerrar la pestaña
+  window.addEventListener("beforeunload", async () => {
+    try {
+      await MatchOptionClient.clearFilter();
+    } catch (err) {
+      console.warn("No se pudieron limpiar las cookies:", err);
+    }
+  });
+</script>

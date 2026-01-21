@@ -1,0 +1,32 @@
+---
+import "@styles/global.css";
+
+interface Props {
+  label: string;
+  href?: string;
+  iconSrc?: string;
+  iconPosition?: "left" | "right";
+  iconRotation?: number;
+  className?: string;
+}
+
+const { label, iconSrc, href, iconPosition, className, iconRotation,  } = Astro.props;
+---
+
+<a
+  href={href ? href : ""}
+  class={`text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 gap-2 rounded-md flex cursor-pointer ${className}`}
+>
+  {label}
+  {
+    iconSrc ? (
+      <img
+        class:list={[
+          `size-7 align-middle  ${`rotate-${iconRotation}`}`,
+          iconSrc ? "" : "hidden",
+          iconPosition === "left" ? "order-first pr-2" : "order-last pl-2",
+        ]}
+        src={iconSrc}
+      />
+    ) : null
+  } </a>

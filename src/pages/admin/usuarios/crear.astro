@@ -1,0 +1,41 @@
+---
+import "@styles/global.css";
+import FormLayout from "@layouts/FormLayout.astro";
+import { roles } from "@consts/roles";
+import { Input, ComboBox, FormButtons } from "@components/molecules/forms/index";
+
+export const prerender = false;
+
+const user = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
+const { super: superRole } = roles;
+---
+
+<FormLayout
+  user={user}
+  formTitle="Registro de Usuario"
+  pageTitle="Registro de Usuario"
+>
+  <form autocomplete="on" method="post">
+    <Input id="name" label="Nombre" maxlength={100} minlength={3}/>
+
+    <ComboBox id="rol" label="Rol">
+      <option value="superuser" selected={superRole}>Administrador</option>
+      <option value="profesor">Profesor</option>
+    </ComboBox>
+
+    <Input id="email" label="Correo Electrónico" type="email"/>
+    <Input
+      id="password"
+      label="Contraseña"
+      type="password"
+      maxlength={30}
+      minlength={8}
+    />
+
+    <FormButtons label="Registrar Usuario" />
+  </form>
+</FormLayout>
+
+<script src="./scripts/create.ts"/>

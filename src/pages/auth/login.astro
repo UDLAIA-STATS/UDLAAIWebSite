@@ -1,60 +1,68 @@
 ---
 import "@styles/global.css";
 import Layout from "@layouts/Layout.astro";
-import arrowNextRight from "@assets/arrow_next_right.svg";
+import arrowNext from "@assets/arrow_next.svg";
+import { Input, FormButtons } from "@components/molecules/forms/index";
 
-const buttonClass =
-  "text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md flex cursor-pointer flex";
+export const prerender = false;
+
 const inputClass =
   "bg-white text-black rounded-md p-2 w-md focus:outline-none focus:ring-2 focus:ring-[#C10230]";
+
+const loggedInUser = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
 ---
 
 <Layout>
   <section
-    class="h-fit md:w-svw lg:w-max min-h-[100vh] text-white flex flex-wrap justify-self-center-safe flex-col mt-16">
-    <div id="container" class="flex flex-col items-center justify-center gap-5 rounded-sm bg-[#C10230] self-center w-shw px-5 pt-4 pb-8">
-        <div class="font-bold text-3xl flex pb-3">
-            <h1>Inicio de Sesión</h1>
-        </div>
-        <div id="register-form" class="flex flex-col gap-5">
-            <form action="" autocomplete="on" method="post">
-                <div class="flex flex-col gap-2 mb-4 px-5">
-                    <label class="text-base font-medium" for="email"
-                    >Correo Electrónico</label
-                    >
-                    <input
-                    type="email"
-                    maxlength="70"
-                    id="email"
-                    name="email"
-                    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-                    class={inputClass}
-                    required
-                    />
-                </div>
-                <div class="flex flex-col gap-2 mb-4 px-5">
-                    <label class="text-base font-medium" for="password">Contraseña</label>
-                    <input
-                    type="password"
-                    maxlength="30"
-                    id="password"
-                    name="password"
-                    class={inputClass}
-                    required
-                    />
-                </div>
-                <div class="flex justify-center mt-5 pt-2">
-                    <button class={buttonClass} type="submit"
-                    >Iniciar Sesión
-                    <img
-                    src={arrowNextRight.src}
-                    class="size-7 align-middle pl-2"
-                    alt=""
-                    />
-                </button>
+    class="md:w-svw lg:w-max h-svh text-white flex flex-wrap justify-self-center-safe flex-col mt-16"
+  >
+    <div
+      id="container"
+      class="flex flex-col items-center justify-center gap-5 rounded-sm bg-[#C10230] self-center w-shw px-5 pt-4 pb-8"
+    >
+      <div class="font-bold text-3xl flex pb-3">
+        <h1>Inicio de Sesión</h1>
+      </div>
+      <div id="register-form" class="flex flex-col gap-5">
+        <form autocomplete="on" data-astro-reload>
+          <Input id="name" label="Usuario" maxlength={70} />
+
+          <Input
+            type="password"
+            id="password"
+            label="Contraseña"
+            maxlength={30}
+          />
+          <div class="flex flex-row gap-2 mb-4 px-5 justify-between" hidden>
+            <div>
+              <input
+                type="checkbox"
+                id="rememberMe"
+                name="rememberMe"
+                class="mr-1 align-middle size-fit"
+              />
+              <label for="rememberMe" class="text-sm">Recuérdame</label>
             </div>
+          </div>
+          <div class="flex justify-center mt-5 pt-2">
+            <button
+              class="disabled:bg-gray-300 text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md cursor-pointer flex gap-2"
+              type="button"
+              id="btn-login"
+              >Iniciar Sesión
+              <img
+                src={arrowNext.src}
+                class="size-7 align-middle pl-2 rotate-180"
+                alt=""
+              />
+            </button>
+          </div>
         </form>
+      </div>
     </div>
-</div>
   </section>
 </Layout>
+
+<script src="./scripts/login.ts"></script>

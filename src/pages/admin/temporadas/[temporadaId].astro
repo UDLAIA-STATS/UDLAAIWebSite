@@ -1,0 +1,103 @@
+---
+import "@styles/global.css";
+import FormLayout from "@layouts/FormLayout.astro";
+import Swal from "sweetalert2";
+import { actions } from "astro:actions";
+import { privateRoutesMap } from "@consts/index";
+import {
+  Input,
+  ComboBox,
+  FormButtons,
+  TextArea,
+} from "@components/molecules/forms/index";
+
+const { temporadaId } = Astro.params;
+
+const user = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
+
+const { data: temporadaData, error: errorTemporada } = await Astro.callAction(
+  actions.getTemporadaById,
+  { id: Number.parseInt(temporadaId ?? "0") }
+);
+
+if (errorTemporada || !temporadaData) {
+  console.error("Error fetching temporada:", errorTemporada);
+  Swal.fire("Error", "Error al cargar la temporada", "error").then(() => {
+    Astro.redirect(privateRoutesMap.VER_TEMPORADAS);
+  });
+}
+
+const temporada = temporadaData!.data;
+---
+
+<FormLayout
+  formTitle={"Editar Temporada"}
+  pageTitle={"Editar Temporada"}
+  user={user}
+>
+  <form id="form-temporada" class="flex flex-col w-full max-w-md">
+    <Input
+      id="idtemporada"
+      value={temporada?.idtemporada ?? ""}
+      label="ID Temporada"
+      hidden
+    />
+
+    <!-- Nombre -->
+    <Input
+      id="nombretemporada"
+      value={temporada?.nombretemporada ?? ""}
+      label="Nombre de la Temporada"
+      type="text"
+    />
+
+    <!-- Temporada activa -->
+    <ComboBox id="temporadaactiva" label="Temporada Activa">
+      <option value="true" selected={temporada?.temporadaactiva}>Sí</option>
+      <option value="false" selected={!temporada?.temporadaactiva}>No</option>
+    </ComboBox>
+
+    <!-- Tipo -->
+    <ComboBox id="tipotemporada" label="Tipo de Temporada">
+      <option value="" disabled>Selecciona un tipo</option>
+      <option value="Oficial" selected={temporada?.tipotemporada === "Oficial"}
+        >Oficial</option
+      >
+      <option
+        value="Amistosa"
+        selected={temporada?.tipotemporada === "Amistosa"}>Amistosa</option
+      >
+    </ComboBox>
+
+    <!-- Fechas -->
+    <Input
+      id="fechainiciotemporada"
+      value={temporada?.fechainiciotemporada?.split("T")[0] ?? ""}
+      label="Fecha de Inicio"
+      type="date"
+    />
+
+    <Input
+      id="fechafintemporada"
+      value={temporada?.fechafintemporada?.split("T")[0] ?? ""}
+      label="Fecha de Fin"
+      type="date"
+    />
+
+    <!-- Descripción -->
+    <TextArea
+      id="descripciontemporada"
+      value={temporada?.descripciontemporada ?? ""}
+      label="Descripción"
+      maxlength={250}
+      rows={3}
+    />
+
+    <!-- Botones -->
+    <FormButtons label="Actualizar Temporada" />
+  </form>
+</FormLayout>
+
+<script src="./scripts/edit.ts"/>

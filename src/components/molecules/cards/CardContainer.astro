@@ -1,0 +1,20 @@
+---
+
+interface Props {
+  className: string;
+}
+
+const { className } = Astro.props;
+---
+
+<div
+  id="card-container"
+  class:list={[
+    "bg-[#C10230] text-white rounded-sm shadow-lg px-5 py-3 flex items-center gap-2",
+    className,
+  ]}
+>
+  <div id="card-content" class="flex flex-row gap-5 w-full h-full">
+    <slot />
+  </div>
+</div>

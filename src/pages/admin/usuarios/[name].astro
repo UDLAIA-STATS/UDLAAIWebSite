@@ -1,0 +1,89 @@
+---
+import { actions } from "astro:actions";
+import { publicRoutesMap } from "@consts/routes";
+import type { User } from "@interfaces/index";
+import { Input, ComboBox, FormButtons } from "@components/molecules/forms/index";
+import FormLayout from "@layouts/FormLayout.astro";
+
+export const prerender = false;
+
+const { name } = Astro.params;
+
+const { data, error } = await Astro.callAction(actions.getUserByUsername, {
+  username: name ?? ""
+});
+const user = data?.data as User;
+const originalName = user.nombre_usuario;
+
+if (error || !user) {
+  console.error("Error fetching user:", error);
+  Astro.redirect(publicRoutesMap[404]);
+}
+
+const loggedUser = Astro.cookies.get("user")
+  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
+  : null;
+---
+
+<FormLayout
+  user={loggedUser}
+  formTitle="Editar Usuario"
+  pageTitle="Editar Usuario"
+>
+  <form
+    action=""
+    method="post"
+    autocomplete="on"
+    id="form-usuario"
+    class="text-white"
+  >
+    <Input
+      id="originalName"
+      label="Nombre Actual"
+      value={originalName}
+      hidden
+    />
+    <Input
+      id="name"
+      label="Nombre"
+      value={user.nombre_usuario}
+      maxlength={100}
+      minlength={3}
+    />
+
+    <ComboBox id="rol" label="Rol">
+      <option value="superuser" selected={user.rol === "superuser"}>
+        Administrador
+      </option>
+      <option value="profesor" selected={user.rol === "profesor"}>
+        Profesor
+      </option>
+    </ComboBox>
+
+    <ComboBox id="is_active" label="Activo">
+      <option value="true" selected={user.is_active}>Sí</option>
+      <option value="false" selected={!user.is_active}>No</option>
+    </ComboBox>
+
+    <Input
+      id="email"
+      label="Correo Electrónico"
+      type="email"
+      value={user.email_usuario}
+      maxlength={70}
+    />
+    <Input
+      id="password"
+      label="Contraseña (dejar en blanco para no cambiar)"
+      type="password"
+      maxlength={30}
+      minlength={8}
+      placecholder="*********"
+    />
+
+    <FormButtons label="Actualizar Usuario" />
+  </form>
+</FormLayout>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" />
+<script src="./scripts/edit.ts"/>
