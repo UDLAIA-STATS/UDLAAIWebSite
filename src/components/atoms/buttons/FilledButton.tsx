@@ -1,4 +1,4 @@
-import { createSignal, type Component, on, createEffect } from "solid-js";
+import { createSignal, type Component, createEffect } from "solid-js";
 
 interface Props {
     icon?: string;

@@ -8,12 +8,12 @@ import {
   successResponseSerializer,
 } from "@utils/index";
 
-const sortableFields: (keyof User)[] = [
+const sortableFields: Set<keyof User> = new Set([
   "nombre_usuario",
   "email_usuario",
   "rol",
   "is_active",
-];
+]);
 
 export const getUsers = defineAction({
   accept: "json",
@@ -127,7 +127,7 @@ const sortUsers = (
   sortBy?: keyof User,
   orderBy: "asc" | "desc" = "asc"
 ): User[] => {
-  if (!sortBy || !sortableFields.includes(sortBy)) {
+  if (!sortBy || !sortableFields.has(sortBy)) {
     return items;
   }
 

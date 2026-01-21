@@ -4,6 +4,7 @@ import { suscribeVideoUpload } from "./suscribe_websocket";
 export const uploadFile = async (
   file: File,
   partidoId: number,
+  color: string,
   onProgress?: (percent: number) => void
 ): Promise<{ ok: true; key: string }> => {
   try {
@@ -21,6 +22,7 @@ export const uploadFile = async (
     formData.append("video", file);
     formData.append("id_partido", String(partidoId));
     formData.append("video_key", videoKey);
+    formData.append("color", color);
 
     const res = await axios.post(`${uploadApi}/upload/`, formData, {
       headers: { "Content-Type": "multipart/form-data" },

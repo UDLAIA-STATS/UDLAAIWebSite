@@ -6,3 +6,4 @@ export * from "./match-option-cookies";
 export * from "./validation/index"
 export * from "./serializers/index";
 export * from "./forms/index";
+export * from './color_to_rgb';

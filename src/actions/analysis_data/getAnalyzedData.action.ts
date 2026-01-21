@@ -18,7 +18,6 @@ export const getAnalyzedData = defineAction({
       if (match_id !== undefined) endpoint += `&match_id=${match_id}`;
 
       const res = await axios.get(endpoint);
-      const status = res.status;
 
       return paginationResponseSerializer(res.data);
     } catch (error) {
@@ -52,7 +51,6 @@ handler: async ( { id } ) => {
     try {
       let endpoint = `${statsApi}/consolidated/${id}/`;
       const res = await axios.get(endpoint);
-      const status = res.status;
 
       return successResponseSerializer(res.data);
     } catch (error) {

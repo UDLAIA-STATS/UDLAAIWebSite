@@ -29,7 +29,7 @@ const { data: playerData, error: playerError } = await Astro.callAction(
   {
     page: pageParam,
     pageSize: 10,
-  }
+  },
 );
 
 if (playerError || !playerData) {
@@ -69,31 +69,40 @@ const rows = players
     u.jugadoractivo ? "Sí" : "No",
   ])
   .sort((a, b) => {
-    if (sortParam) {
-      const index = headers.findIndex(
-        (header) =>
-          header.data.toLowerCase() ===
-          (sortParam === "idbanner"
-            ? "banner"
-            : sortParam === "nombrejugador"
+    if (!sortParam) return 0;
+
+    const index = headers.findIndex(
+      (header) =>
+        header.data.toLowerCase() ===
+        (sortParam === "idbanner"
+          ? "banner"
+          : sortParam === "nombrejugador"
             ? "nombre"
             : sortParam === "apellidojugador"
-            ? "apellido"
-            : sortParam === "numerocamisetajugador"
-            ? "número de camiseta"
-            : "")
-      );
-      if (index !== -1) {
-        const aValue = a[index] as string;
-        const bValue = b[index] as string;
-        if (orderParam === "asc") {
-          return aValue.localeCompare(bValue);
-        } else {
-          return bValue.localeCompare(aValue);
-        }
-      }
+              ? "apellido"
+              : sortParam === "numerocamisetajugador"
+                ? "número de camiseta"
+                : ""),
+    );
+
+    if (index === -1) return 0;
+
+    const aValue = a[index];
+    const bValue = b[index];
+
+    // 🔹 Orden numérico
+    if (typeof aValue === "number" && typeof bValue === "number") {
+      return orderParam === "asc" ? aValue - bValue : bValue - aValue;
     }
-    return 0;
+
+    // 🔹 Orden alfabético (string)
+    return orderParam === "asc"
+      ? String(aValue).localeCompare(String(bValue), "es", {
+          sensitivity: "base",
+        })
+      : String(bValue).localeCompare(String(aValue), "es", {
+          sensitivity: "base",
+        });
   });
 
 function handleDelete(username: string) {
@@ -114,7 +123,7 @@ tableActions.push(
     icon: DeleteIcon.src,
     alt: "Eliminar jugador",
     type: "button",
-  }
+  },
 );
 ---
 
@@ -176,7 +185,7 @@ tableActions.push(
                           </button>
                         </td>
                       )
-                    )
+                    ),
                   )}
               </tr>
             ))}
@@ -190,4 +199,4 @@ tableActions.push(
   }
 </AdminPanelLayout>
 
-<script src="./scripts/index.ts" />
+<script src="./scripts/index.ts"></script>

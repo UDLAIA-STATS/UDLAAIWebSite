@@ -16,6 +16,7 @@ export default function VideoContainer() {
   const [partidosBase, setPartidosBase] = createSignal<Partido[]>([]);
   const [partidos, setPartidos] = createSignal<Partido[]>([]);
   const [temporadas, setTemporadas] = createSignal<Temporada[]>([]);
+  const [color, setColor] = createSignal<string>("#C10230");
   const [temporadaSeleccionada, setTemporadaSeleccionada] = createSignal<
     number | null
   >(null);
@@ -93,6 +94,12 @@ export default function VideoContainer() {
     }
   };
 
+  const onColorChange = (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    console.log(target.value);
+    setColor(target.value);
+  }
+
   const submitVideo = async () => {
     if (!partidoSeleccionado() || !file() || !temporadaSeleccionada()) {
       Swal.fire({
@@ -104,7 +111,7 @@ export default function VideoContainer() {
     }
     setLoading(true);
     try {
-      await startAnalysis(file()!, partidoSeleccionado()!);
+      await startAnalysis(file()!, partidoSeleccionado()!, color());
 
       setPreview(null);
       setFile(null);
@@ -187,6 +194,15 @@ export default function VideoContainer() {
               )}
             </For>
           </select>
+
+          <label class="text-sm font-medium text-gray-600">Color</label>
+          <input
+            type="color"
+            id="color-picker"
+            class="w-full h-10 p-0 border-0 rounded-md cursor-pointer"
+            value={color()}
+            onChange={onColorChange}
+          />
 
           <label class="mt-2 text-sm font-medium text-gray-600">Video</label>
           <span class="text-sm text-gray-400">

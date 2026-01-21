@@ -2,6 +2,7 @@ import type { Partido } from "@interfaces/torneos.interface";
 import { uploadFile } from "@services/index";
 import { actions } from "astro:actions";
 import Swal from "sweetalert2";
+import { colorHexToRgb } from "./color_to_rgb";
 
 export const generateVideoThumbnail = (videoFile: File) =>
   new Promise<string>((resolve, reject) => {
@@ -54,7 +55,8 @@ export const generateVideoThumbnail = (videoFile: File) =>
 
 async function uploadWithProgress(
   file: File,
-  partidoId: number
+  partidoId: number,
+  color: string
 ): Promise<string> {
   const progressPopup = Swal.fire({
     title: "Subiendo video…",
@@ -70,7 +72,7 @@ async function uploadWithProgress(
   });
 
   try {
-    const { key } = await uploadFile(file, partidoId, (pct) => {
+    const { key } = await uploadFile(file, partidoId, color, (pct) => {
       const bar = document.getElementById("progress-bar") as HTMLElement;
       const txt = document.getElementById("progress-text") as HTMLElement;
       if (bar) bar.style.width = `${pct}%`;
@@ -86,7 +88,8 @@ async function uploadWithProgress(
 
 export async function startAnalysis(
   video: File,
-  partido: Partido
+  partido: Partido,
+  color: string
 ): Promise<void> {
   if (partido.partidosubido) {
     await Swal.fire({
@@ -98,8 +101,11 @@ export async function startAnalysis(
   }
 
   let key: string;
+  const rgb = colorHexToRgb(color);
+  const rgbString = rgb ? `${rgb.r},${rgb.g},${rgb.b}` : "193,2,48";
+  console.log("Color seleccionado:", color, rgb);
   try {
-    key = await uploadWithProgress(video, partido.idpartido);
+    key = await uploadWithProgress(video, partido.idpartido, rgbString);
   } catch (e: any) {
     await Swal.fire({
       icon: "error",
