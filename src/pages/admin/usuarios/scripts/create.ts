@@ -33,25 +33,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    // const { value: userCredential } = await Swal.fire({
-    //   title: "Ingrese su contraseña",
-    //   input: "password",
-    //   inputAttributes: {
-    //     autocapitalize: "off",
-    //   },
-    //   showCancelButton: true,
-    //   confirmButtonText: "Aceptar",
-    //   cancelButtonText: "Cancelar",
-    //   showLoaderOnConfirm: true,
-    //   preConfirm: async ( userCredential) => {
-    //     if (!userCredential) {
-    //       Swal.showValidationMessage("La contraseña es requerida");
-    //       return;
-    //     }
-    //     return userCredential;
-    //   },
-    // });
-
     try {
       const { data, error } = await actions.registerUser(formData);
 

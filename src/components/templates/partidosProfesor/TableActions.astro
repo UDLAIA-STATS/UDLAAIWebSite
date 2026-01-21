@@ -120,7 +120,7 @@ const orderParam = searchParams.get("orderBy") ?? "asc";
   ) as HTMLButtonElement;
 
   btnLimpiarFiltros.addEventListener("click", () => {
-    const currentUrl = new URL(window.location.href);
+    const currentUrl = new URL(globalThis.location.href);
     currentUrl.searchParams.delete("sortBy");
     currentUrl.searchParams.delete("orderBy");
     navigate(currentUrl.toString());
@@ -128,7 +128,7 @@ const orderParam = searchParams.get("orderBy") ?? "asc";
 
   sortBySelect.addEventListener("change", () => {
     const selectedSortBy = sortBySelect.value;
-    const currentUrl = new URL(window.location.href);
+    const currentUrl = new URL(globalThis.location.href);
     if (selectedSortBy) {
       currentUrl.searchParams.set("sortBy", selectedSortBy);
       currentUrl.searchParams.set("orderBy", orderBySelect.value);
@@ -140,7 +140,7 @@ const orderParam = searchParams.get("orderBy") ?? "asc";
 
   orderBySelect.addEventListener("change", () => {
     const selectedOrderBy = orderBySelect.value;
-    const currentUrl = new URL(window.location.href);
+    const currentUrl = new URL(globalThis.location.href);
     if (sortBySelect.value) {
       currentUrl.searchParams.set("orderBy", selectedOrderBy);
       currentUrl.searchParams.set("sortBy", sortBySelect.value);

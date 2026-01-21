@@ -5,33 +5,54 @@ import type {
   Player,
   ProcessDataValues,
 } from "@interfaces/index";
-import { actions } from "astro:actions";
+
+export const getSeasonsOnData = (
+  data: AnalyzedDataTable[],
+): Set<{ id: number; name: string }> => {
+  const seasonsSet: Set<{ id: number; name: string }> = new Set();
+  for (const item of data) {
+    if (
+      seasonsSet.has({ id: item.temporada_id, name: item.temporada_nombre })
+    ) {
+      continue;
+    }
+    seasonsSet.add({ id: item.temporada_id, name: item.temporada_nombre });
+  }
+
+  return seasonsSet;
+};
+
+export const filterDataOnSeason = (
+  data: AnalyzedDataTable[],
+  seasonId: number,
+) => data.filter((item) => item.temporada_id === seasonId);
 
 export const getProcessedData = async (
-  dataValues: ProcessDataValues
+  dataValues: ProcessDataValues,
 ): Promise<AnalyzedDataTable[]> => {
   try {
-
     const analyzedData: AnalyzedData[] = dataValues.analyzedData;
     const partidos: Partido[] = dataValues.partidos;
     const players: Player[] = dataValues.players;
 
     const partidosMap = new Map(partidos.map((p) => [p.idpartido, p]));
-    const playersMap = new Map(players.map((p) => [p.idjugador, p]));
 
     let rows: AnalyzedDataTable[] = [];
 
     for (const item of analyzedData) {
       const partido = partidosMap.get(item.match_id);
       const player = players.find(
-        (p) => p.jugadoractivo && p.numerocamisetajugador === item.shirt_number
+        (p) => p.jugadoractivo && p.numerocamisetajugador === item.shirt_number,
       );
 
-      if (dataValues.query && !matchesSearch(partido, player, dataValues.query)) continue;
+      if (dataValues.query && !matchesSearch(partido, player, dataValues.query))
+        continue;
 
       rows.push({
         id: item.id,
         match_id: item.match_id,
+        temporada_nombre: partido?.temporada_nombre || "No encontrado",
+        temporada_id: partido?.idtemporada || 0,
         player_id: item.player_id,
         player_name: player
           ? `${player.nombrejugador} ${player.apellidojugador}`
@@ -100,7 +121,7 @@ export const getProcessedData = async (
 const matchesSearch = (
   partido: Partido | undefined,
   jugador: Player | undefined,
-  search: string
+  search: string,
 ): boolean => {
   const s = search.toLowerCase();
 

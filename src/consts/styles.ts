@@ -6,7 +6,7 @@ export const colors = {
 };
 
 export const buttonClass = `text-[${colors.red}] bg-white border-[${colors.red}] border-solid border-2 px-4 py-2 rounded-md flex items-center justify-center cursor-pointer transition`;
-export const inputClass = `bg-white text-black rounded-md p-2 w-md focus:outline-none focus:ring-2 focus:ring-[${colors.red}]`;
+export const inputClass = `bg-white text-black rounded-md p-2 w-md focus:outline-none focus:ring-1 focus:ring-[${colors.red}]`;
 
 export const highlightedButtonClass =
     `bg-[${colors.red}] text-white border-2 border-[${colors.red}] rounded-md px-4 py-2 transition-all duration-200`;

@@ -1,0 +1,92 @@
+---
+interface Props {
+  search: string;
+  sortBy: string;
+  orderBy: string;
+  groupBy?: string;
+  temporadasData?: Set<{ id: number; name: string }>;
+  canGroupBySeason?: boolean;
+}
+const {
+  search,
+  sortBy,
+  orderBy,
+  temporadasData,
+  groupBy = "",
+  canGroupBySeason = false,
+} = Astro.props;
+const componentClass = "flex flex-col flex-wrap gap-1";
+---
+
+<section class="flex flex-wrap gap-7 flex-row pt-5 pb-7">
+  <div class={componentClass}>
+    <label for="search" class="block text-sm font-medium">Buscar</label>
+    <input
+      id="search"
+      type="text"
+      placeholder="Jugador, torneo o fecha..."
+      class="bg-white text-black rounded-md p-2 w-3xs focus:outline-none ring-2 ring-gray-300 focus:ring-1 focus:ring-black"
+      value={search}
+    />
+  </div>
+  <div class:list={[componentClass, canGroupBySeason ? "" : "hidden"]}>
+    <label for="groupBy" class="block text-sm font-medium"
+      >Agrupar por Temporada</label
+    >
+    <select
+      id="groupBy"
+      class="bg-white text-black rounded-md p-2 w-4xs focus:outline-none focus:ring-1 focus:ring-black"
+    >
+      <option selected={groupBy === ""} value="" disabled
+        >-- Selecciona --</option
+      >
+      {
+        temporadasData ? (
+          [...temporadasData].map((temporada) => (
+            <option
+              selected={groupBy === String(temporada.id)}
+              value={temporada.id}
+            >
+              {temporada.name}
+            </option>
+          ))
+        ) : (
+          <option selected disabled value="">
+            No hay temporadas disponibles
+          </option>
+        )
+      }
+    </select>
+  </div>
+  <div class={componentClass}>
+    <label for="sortBy" class="block text-sm font-medium">Ordenar por</label>
+    <select
+      id="sortBy"
+      class="bg-white text-black rounded-md p-2 w-4xs focus:outline-none focus:ring-1 focus:ring-black"
+    >
+      <option selected={sortBy === "player"} value="player">Jugador</option>
+      <option selected={sortBy === "shirt_number"} value="shirt_number"
+        >N° Camiseta</option
+      >
+      <option selected={sortBy === "tournament"} value="tournament"
+        >Torneo</option
+      >
+      <option selected={sortBy === "match_date"} value="match_date"
+        >Fecha de Partido</option
+      >
+      <option selected={sortBy === "analysis_date"} value="analysis_date"
+        >Fecha de Análisis</option
+      >
+    </select>
+  </div>
+  <div class={componentClass}>
+    <label for="orderBy" class="block text-sm font-medium">Orden</label>
+    <select
+      id="orderBy"
+      class="bg-white text-black rounded-md p-2 w-4xs focus:outline-none focus:ring-1 focus:ring-black"
+    >
+      <option selected={orderBy === "asc"} value="asc">Ascendente</option>
+      <option selected={orderBy === "desc"} value="desc">Descendente</option>
+    </select>
+  </div>
+</section>
