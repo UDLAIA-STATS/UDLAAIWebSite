@@ -1,4 +1,7 @@
-import { usuarioSerializer } from "@utils/serializers/usuario/usuario_serializer";
+import {
+  errorResponseSerializer,
+  successResponseSerializer,
+} from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import { log } from "console";
@@ -6,27 +9,24 @@ import { log } from "console";
 export const registerUser = defineAction({
   accept: "form",
   input: z.object({
-    name: z.string().min(2).max(100),
-    email: z.string().email(),
+    name: z.string(),
+    email: z.string(),
     rol: z.enum(["superuser", "profesor"]),
-    password: z.string().min(8),
-    userCredential: z.string().min(8).max(100),
+    password: z.string(),
   }),
-  handler: async ({ email, password, name, rol, userCredential }, { cookies }) => {
+  handler: async (
+    { email, password, name, rol },
+    { cookies }
+  ) => {
     try {
       console.log("Registrando usuario:", { name, email, password });
-      const loggedInUser = cookies.get("user")
-        ? (JSON.parse(cookies.get("user")?.value as string) as LoggedUser)
-        : null;
       const authUrl = import.meta.env.AUTH_URL;
-      const basicAuth = Buffer.from(
-        `${loggedInUser?.nickname}:${userCredential}`
-      ).toString("base64");
+
+
       const response = await fetch(`${authUrl}/register/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Basic ${basicAuth}`,
         },
         body: JSON.stringify({
           nombre_usuario: name,
@@ -35,20 +35,21 @@ export const registerUser = defineAction({
           contrasenia_usuario: password,
         }),
       });
-      console.log("Respuesta del servidor:", response);
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = usuarioSerializer(errorData);
-        log(`Response: ${errorData.data}`);
-        throw new Error(errorData.data);
-      }
-      const data = await response.json();
 
-      return { 
-        message: data.mensaje,
-        status: data.status,
-        data: data.data
-       };
+      const details = await response.json();
+
+      console.log("Respuesta del servidor:", response);
+
+      if (!response.ok) {
+        const errorData = errorResponseSerializer(details);
+        let errorMessage = errorData.error;
+        if (errorData.data) {
+          errorMessage = errorData.data;
+        }
+        throw new Error(errorMessage || "Error al registrar usuario");
+      }
+
+      return successResponseSerializer(details);
     } catch (err) {
       console.error("Fallo en la acción:", err);
       throw err;

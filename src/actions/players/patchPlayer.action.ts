@@ -1,7 +1,9 @@
 import { defineAction } from "astro:actions";
 import { jugadorUpdateSchema } from "./playerSchemas";
+import { errorResponseSerializer, successResponseSerializer } from "@utils/serializers";
 
 export const updateJugador = defineAction({
+   
   accept: "form",
   input: jugadorUpdateSchema,
   handler: async ({ idjugador, ...updates }) => {
@@ -16,11 +18,15 @@ export const updateJugador = defineAction({
         }
       );
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Error al actualizar jugador");
+        const errorData = errorResponseSerializer(await response.json());
+        let errorMessage = errorData.error;
+        if (errorData.data) {
+          errorMessage = errorData.data;
+        }
+        throw new Error(errorMessage || "Error al actualizar el jugador");
       }
-      const resp = await response.json();
-      return { data: resp };
+      const data = successResponseSerializer(await response.json());
+      return data;
     } catch (error) {
       console.error(`Error al actualizar el:`, error);
       throw error;

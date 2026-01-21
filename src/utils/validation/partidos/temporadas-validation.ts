@@ -1,6 +1,10 @@
-import type { Temporada } from "@interfaces/torneos.interface";
+import type { Temporada } from "@interfaces/index";
+import {
+  setFieldError,
+  clearFieldError,
+} from "@utils/validation/validation-utils";
 
-export const validateTemporadas = (formData: FormData): string => {
+export const validateTemporadas = (formData: FormData): boolean => {
   // Extraer valores del formulario
   const nombreTemporada =
     (formData.get("nombretemporada") as string)?.trim() ?? "";
@@ -14,66 +18,115 @@ export const validateTemporadas = (formData: FormData): string => {
   const temporadaActiva =
     (formData.get("temporadaactiva") as string)?.trim() ?? "";
 
+  // limpiar errores previos
+  clearFieldError("nombretemporada");
+  clearFieldError("descripciontemporada");
+  clearFieldError("tipotemporada");
+  clearFieldError("fechainiciotemporada");
+  clearFieldError("fechafintemporada");
+  clearFieldError("idtorneo");
+  clearFieldError("temporadaactiva");
+
   // Validaciones individuales
-  const validationsErrors: Record<string, string> = {
-    nombreTemporada:
-      nombreTemporada.length === 0
-        ? "El nombre de la temporada es obligatorio."
-        : nombreTemporada.length < 5
-          ? "El nombre de la temporada es muy corto (mínimo 5 caracteres)."
-          : "",
-    descripcionTemporada:
-      descripcionTemporada.length === 0
-        ? "La descripción de la temporada es obligatoria."
-        : descripcionTemporada.length < 10
-          ? "La descripción de la temporada es muy corta (mínimo 10 caracteres)."
-          : "",
-    tipoTemporada:
-      tipoTemporada.length === 0
-        ? "El tipo de temporada es obligatorio."
-        : !["oficial", "amistosa"].includes(tipoTemporada.toLowerCase())
-          ? "Tipo de temporada inválido."
-          : "",
-    fechaInicio:
-      fechaInicio.length === 0 ? "La fecha de inicio es obligatoria." : "",
-    fechaFin: fechaFin.length === 0 ? "La fecha de fin es obligatoria." : "",
-    fechasInvalidas:
-      fechaInicio && fechaFin && new Date(fechaFin) < new Date(fechaInicio)
-        ? "La fecha de fin no puede ser anterior a la fecha de inicio."
-        : "",
-    temporadaActiva:
-      temporadaActiva.length === 0
-        ? "Debe indicar si la temporada está activa o no."
-        : "",
-  };
+  let hasErrors = false;
 
-  // Filtrar errores no vacíos
-  const errorMessages = Object.values(validationsErrors).filter(
-    (msg) => msg !== ""
-  );
+  if (nombreTemporada.length === 0) {
+    setFieldError(
+      "nombretemporada",
+      "El nombre de la temporada es obligatorio."
+    );
+    hasErrors = true;
+  } else if (nombreTemporada.length < 5) {
+    setFieldError(
+      "nombretemporada",
+      "El nombre de la temporada es muy corto (mínimo 5 caracteres)."
+    );
+    hasErrors = true;
+  } else {
+    clearFieldError("nombretemporada");
+  }
 
-  // Retornar errores concatenados
-  return errorMessages.length > 0 ? errorMessages.join("<br/>") : "";
+  if (descripcionTemporada.length === 0) {
+    setFieldError(
+      "descripciontemporada",
+      "La descripción de la temporada es obligatoria."
+    );
+    hasErrors = true;
+  } else if (descripcionTemporada.length < 10) {
+    setFieldError(
+      "descripciontemporada",
+      "La descripción de la temporada es muy corta (mínimo 10 caracteres)."
+    );
+    hasErrors = true;
+  } else {
+    clearFieldError("descripciontemporada");
+  }
+
+  if (tipoTemporada.length === 0) {
+    setFieldError("tipotemporada", "El tipo de temporada es obligatorio.");
+    hasErrors = true;
+  } else if (!["oficial", "amistosa"].includes(tipoTemporada.toLowerCase())) {
+    setFieldError("tipotemporada", "Tipo de temporada inválido.");
+    hasErrors = true;
+  } else {
+    clearFieldError("tipotemporada");
+  }
+
+  if (fechaInicio.length === 0) {
+    setFieldError("fechainiciotemporada", "La fecha de inicio es obligatoria.");
+    hasErrors = true;
+  } else {
+    clearFieldError("fechainiciotemporada");
+  }
+
+  if (fechaFin.length === 0) {
+    setFieldError("fechafintemporada", "La fecha de fin es obligatoria.");
+    hasErrors = true;
+  } else {
+    clearFieldError("fechafintemporada");
+  }
+
+  if (fechaInicio && fechaFin && new Date(fechaFin) < new Date(fechaInicio)) {
+    setFieldError(
+      "fechafintemporada",
+      "La fecha de fin no puede ser anterior a la fecha de inicio."
+    );
+    hasErrors = true;
+  }
+
+  if (temporadaActiva.length === 0) {
+    setFieldError(
+      "temporadaactiva",
+      "Debe indicar si la temporada está activa o no."
+    );
+    hasErrors = true;
+  } else {
+    clearFieldError("temporadaactiva");
+  }
+
+  return hasErrors;
 };
 
-/**
- * Compara una temporada existente con los valores actuales del formulario.
- * Retorna true si hubo alguna modificación.
- */
 export const isTemporadaUpdated = (
   temporada: Temporada,
   formData: FormData
 ): boolean => {
   // Extraer valores del formulario con normalización
-  const nombreTemporada = (formData.get("nombretemporada") as string)?.trim() ?? "";
-  const descripcionTemporada = (formData.get("descripciontemporada") as string)?.trim() ?? "";
-  const tipoTemporadaRaw = (formData.get("tipotemporada") as string)?.trim() ?? "";
+  const nombreTemporada =
+    (formData.get("nombretemporada") as string)?.trim() ?? "";
+  const descripcionTemporada =
+    (formData.get("descripciontemporada") as string)?.trim() ?? "";
+  const tipoTemporadaRaw =
+    (formData.get("tipotemporada") as string)?.trim() ?? "";
   const tipoTemporada =
-    tipoTemporadaRaw.charAt(0).toUpperCase() + tipoTemporadaRaw.slice(1).toLowerCase();
+    tipoTemporadaRaw.charAt(0).toUpperCase() +
+    tipoTemporadaRaw.slice(1).toLowerCase();
 
-  const fechaInicio = (formData.get("fechainiciotemporada") as string)?.trim() ?? "";
+  const fechaInicio =
+    (formData.get("fechainiciotemporada") as string)?.trim() ?? "";
   const fechaFin = (formData.get("fechafintemporada") as string)?.trim() ?? "";
-  const temporadaActiva = (formData.get("temporadaactiva") as string) === "true" ||
+  const temporadaActiva =
+    (formData.get("temporadaactiva") as string) === "true" ||
     (formData.get("temporadaactiva") as string) === "on";
 
   // Normalización de fechas para evitar diferencias por formato
@@ -91,4 +144,3 @@ export const isTemporadaUpdated = (
 
   return cambiosDetectados;
 };
-

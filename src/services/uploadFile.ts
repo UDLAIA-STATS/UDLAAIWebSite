@@ -1,37 +1,46 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
+import { suscribeVideoUpload } from "./suscribe_websocket";
 
 export const uploadFile = async (
   file: File,
   partidoId: number,
+  color: string,
   onProgress?: (percent: number) => void
-) => {
+): Promise<{ ok: true; key: string }> => {
   try {
-    const uploadApi = import.meta.env.UPLOAD_SERVICE_URL;
-    console.log("UPLOAD SERVICE URL:", uploadApi);
+    const uploadApi = import.meta.env.PUBLIC_UPLOAD_SERVICE_URL;
+    const generatedKey = await axios.post(`${uploadApi}/generate-key/`, {
+      video_name: file.name,
+    });
+
+    const videoKey = generatedKey.data.video_key;
+    console.log("Generated video key:", videoKey);
+
+    suscribeVideoUpload(videoKey, onProgress);
 
     const formData = new FormData();
     formData.append("video", file);
     formData.append("id_partido", String(partidoId));
+    formData.append("video_key", videoKey);
+    formData.append("color", color);
 
-    const res = await axios.post(`http://127.0.0.1:8050/api/upload/`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-      onUploadProgress: (progressEvent) => {
-        if (!progressEvent.total) return;
-        const pct = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
-        );
-        onProgress?.(pct);
-      },
+    const res = await axios.post(`${uploadApi}/upload/`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
 
-    return {
-      ok: true,
-      key: res.data.key as string,
-    };
+    console.log("Upload response:", res.data.message);
+
+    return { ok: true, key: videoKey };
   } catch (err) {
-    console.error(err);
-    throw new Error("Error al subir el video, por favor intente nuevamente.");
+    if (axios.isAxiosError(err)) {
+      const backendMessage =
+        err.response?.data?.data ||
+        err.response?.data.error ||
+        err.message ||
+        "Error desconocido del servidor";
+      throw new Error(`Error al subir el video: ${backendMessage}`);
+    }
+
+    throw new Error("Error inesperado al subir el video.");
   }
 };

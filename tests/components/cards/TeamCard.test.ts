@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import TeamCard from "../../../src/components/cards/TeamCard.astro";
+import TeamCard from "../../../src/components/molecules/cards/TeamCard.astro";
 import { renderAstroComponent } from "../../helpers";
 
 test("TeamCard renders player name and buttons correctly", async () => {

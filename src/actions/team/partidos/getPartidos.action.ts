@@ -1,7 +1,6 @@
-import type { Partido } from "@interfaces/index";
+import { errorResponseSerializer, paginationResponseSerializer, successResponseSerializer } from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import debug from "debug";
 
 export const getPartidos = defineAction({
   accept: "json",
@@ -14,20 +13,16 @@ export const getPartidos = defineAction({
     try {
       const res = await fetch(`${baseUrl}/partidos/all/?page=${page}&offset=${pageSize}`);
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `Error ${res.status}: ${res.statusText}`);
+        const errorData = errorResponseSerializer(await res.json());
+        let errorMessage = errorData.error;
+        if (errorData.data) {
+          errorMessage = errorData.data;
+        }
+        throw new Error(errorMessage || `Error ${res.status}: ${res.statusText}`);
       };
-      const data = await res.json();
-      const content = data.data;
+      const data = paginationResponseSerializer(await res.json());
       console.log('Datos obtenidos de partido' + data)
-      debug.log('Datos obtenidos de partido' + data)
-      return { 
-        count: content.count,
-        page: content.page,
-        offset: content.offset,
-        pages: content.pages,
-        data: content.results as Partido[]
-       };
+      return data;
     } catch (err) {
       console.error("Error al obtener partidos:", err);
       throw new Error(err instanceof Error ? err.message : "No se pudo obtener la lista de partidos");
@@ -43,13 +38,16 @@ export const getPartidoById = defineAction({
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
       const res = await fetch(`${baseUrl}/partidos/${id}/`);
-      if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
-      const data = await res.json();
-      return { 
-        mensaje: data.mensaje,
-        status: data.status,
-        data: data.data as Partido
-       };
+      if (!res.ok) {
+        const errorData = errorResponseSerializer(await res.json());
+        let errorMessage = errorData.error;
+        if (errorData.data) {
+          errorMessage = errorData.data;
+        }
+        throw new Error(errorMessage || `Error ${res.status}: ${res.statusText}`);
+      }
+      const data = successResponseSerializer(await res.json());
+      return data;
     } catch (err) {
       console.error(`Error al obtener partido ID ${id}:`, err);
       throw new Error("No se pudo obtener el partido");

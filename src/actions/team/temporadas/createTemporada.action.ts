@@ -1,7 +1,10 @@
 import type { Temporada } from "@interfaces/torneos.interface";
 import { defineAction } from "astro:actions";
 import { temporadaSchema } from "./temporadasSchema";
-
+import {
+  errorResponseSerializer,
+  successResponseSerializer,
+} from "@utils/serializers";
 
 export const createTemporada = defineAction({
   accept: "form",
@@ -26,12 +29,21 @@ export const createTemporada = defineAction({
           fechafintemporada: fechafintemporada,
         }),
       });
+
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.non_field_errors || `Error ${res.status}: ${res.statusText}`);
+        const errorData = errorResponseSerializer(await res.json());
+        let errorMessage = errorData.error;
+
+        if (errorData.data) {
+          errorMessage = errorData.data;
+        }
+        throw new Error(
+          errorMessage || `Error ${res.status}: ${res.statusText}`
+        );
       }
-      const data = await res.json();
-      return { data: data.data as Temporada };
+
+      const data = successResponseSerializer(await res.json());
+      return data;
     } catch (err) {
       console.error("Error al crear temporada:", err);
       throw new Error("No se pudo crear la temporada");

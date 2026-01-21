@@ -1,7 +1,6 @@
 ---
-import "@styles/global.css";
-import arrowNext from "@assets/arrow_next.svg";
 import FormLayout from "@layouts/FormLayout.astro";
+import { Input, ComboBox, FormButtons } from "@components/molecules/forms/index";
 
 const buttonClass =
   "text-[#C10230] bg-white border-[#C10230] border-solid border-2 px-4 py-2 rounded-md flex items-center justify-center cursor-pointer transition";
@@ -15,224 +14,56 @@ const user = Astro.cookies.get("user")
 
 <FormLayout user={user} formTitle="Crear Jugador" pageTitle="Agregar Jugador">
   <form id="formJugador" class="flex flex-col w-full max-w-md">
-    <div class="flex gap-2 flex-col mb-4">
-      <label class="text-base font-medium" for="idbanner">ID Banner</label>
-      <input
-        type="text"
-        id="idbanner"
-        name="idbanner"
-        minlength="9"
-        maxlength="9"
-        class={inputClass}
-        required
-      />
-    </div>
-
+    <Input
+      id="idbanner"
+      label="ID Banner"
+      maxlength={9}
+      minlength={9}
+      required
+    />
     <!-- Nombres -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label class="text-base font-medium" for="nombrejugador">Nombres</label>
-      <input
-        type="text"
-        id="nombrejugador"
-        name="nombrejugador"
-        maxlength="100"
-        class={inputClass}
-        required
-      />
-    </div>
-
+    <Input id="nombrejugador" label="Nombres" maxlength={100} required />
+    
     <!-- Apellidos -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label class="text-base font-medium" for="apellidojugador"
-        >Apellidos</label
-      >
-      <input
-        type="text"
-        id="apellidojugador"
-        name="apellidojugador"
-        maxlength="100"
-        class={inputClass}
-        required
-      />
-    </div>
-
+    <Input id="apellidojugador" label="Apellidos" maxlength={100} required />
+    
     <!-- Número de camiseta -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label class="text-base font-medium" for="numerocamisetajugador"
-        >Número de camiseta</label
-      >
-      <input
-        type="number"
-        id="numerocamisetajugador"
-        name="numerocamisetajugador"
-        min="1"
-        max="99"
-        class={inputClass}
-        required
-      />
-    </div>
-
+    <Input
+    id="numerocamisetajugador"
+    label="Número de Camiseta"
+    type="number"
+    maxlength={2}
+    minlength={1}
+    required
+    />
+    
     <!-- Posición -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label class="text-base font-medium" for="posicionjugador">Posición</label
-      >
-      <select
-        id="posicionjugador"
-        name="posicionjugador"
-        class={inputClass}
-        required
-      >
-        <option value="">-- Selecciona --</option>
-        <option value="Portero">Portero</option>
-        <option value="Defensa">Defensa</option>
-        <option value="Mediocampista">Mediocampista</option>
-        <option value="Delantero">Delantero</option>
-      </select>
-    </div>
-
+    <ComboBox id="posicionjugador" label="Posición" required>
+      <option value="">-- Selecciona --</option>
+      <option value="Portero">Portero</option>
+      <option value="Defensa">Defensa</option>
+      <option value="Mediocampista">Mediocampista</option>
+      <option value="Delantero">Delantero</option>
+    </ComboBox>
+    
     <!-- Jugador activo -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label class="text-base font-medium" for="jugadoractivo"
-        >Jugador Activo</label
-      >
-      <select
-        id="jugadoractivo"
-        name="jugadoractivo"
-        class={inputClass}
-        required
-      >
-        <option value="">-- Selecciona --</option>
-        <option value="true">Activo</option>
-        <option value="false">Inactivo</option>
-      </select>
-    </div>
-
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="imagenjugador" class="text-base font-medium">Foto de la camiseta (opcional)</label>
-      <input id="imagenjugador" name="imagenjugador" type="file" class={inputClass} accept="image/*" />
-    </div>
-
+    <ComboBox id="jugadoractivo" label="Jugador Activo" required>
+      <option value="" disabled selected>-- Selecciona --</option>
+      <option value="true">Activo</option>
+      <option value="false">Inactivo</option>
+    </ComboBox>
+    
+    <!-- Imagen del jugador -->
+    <!-- <Input
+    id="imagenjugador"
+    label="Foto de la camiseta (opcional)"
+    type="file"
+    accept="image/*"
+    /> -->
+    
     <!-- Botón -->
-    <div class="flex justify-center text-center mt-5 mx-5 pt-2 gap-5">
-      <button class={buttonClass} type="button" id="btn-cancel">
-        Cancelar
-      </button>
-      <button id="btnSubmit" class={buttonClass} type="button">
-        Guardar Jugador
-        <img
-          src={arrowNext.src}
-          class="flex size-7 align-middle pr-1 rotate-180"
-          alt=""
-        />
-      </button>
-    </div>
+    <FormButtons label="Crear Jugador" />
   </form>
-</FormLayout>
-
-<script>
-  import { privateRoutesMap } from "@consts/index";
-import { fileToBase64 } from "@utils/index";
-import { validateJugador } from "@utils/validation/player/player-validation";
-  import { actions } from "astro:actions";
-  import { navigate } from "astro:transitions/client";
-  import Swal from "sweetalert2";
-
-  const btnSubmit = document.getElementById("btnSubmit") as HTMLButtonElement;
-  const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
-
-  btnCancel.addEventListener("click", () => {
-    navigate(privateRoutesMap.ADMIN_JUGADORES);
-  });
+  </FormLayout>
   
-  btnSubmit.addEventListener("click", async () => {
-    btnSubmit.disabled = true;
-    btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
-    const form = document.getElementById("formJugador") as HTMLFormElement;
-    const formData = new FormData(form);
-
-    // Validar antes de enviar
-    const validationErrors = validateJugador(formData);
-    if (validationErrors) {
-      Swal.fire({
-        icon: "error",
-        title: "Error de validación",
-        html: validationErrors,
-      });
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-      return;
-    }
-
-    const jugadoresData = await actions.getJugadores.orThrow({pageSize: 1000});
-    const jugadores = jugadoresData.data;
-    const camisetaOcupada = jugadores.some(
-      (j) => {
-        return (
-          j.numerocamisetajugador.toString() ===
-          formData.get("numerocamisetajugador")?.toString() && j.jugadoractivo
-        )
-      }
-    )
-
-    if (camisetaOcupada) {
-      Swal.fire({
-        icon: "error",
-        title: "Número de camiseta no disponible",
-        text: "El número de camiseta ya está asignado a otro jugador activo.",
-      });
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-      return;
-    }
-
-
-    try {
-      const logo = formData.get("imagenjugador");
-      if (logo) {
-        const file = logo as File;
-        const base64 = await fileToBase64(file)
-        formData.set("imagenjugador", base64); 
-      } else {
-        formData.delete("imagenjugador");
-      }
-      const { data, error } = await actions.createJugador(formData);
-
-      if (error) {
-        console.log(error);
-        Swal.fire({
-          icon: "error",
-          title: "Error al crear el jugador",
-          text: "Los datos son incorrectos o el jugador ya existe.",
-        });
-        btnSubmit.disabled = false;
-        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-        return;
-      }
-
-      Swal.fire({
-        icon: "success",
-        title: "Jugador registrado",
-        text: "El jugador ha sido agregado exitosamente.",
-        confirmButtonText: "Aceptar",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          navigate(privateRoutesMap.ADMIN_JUGADORES);
-          btnSubmit.disabled = false;
-          btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-        }
-      });
-
-      form.reset();
-    } catch (err) {
-      console.error(err);
-      Swal.fire({
-        icon: "error",
-        title: "Error inesperado",
-        text: err instanceof Error ? err.message : "Ocurrió un error inesperado.",
-      });
-    } finally {
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-    }
-  });
-</script>
+<script src="./scripts/create.ts"/>

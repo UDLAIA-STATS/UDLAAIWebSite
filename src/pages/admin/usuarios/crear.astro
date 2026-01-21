@@ -1,16 +1,10 @@
 ---
 import "@styles/global.css";
 import FormLayout from "@layouts/FormLayout.astro";
-import arrowNext from "@assets/arrow_next.svg";
-import NotAuthorized from "@components/shared/NotAuthorized.astro";
 import { roles } from "@consts/roles";
+import { Input, ComboBox, FormButtons } from "@components/molecules/forms/index";
 
 export const prerender = false;
-
-const buttonClass =
-  "text-[#C10230] bg-white border-[#C10230] border-solid border-2 w-full px-4 py-2 justify-center rounded-md flex cursor-pointer text-center";
-const inputClass =
-  "bg-white text-black rounded-md p-2 w-md focus:outline-none focus:ring-2 focus:ring-[#C10230]";
 
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
@@ -18,180 +12,30 @@ const user = Astro.cookies.get("user")
 const { super: superRole } = roles;
 ---
 
-<FormLayout 
-user={user} 
-formTitle="Registro de Usuario" 
-pageTitle="Registro de Usuario">
+<FormLayout
+  user={user}
+  formTitle="Registro de Usuario"
+  pageTitle="Registro de Usuario"
+>
   <form autocomplete="on" method="post">
-          <div class="flex flex-col gap-2 mb-4 px-5">
-            <label class="text-base font-medium" for="name"> Nombre </label>
-            <input
-              type="text"
-              maxlength="100"
-              minlength="3"
-              id="name"
-              name="name"
-              class={inputClass}
-              required
-            />
-          </div>
+    <Input id="name" label="Nombre" maxlength={100} minlength={3}/>
 
-          <div class="flex flex-col gap-2 mb-4 px-5">
-          <label class="text-base font-medium" for="rol">Rol</label>
-          <select id="rol" name="rol" class={inputClass} required>
-            <option value="" selected disabled>-- Selecciona --</option>
-            <option value="superuser">Administrador</option>
-            <option value="profesor">Profesor</option>
-          </select>
-        </div>
+    <ComboBox id="rol" label="Rol">
+      <option value="superuser" selected={superRole}>Administrador</option>
+      <option value="profesor">Profesor</option>
+    </ComboBox>
 
-          <div class="flex flex-col gap-2 mb-4 px-5">
-            <label class="text-base font-medium" for="email">
-              Correo Electrónico
-            </label>
-            <input
-              type="email"
-              maxlength="70"
-              id="email"
-              name="email"
-              class={inputClass}
-              required
-            />
-          </div>
-          <div class="flex flex-col gap-2 mb-4 px-5">
-            <label class="text-base font-medium" for="password">
-              Contraseña
-            </label>
-            <input
-              type="password"
-              maxlength="30"
-              minlength="8"
-              id="password"
-              name="password"
-              autocomplete="new-password"
-              class={inputClass}
-              required
-            />
-          </div>
-          <div class="flex justify-center text-center mt-5 mx-5 pt-2 gap-5">
-            <button class={buttonClass} type="button" id="btn-cancel">
-              Cancelar
-            </button>
-            <button class={buttonClass} type="submit" id="btn-register">
-              Registrar
-              <img
-                src={arrowNext.src}
-                class="size-7 align-middle pl-2 rotate-180"
-                alt=""
-              />
-            </button>
-          </div>
-        </form>
+    <Input id="email" label="Correo Electrónico" type="email"/>
+    <Input
+      id="password"
+      label="Contraseña"
+      type="password"
+      maxlength={30}
+      minlength={8}
+    />
+
+    <FormButtons label="Registrar Usuario" />
+  </form>
 </FormLayout>
 
-<script>
-  import { privateRoutesMap } from "@consts/routes";
-import { validateUsers } from "@utils/validation/admin/usuarios-validation";
-import { actions } from "astro:actions";
-import { navigate } from "astro:transitions/client";
-  import Swal from "sweetalert2";
-
-  const form = document.querySelector("form") as HTMLFormElement;
-  const btnSubmit = form!.querySelector(
-    "button[type='submit']"
-  ) as HTMLButtonElement;
-  const btnCancel = document.getElementById(
-    "btn-cancel"
-  ) as HTMLButtonElement;
-
-  btnCancel.addEventListener("click", (e) => {
-    e.preventDefault();
-    navigate(privateRoutesMap.ADMINS_USERS);
-  });
-
-  form.addEventListener("submit", (e) => e.preventDefault());
-
-  btnSubmit.addEventListener("click", async (e) => {
-    e.preventDefault();
-    btnSubmit.disabled = true;
-    btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
-    const formData = new FormData(form);
-    // const errorMessage = validateUsers(formData);
-
-    // if (errorMessage.length > 0) {
-    //   Swal.fire("Error", errorMessage, "error");
-    //   btnSubmit.disabled = false;
-    //   btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-    //   return;
-    // }
-
-    const { value: userCredential } = await Swal.fire({
-      title: "Ingrese su contraseña",
-      input: "password",
-      inputAttributes: {
-        autocapitalize: "off",
-      },
-      showCancelButton: true,
-      confirmButtonText: "Aceptar",
-      cancelButtonText: "Cancelar",
-      showLoaderOnConfirm: true,
-      preConfirm: async (userCredential) => {
-        if (!userCredential) {
-          Swal.showValidationMessage("La contraseña es requerida");
-          return;
-        }
-        return userCredential;
-      },
-    });
-
-    formData.append("userCredential", userCredential);
-    try {
-
-      const { data, error } = await actions.registerUser(formData);
-  
-      if (error) {
-        console.error("Error:", error);
-        if (error.message.toString().includes("validation")) {
-          await Swal.fire({
-            icon: "error",
-            title: "Error al registrar el usuario",
-            text: "Uno de los campos no es válido. Por favor, verifica e intenta nuevamente.",
-          });
-          btnSubmit.disabled = false;
-          btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-          return;
-        }
-        // const nameError = error. 
-        await Swal.fire({
-          icon: "error",
-          title: "Error al registrar el usuario",
-          text: error.message,
-        });
-        btnSubmit.disabled = false;
-        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-        return;
-      }
-  
-      if (data) {
-        console.log("Success:", data);
-        await Swal.fire({
-          icon: "success",
-          title: "Registro de usuario exitoso",
-        });
-      }
-      btnSubmit.removeAttribute("disabled");
-      form.reset();
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-      navigate(privateRoutesMap.ADMINS_USERS);
-    } catch (error) {
-      console.error("Error inesperado:", error);
-      await Swal.fire({
-        icon: "error",
-        title: "Error inesperado",
-        text: "Ocurrió un error inesperado. Por favor, intenta nuevamente más tarde.",
-      });
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-    }
-  });
-</script>
+<script src="./scripts/create.ts"/>

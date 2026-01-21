@@ -1,11 +1,23 @@
 import { defineAction } from "astro:actions";
 import { partidoSchema } from "./partidoSchemas";
 import type { Partido } from "@interfaces/index";
+import {
+  errorResponseSerializer,
+  successResponseSerializer,
+} from "@utils/serializers";
 
 export const createPartido = defineAction({
   accept: "form",
   input: partidoSchema,
-  handler: async ({ fechapartido, idequipolocal, idequipovisitante, idtorneo, idtemporada, marcadorequipolocal, marcadorequipovisitante }) => {
+  handler: async ({
+    fechapartido,
+    idequipolocal,
+    idequipovisitante,
+    idtorneo,
+    idtemporada,
+    marcadorequipolocal,
+    marcadorequipovisitante,
+  }) => {
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
       const res = await fetch(`${baseUrl}/partidos/`, {
@@ -23,15 +35,24 @@ export const createPartido = defineAction({
       });
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.non_field_errors || `Error ${res.status}: ${res.statusText}`);
+        const errorData = errorResponseSerializer(await res.json());
+        let errorMessage = errorData.error;
+
+        if (errorData.data) {
+          errorMessage = errorData.data;
+        }
+        throw new Error(
+          errorMessage || `Error ${res.status}: ${res.statusText}`
+        );
       }
 
-      const data = await res.json();
-      return { data: data.data as Partido };
+      const data = successResponseSerializer(await res.json());
+      return data;
     } catch (err) {
       console.error("Error al crear partido:", err);
-      throw new Error(err instanceof Error ? err.message : "No se pudo crear el partido");
+      throw new Error(
+        err instanceof Error ? err.message : "No se pudo crear el partido"
+      );
     }
   },
 });

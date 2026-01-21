@@ -70,10 +70,6 @@ cd proyecto-capstone-front
 yarn install
 ```
 
-```sh
-yarn add astro
-```
-
 ### 3. Configurar variables de entorno
 
 Crea los archivos de entorno necesarios (si aplica):

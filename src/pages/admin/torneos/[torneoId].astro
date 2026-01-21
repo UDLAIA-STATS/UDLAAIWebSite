@@ -1,11 +1,16 @@
 ---
 import "@styles/global.css";
 import FormLayout from "@layouts/FormLayout.astro";
-import arrowNext from "@assets/arrow_next.svg";
-import type { Torneo } from "@interfaces/torneos.interface";
-import { buttonClass, inputClass, privateRoutesMap } from "@consts/index";
+import type { Temporada, Torneo } from "@interfaces/torneos.interface";
+import { privateRoutesMap } from "@consts/index";
 import { actions } from "astro:actions";
 import Swal from "sweetalert2";
+import {
+  Input,
+  ComboBox,
+  FormButtons,
+  TextArea,
+} from "@components/molecules/forms/index";
 
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
@@ -35,7 +40,7 @@ if (error || errorTemporadas) {
 }
 
 const torneo: Torneo = data?.data ?? null;
-const temporadas = dataTemporadas?.data ?? [];
+const temporadas = (dataTemporadas?.results as Temporada[]) ?? [];
 
 if (!torneo) {
   Swal.fire("Error", "No se encontró el torneo solicitado", "error");
@@ -44,231 +49,66 @@ if (!torneo) {
 ---
 
 <FormLayout formTitle="Editar Torneo" pageTitle="Editar Torneo" user={user}>
-  <form id="form-torneo" class="flex flex-col w-full max-w-md">
-    <!-- Campo oculto ID -->
-    <input
-      type="hidden"
-      name="idtorneo"
-      id="idtorneo"
-      value={torneo.idtorneo}
-    />
+  <form id="form-torneo">
+    <Input id="idtorneo" label="ID Torneo" value={torneo.idtorneo} hidden />
 
     <!-- Nombre -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="nombretorneo" class="text-base font-medium"
-        >Nombre del Torneo</label
-      >
-      <input
-        type="text"
-        id="nombretorneo"
-        name="nombretorneo"
-        value={torneo.nombretorneo ?? ""}
-        maxlength="100"
-        class={inputClass}
-        required
-      />
-    </div>
+    <Input
+      id="nombretorneo"
+      label="Nombre del Torneo"
+      type="text"
+      value={torneo.nombretorneo ?? ""}
+    />
 
     <!-- Temporada -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="idtemporada" class="text-base font-medium">Temporada</label>
-      <select name="idtemporada" id="idtemporada" class={inputClass} required>
-        <option value="" disabled>Selecciona una temporada</option>
-        {
-          temporadas.map((temp) => (
-            <option
-              value={temp.idtemporada}
-              selected={temp.idtemporada === torneo.idtemporada}
-            >
-              {temp.nombretemporada}
-            </option>
-          ))
-        }
-      </select>
-    </div>
+    <ComboBox id="idtemporada" label="Temporada">
+      <option value="" disabled>Selecciona una temporada</option>
+      {
+        temporadas.map((temp) => (
+          <option
+            value={temp.idtemporada}
+            selected={temp.idtemporada === torneo.idtemporada}
+          >
+            {temp.nombretemporada}
+          </option>
+        ))
+      }
+    </ComboBox>
 
     <!-- Fechas -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="fechainiciotorneo" class="text-base font-medium"
-        >Fecha de Inicio</label
-      >
-      <input
-        type="date"
-        id="fechainiciotorneo"
-        name="fechainiciotorneo"
-        value={torneo.fechainiciotorneo
-          ? torneo.fechainiciotorneo.split("T")[0]
-          : ""}
-        class={inputClass}
-        required
-      />
-    </div>
-
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="fechafintorneo" class="text-base font-medium"
-        >Fecha de Fin</label
-      >
-      <input
-        type="date"
-        id="fechafintorneo"
-        name="fechafintorneo"
-        value={torneo.fechafintorneo ? torneo.fechafintorneo.split("T")[0] : ""}
-        class={inputClass}
-        required
-      />
-    </div>
+    <Input
+      id="fechainiciotorneo"
+      label="Fecha de Inicio"
+      type="date"
+      value={torneo.fechainiciotorneo
+        ? torneo.fechainiciotorneo.split("T")[0]
+        : ""}
+    />
+    <Input
+      id="fechafintorneo"
+      label="Fecha de Fin"
+      type="date"
+      value={torneo.fechafintorneo ? torneo.fechafintorneo.split("T")[0] : ""}
+    />
 
     <!-- Estado activo -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="torneoactivo" class="text-base font-medium">Activo</label>
-      <select name="torneoactivo" id="torneoactivo" class={inputClass}>
-        <option value="true" selected={torneo.torneoactivo}>Sí</option>
-        <option value="false" selected={!torneo.torneoactivo}>No</option>
-      </select>
-    </div>
+    <ComboBox id="torneoactivo" label="Activo">
+      <option value="true" selected={torneo.torneoactivo}>Sí</option>
+      <option value="false" selected={!torneo.torneoactivo}>No</option>
+    </ComboBox>
 
     <!-- Descripción -->
-    <div class="flex gap-2 flex-col mb-4">
-      <label for="descripciontorneo" class="text-base font-medium"
-        >Descripción</label
-      >
-      <textarea
-        id="descripciontorneo"
-        name="descripciontorneo"
-        maxlength="250"
-        class={inputClass}
-        rows="3">{torneo.descripciontorneo ?? ""}</textarea
-      >
-    </div>
+    <TextArea
+      id="descripciontorneo"
+      label="Descripción"
+      value={torneo.descripciontorneo ?? ""}
+      rows={3}
+      maxlength={250}
+    />
 
     <!-- Botones -->
-    <div class="flex justify-center text-center mt-5 mx-5 pt-2 gap-5">
-      <button class={buttonClass} type="button" id="btn-cancel">
-        Cancelar
-      </button>
-      <button class={buttonClass} type="submit" id="btn-submit">
-        Actualizar Torneo
-        <img src={arrowNext.src} class="size-7 rotate-180" alt="" />
-      </button>
-    </div>
+    <FormButtons label="Actualizar Torneo" />
   </form>
 </FormLayout>
 
-<script>
-  import Swal from "sweetalert2";
-  import { actions } from "astro:actions";
-  import { navigate } from "astro:transitions/client";
-  import { privateRoutesMap } from "@consts/routes";
-  import {
-    validateTorneo,
-    isTorneoUpdated,
-  } from "@utils/validation/partidos/torneo-validation";
-  import type { Torneo } from "@interfaces/index";
-
-  const form = document.getElementById("form-torneo") as HTMLFormElement;
-  const btnSubmit = document.getElementById("btn-submit") as HTMLButtonElement;
-  const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
-  const temporadasSelect = document.getElementById(
-    "idtemporada"
-  ) as HTMLSelectElement;
-
-  temporadasSelect.addEventListener("change", async () => {
-    const selectedValue = temporadasSelect.value;
-    const data = await actions.getTemporadaById.orThrow({
-      id: Number(selectedValue),
-    });
-    const temporada = data.data;
-    const fechaInicioInput = document.getElementById(
-      "fechainiciotorneo"
-    ) as HTMLInputElement;
-    const fechaFinInput = document.getElementById(
-      "fechafintorneo"
-    ) as HTMLInputElement;
-
-    fechaInicioInput.value = temporada.fechainiciotemporada.split("T")[0];
-    fechaInicioInput.min = temporada.fechainiciotemporada.split("T")[0];
-    fechaInicioInput.max = temporada.fechafintemporada.split("T")[0];
-    fechaFinInput.value = temporada.fechafintemporada.split("T")[0];
-    fechaFinInput.min = temporada.fechainiciotemporada.split("T")[0];
-    fechaFinInput.max = temporada.fechafintemporada.split("T")[0];
-  });
-  btnCancel.addEventListener("click", (e) => {
-    e.preventDefault();
-    navigate(privateRoutesMap.VER_TORNEOS);
-  });
-
-  btnSubmit.addEventListener("click", async (e) => {
-    e.preventDefault();
-    btnSubmit.disabled = true;
-    btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
-
-    const formData = new FormData(form);
-    const errorMessage = validateTorneo(formData);
-
-    if (errorMessage) {
-      Swal.fire("Error", errorMessage, "error");
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-      return;
-    }
-
-    const torneoData = await actions.getTorneoById.orThrow({
-      id: Number.parseInt(formData.get("idtorneo")?.toString() ?? "0"),
-    });
-    const torneoActual = torneoData.data as Torneo;
-    const cambiosDetectados = isTorneoUpdated(torneoActual, formData);
-
-    if (!cambiosDetectados) {
-      Swal.fire(
-        "Información",
-        "No se han detectado cambios en el torneo.",
-        "info"
-      );
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-      return;
-    }
-
-    // Normalización de datos antes de actualizar
-    const torneoActivo = formData.get("torneoactivo") === "true";
-    const fechaInicio = new Date(formData.get("fechainiciotorneo") as string);
-    const fechaFin = new Date(formData.get("fechafintorneo") as string);
-
-    formData.set("fechainiciotorneo", fechaInicio.toISOString());
-    formData.set("fechafintorneo", fechaFin.toISOString());
-    formData.set("torneoactivo", torneoActivo.toString());
-
-    try {
-      const { data, error } = await actions.updateTorneo(formData);
-
-      if (error) {
-        Swal.fire(
-          "Error",
-          error.message || "No se pudo actualizar el torneo",
-          "error"
-        );
-        btnSubmit.disabled = false;
-        btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-        return;
-      }
-
-      Swal.fire("Éxito", "Torneo actualizado correctamente", "success").then(
-        () => {
-          navigate(privateRoutesMap.VER_TORNEOS);
-        }
-      );
-    } catch (err) {
-      console.error(err);
-      Swal.fire(
-        "Error",
-        "Ocurrió un problema al actualizar el torneo",
-        "error"
-      );
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-    } finally {
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-    }
-  });
-</script>
+<script src="./scripts/edit.ts"></script>

@@ -17,7 +17,6 @@
     "@astrojs/check": "^0.9.4",
     "@astrojs/cloudflare": "^12.6.11",
     "@astrojs/db": "^0.18.2",
-    "@astrojs/netlify": "^6.5.11",
     "@astrojs/solid-js": "^5.1.1",
     "@aws-sdk/client-s3": "^3.940.0",
     "@aws-sdk/lib-storage": "^3.940.0",
@@ -27,7 +26,7 @@
     "@tailwindcss/vite": "^4.1.14",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
-    "astro": "5.12.3",
+    "astro": "^5.16.11",
     "axios": "^1.13.2",
     "js-cookie": "^3.0.5",
     "nanostores": "^1.0.1",
@@ -38,7 +37,8 @@
     "tailwindcss": "^4.1.14",
     "typescript": "^5.9.3",
     "vitest": "3.1.4",
-    "wrangler": "^4.50.0"
+    "wrangler": "^4.50.0",
+    "ws": "^8.19.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.1",

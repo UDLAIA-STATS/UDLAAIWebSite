@@ -1,18 +1,13 @@
 ---
-import type { GetStaticPaths } from "astro";
 import { getAddHref, matchOptions } from "@utils/handle-partidos-table";
 import { actions } from "astro:actions";
-import type { Torneo } from "@interfaces/torneos.interface";
-import { privateRoutesMap } from "@consts/routes";
-import Layout from "@layouts/Layout.astro";
 import AdminPanelLayout from "@layouts/AdminPanelLayout.astro";
-import PartidosSideBar from "@components/partidosProfesor/PartidosSideBar.astro";
-import NotAuthorized from "@components/shared/NotAuthorized.astro";
+import PartidosSideBar from "@components/templates/partidosProfesor/PartidosSideBar.astro";
+import NotAuthorized from "@components/organisms/NotAuthorized.astro";
 import type { Link } from "@interfaces/link.interface";
-import PartidosProfesorTable from "@components/partidosProfesor/PartidosProfesorTable.astro";
-import Pagination from "@components/shared/Pagination.astro";
-import { buttonClass } from "@consts/styles";
-import PartidosProfesorActions from "@components/partidosProfesor/TableActions.astro";
+import PartidosProfesorTable from "@components/templates/partidosProfesor/PartidosProfesorTable.astro";
+import Pagination from "@components/organisms/Pagination.astro";
+import PartidosProfesorActions from "@components/templates/partidosProfesor/TableActions.astro";
 import type { SortOptions } from "@interfaces/index";
 import { matchSidebarLinks } from "@consts/navbar-links";
 

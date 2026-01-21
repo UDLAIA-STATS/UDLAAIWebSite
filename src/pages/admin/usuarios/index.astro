@@ -1,27 +1,42 @@
 ---
 import { privateRoutesMap } from "@consts/routes";
-import { Table } from "@components/tables/Table";
-import type { SortOptions, TableActions, TableContent } from "@interfaces/table-actions.interface";
+import { Table } from "@components/templates/tables/Table";
+import type {
+  SortOptions,
+  TableActions,
+  TableContent,
+} from "@interfaces/table-actions.interface";
 import type { User } from "@interfaces/user.interface";
+import type { Pagination } from "@interfaces/pagination.interface";
 import EditIcon from "@assets/edit_icon_black.svg";
 import DeleteIcon from "@assets/delete_icon_black.svg";
 import { actions } from "astro:actions";
-import TableActionsComponent from "@components/partidosProfesor/TableActions.astro";
+import TableActionsComponent from "@components/templates/partidosProfesor/TableActions.astro";
 import AdminPanelLayout from "@layouts/AdminPanelLayout.astro";
-import NotAuthorized from "@components/shared/NotAuthorized.astro";
-import PaginationComponent from "@components/shared/Pagination.astro";
-import type { Pagination } from "@interfaces/pagination.interface";
+import PaginationComponent from "@components/organisms/Pagination.astro";
 
 const { AUTH_REGISTER, EDIT_USER } = privateRoutesMap;
 
-const searchParams = Astro.url.searchParams;
-const pageParam = Number(searchParams.get("page") ?? 1);
-const sortParam = searchParams.get("sortBy") ?? "";
-const orderParam = searchParams.get("orderBy") ?? "asc";
+const getNumberParam = (param: string | null, fallback = 1): number => {
+  const value = Number(param);
+  return Number.isFinite(value) && value > 0 ? value : fallback;
+};
 
-const user = Astro.cookies.get("user")
-  ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
-  : null;
+const safeJsonParse = <T,>(value?: string): T | null => {
+  try {
+    return value ? (JSON.parse(value) as T) : null;
+  } catch {
+    return null;
+  }
+};
+
+const searchParams = Astro.url.searchParams;
+
+const page = getNumberParam(searchParams.get("page"));
+const sortBy = searchParams.get("sortBy") ?? "";
+const orderBy = searchParams.get("orderBy") === "desc" ? "desc" : "asc";
+
+const loggedUser = safeJsonParse<LoggedUser>(Astro.cookies.get("user")?.value);
 
 const headers: TableContent[] = [
   { data: "Nombre de usuario" },
@@ -29,23 +44,8 @@ const headers: TableContent[] = [
   { data: "Rol" },
   { data: "Activo" },
   { data: "Editar" },
-  { data: "Eliminar" },  
+  { data: "Desactivar" },
 ];
-
-const { data, error } = await Astro.callAction(actions.getUsers, {
-  userCredential: import.meta.env.DEFAULT_ADMIN_PASSWORD,
-  page: pageParam,
-  pageSize: 20,
-});
-
-if (error || !data) {
-  console.error("Error fetching users:", error);
-  throw new Error("No se pudo obtener la lista de usuarios.");
-}
-
-const users: User[] =
-  data.data.items.filter((u) => u.nombre_usuario !== user?.nickname) ?? [];
-const paginationData: Pagination = data.data.paginationData as Pagination;
 
 const sortOptions: SortOptions[] = [
   { searchParam: "nombre_usuario", displayName: "Nombre de usuario" },
@@ -54,39 +54,48 @@ const sortOptions: SortOptions[] = [
   { searchParam: "is_active", displayName: "Activo" },
 ];
 
-const rows = users.map((u) => [u.nombre_usuario, u.email_usuario, u.rol, u.is_active ? "Sí" : "No"]).sort(
-  (a, b) => {
-    if (sortParam && orderParam) {
-      const index = headers.indexOf(
-        sortOptions[0]
-          ? headers.find(
-              (header) =>
-                header.data.toLowerCase() ===
-                sortOptions[0].displayName.toLowerCase()
-            )!
-          : headers[0]
-      );
-      if (index !== -1) {
-        const valueA = a[index] as string;
-        const valueB = b[index] as string;
-        if (orderParam === "asc") {
-          return valueA.localeCompare(valueB);
-        } else {
-          return valueB.localeCompare(valueA);
-        }
-      }
-    }
-    return 0;
-  }
-);
+let users: User[] = [];
+let paginationData: Pagination | null = null;
 
-function handleDelete(username: string) {
-  console.log(`Usuario ${username} eliminado`);
+try {
+  const { data } = await Astro.callAction(actions.getUsers, {
+    page,
+    pageSize: 20,
+    sortBy,
+    orderBy,
+  });
+
+  if (!data) {
+    throw new Error("Respuesta inválida del servicio");
+  }
+
+  users =
+    data.results.filter(
+      (u: User) => u.nombre_usuario !== loggedUser?.nickname
+    ) ?? [];
+
+  paginationData = {
+    current_page: data.page,
+    total_pages: data.pages,
+    total_items: data.count,
+    offset: data.offset,
+  };
+} catch (err) {
+  console.error("Error fetching users:", err);
 }
 
-const tableActions: TableActions[] = [];
+const rows = users.map((u) => ({
+  username: u.nombre_usuario,
+  isActive: u.is_active,
+  cells: [u.nombre_usuario, u.email_usuario, u.rol, u.is_active ? "Sí" : "No"],
+}));
 
-tableActions.push(
+const handleDelete = (username: string) => {
+  if (!username) return;
+  console.log(`Usuario eliminado: ${username}`);
+};
+
+const tableActions: TableActions[] = [
   {
     href: `${EDIT_USER}/`,
     icon: EditIcon.src,
@@ -98,46 +107,34 @@ tableActions.push(
     icon: DeleteIcon.src,
     alt: "Eliminar usuario",
     type: "button",
-  }
-);
-
-
+  },
+];
 ---
 
-<AdminPanelLayout title="Panel de Administración">
-  {
-    !user ? (
-      <NotAuthorized />
-    ) : (
-      <div class="flex flex-col justify-center w-full">
-        <div class="flex flex-row gap-5 items-baseline justify-between w-full">
-          <h1 class="font-bold text-2xl pr-5">Usuarios</h1>
-            <TableActionsComponent
-              canSort={true}
-              sortByOptions={sortOptions}
-              buttonLabel="Crear Usuario"
-              buttonHref={AUTH_REGISTER}
-              placeholderText="Buscar usuario..."
-            />
+<AdminPanelLayout title="Panel de Administración" user={loggedUser}>
+  <div class="flex flex-col w-full">
+    <div class="flex justify-between items-baseline gap-4">
+      <h1 class="font-bold text-2xl">Usuarios</h1>
+      <TableActionsComponent
+        canSort
+        sortByOptions={sortOptions}
+        buttonLabel="Crear Usuario"
+        buttonHref={AUTH_REGISTER}
+        placeholderText="Buscar usuario..."
+      />
+    </div>
+
+    {
+      users.length === 0 ? (
+        <div class="mt-5 text-center font-medium">
+          No se encontraron usuarios
         </div>
-        <div
-          class:list={[
-            "flex text-lg mt-3 w-svw justify-center text-black font-medium",
-            users.length === 0 ? "" : "hidden",
-          ]}
-        >
-          <span>No se encontraron usuarios</span>
-        </div>
-        <div
-          class:list={[
-            "relative overflow-x-auto w-svw mt-5 flex justify-center",
-            users.length === 0 ? "hidden" : "",
-          ]}
-        >
+      ) : (
+        <div class="relative overflow-x-auto mt-5 flex justify-center">
           <Table headers={headers}>
-            {rows.map((row) => (
-              <tr class="border-b" id={`user-row-${row[0]}`}>
-                {row.map((cell) => (
+            {rows.map(({ username, isActive, cells }) => (
+              <tr class="border-b" id={`user-row-${username}`}>
+                {cells.map((cell) => (
                   <td class="px-6 py-4">{cell}</td>
                 ))}
                 {tableActions &&
@@ -147,7 +144,7 @@ tableActions.push(
                       <td class="px-6 py-4">
                         <a
                           class="cursor-pointer no-underline"
-                          href={action.href?.toString() + row[0]}
+                          href={action.href?.toString() + username}
                         >
                           <img
                             class="size-8"
@@ -162,10 +159,10 @@ tableActions.push(
                           <button
                             type="button"
                             id="delete-button"
-                            value={row[0]}
+                            value={username}
                             data-delete-user
-                            data-username={row[0]}
-                            data-is-active={row[3] === "Sí" ? true : false}
+                            data-username={username}
+                            data-is-active={isActive}
                             class="cursor-pointer"
                           >
                             <img
@@ -182,93 +179,17 @@ tableActions.push(
             ))}
           </Table>
         </div>
-          <div
-            id="navigation"
-            class={`flex flex-row justify-center gap-5 my-5 ${paginationData.total_pages <= 1 ? 'hidden' : ''}`}
-          >
-            <PaginationComponent totalPages={paginationData.total_pages} />
+      )
+    }
+
+    {
+      paginationData && paginationData.total_pages > 1 && (
+        <div class="flex justify-center my-5">
+          <PaginationComponent totalPages={paginationData.total_pages} />
         </div>
-      </div>
-    )
-  }
+      )
+    }
+  </div>
 </AdminPanelLayout>
 
-<script>
-  import { actions } from "astro:actions";
-  import Swal from "sweetalert2";
-  import { navigate } from "astro:transitions/client";
-  import { privateRoutesMap } from "@consts/routes";
-
-  const searchBox = document.getElementById("search-box") as HTMLInputElement;
-
-  document.addEventListener("click", async (event) => {
-    const target = event.target as HTMLElement;
-    if (target.closest("[data-delete-user]")) {
-      const button = target.closest("[data-delete-user]") as HTMLButtonElement;
-      const username = button.getAttribute("data-username");
-      console.log("Eliminar usuario:", username);
-      const isActive = button.getAttribute("data-is-active");
-
-      if (username && isActive === "false") {
-        await Swal.fire({
-          icon: "error",
-          title: "No se pudo eliminar el usuario",
-          text: "El usuario no está activo y no puede ser eliminado.",
-        });
-        return;
-      }
-
-      if (username) {
-        const formData = new FormData();
-        formData.append("nickname", username);
-        formData.append("userCredential", import.meta.env.DEFAULT_ADMIN_PASSWORD);
-        Swal.fire({
-          title: `¿Estás seguro de eliminar al usuario ${username}?`,
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#d33",
-          cancelButtonColor: "#3085d6",
-          confirmButtonText: "Eliminar",
-          cancelButtonText: "Cancelar",
-        }).then(async (result) => {
-          if (result.isConfirmed) {
-            const { data, error } = await actions.deleteUser(formData);
-            if (error) {
-              Swal.fire({
-                icon: "error",
-                title: "Error al eliminar el usuario",
-                text: error.message,
-              });
-            } else {
-              Swal.fire(
-                "Éxito",
-                `Usuario ${username} eliminado`,
-                "success"
-              ).then(() => {
-                navigate(privateRoutesMap.ADMINS_USERS);
-              });
-            }
-          }
-        });
-      }
-    }
-  });
-
-  searchBox.addEventListener("input", async () => {
-    const search = searchBox.value;
-    const rows = document.querySelectorAll("tr[id^='user-row-']");
-    rows.forEach((row) => {
-      const usernameCell = row.querySelector("td:first-child");
-      const emailCell = row.querySelector("td:nth-child(2)");
-      if (usernameCell || emailCell) {
-        const username = usernameCell?.textContent ?? "";
-        const email = emailCell?.textContent ?? "";
-        if (username.toLowerCase().includes(search.toLowerCase()) || email.toLowerCase().includes(search.toLowerCase())) {
-          row.classList.remove("hidden");
-        } else {
-          row.classList.add("hidden");
-        }
-      } 
-    });
-  });
-</script>
+<script src="./scripts/index.ts"></script>

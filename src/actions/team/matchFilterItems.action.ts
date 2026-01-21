@@ -1,3 +1,4 @@
+import { errorResponseSerializer, paginationResponseSerializer } from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 
@@ -6,7 +7,7 @@ export const getDataByFilter = defineAction({
   input: z.object({
     filter: z.string(), // 'torneos' | 'partidos' | 'temporadas' | 'equipos'
     page: z.number().int().positive().optional().default(1),
-    pageSize: z.number().int().positive().optional().default(20),
+    pageSize: z.number().int().positive().optional().default(10),
   }),
   handler: async ({ filter, page, pageSize }) => {
     const filterOption = filter.toLowerCase();
@@ -21,11 +22,16 @@ export const getDataByFilter = defineAction({
     try {
       const response = await fetch(endpoint);
       if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+        const errorData = errorResponseSerializer(await response.json());
+        let errorMessage = errorData.error;
+        if (errorData.data) {
+          errorMessage = errorData.data;
+        }
+        throw new Error(errorMessage || `Error ${response.status}: ${response.statusText}`);
       }
 
       const data = await response.json();
-      const content = data.data;
+      const content = paginationResponseSerializer(data);
 
       return {
         [filterOption]: content.results,

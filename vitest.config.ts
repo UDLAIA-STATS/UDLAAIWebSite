@@ -5,7 +5,7 @@ export default getViteConfig({
   test: {
     environment: "node",
     globals: true,
-    // setupFiles: ["./vitest.setup.ts"],
+    setupFiles: ["./vitest.setup.ts"],
     coverage: {
       enabled: true,
       provider: "v8",

@@ -1,43 +1,57 @@
 import type { Equipo } from "@interfaces/torneos.interface";
+import { setFieldError, clearFieldError } from "@utils/validation/validation-utils";
 
-export const validateEquipos = (formData: FormData): string => {
+export const validateEquipos = (formData: FormData): boolean => {
   const nombre = (formData.get("nombreequipo") as string)?.trim() ?? "";
   const idInstitucion = (formData.get("idinstitucion") as string)?.trim() ?? "";
   const equipoActivo = (formData.get("equipoactivo") as string)?.trim() ?? "";
   const logo = formData.get("imagenequipo") as File | null;
 
-  const validations: Record<string, string> = {
-    nombre:
-      nombre.length === 0
-        ? "El nombre del equipo es obligatorio."
-        : nombre.length < 5
-          ? "El nombre del equipo es muy corto (mínimo 5 caracteres)."
-          : nombre.length > 100
-            ? "El nombre del equipo es demasiado largo (máximo 100 caracteres)."
-            : "",
-    idInstitucion:
-      idInstitucion.length === 0
-        ? "Debe seleccionar una institución."
-        : "",
-    equipoActivo:
-      equipoActivo !== "true" && equipoActivo !== "false"
-        ? "Debe indicar si el equipo está activo o no."
-        : "",
-    logo:
-      logo && logo.size > 0 && !logo.type.startsWith("image/")
-        ? "El logo debe ser una imagen válida (PNG, JPG, etc.)."
-        : "",
-  };
+  // limpiar errores previos
+  clearFieldError("nombreequipo");
+  clearFieldError("idinstitucion");
+  clearFieldError("equipoactivo");
+  clearFieldError("imagenequipo");
 
-  const errorMessages = Object.values(validations).filter(Boolean);
-  return errorMessages.length > 0 ? errorMessages.join("<br/>") : "";
+  let hasErrors = false;
+
+  if (nombre.length === 0) {
+    setFieldError("nombreequipo", "El nombre del equipo es obligatorio.");
+    hasErrors = true;
+  }
+
+  if (idInstitucion.length === 0) {
+    setFieldError("idinstitucion", "Debe seleccionar una institución.");
+    hasErrors = true;
+  }
+
+  if (equipoActivo !== "true" && equipoActivo !== "false") {
+    setFieldError(
+      "equipoactivo",
+      "Debe indicar si el equipo está activo o no.",
+    );
+    hasErrors = true;
+  }
+
+  if (logo && logo.size > 0 && !logo.type.startsWith("image/")) {
+    setFieldError(
+      "imagenequipo",
+      "El logo debe ser una imagen válida (PNG, JPG, etc.).",
+    );
+    hasErrors = true;
+  }
+
+  return hasErrors;
 };
 
 /**
  * Compara un equipo existente con los valores del formulario.
  * Retorna true si hubo alguna modificación.
  */
-export const isEquipoUpdated = (equipo: Equipo, formData: FormData): boolean => {
+export const isEquipoUpdated = (
+  equipo: Equipo,
+  formData: FormData,
+): boolean => {
   const nombreEquipo = (formData.get("nombreequipo") as string)?.trim() ?? "";
   const idInstitucion = Number(formData.get("idinstitucion")) || 0;
   const equipoActivo =
@@ -52,8 +66,6 @@ export const isEquipoUpdated = (equipo: Equipo, formData: FormData): boolean => 
     idInstitucion !== equipo.idinstitucion ||
     equipoActivo !== Boolean(equipo.equipoactivo) ||
     cargoLogo;
-
-  
 
   return cambiosDetectados;
 };

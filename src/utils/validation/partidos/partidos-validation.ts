@@ -1,79 +1,81 @@
 import type { Partido } from "@interfaces/torneos.interface";
+import { setFieldError, clearFieldError } from "@utils/validation/validation-utils";
 
-export const validatePartidos = (formData: FormData): string => {
+export const validatePartidos = (formData: FormData): boolean => {
   const idTorneo = formData.get("idtorneo")?.toString().trim() ?? "";
   const idEquipoLocal = formData.get("idequipolocal")?.toString().trim() ?? "";
-  const idEquipoVisitante = formData
-    .get("idequipovisitante")
-    ?.toString()
-    .trim() ?? "";
-  const marcadorLocal = formData
-    .get("marcadorequipolocal")
-    ?.toString()
-    .trim() ?? "";
-  const marcadorVisitante = formData
-    .get("marcadorequipovisitante")
-    ?.toString()
-    .trim() ?? "";
+  const idEquipoVisitante =
+    formData.get("idequipovisitante")?.toString().trim() ?? "";
+  const marcadorLocal =
+    formData.get("marcadorequipolocal")?.toString().trim() ?? "";
+  const marcadorVisitante =
+    formData.get("marcadorequipovisitante")?.toString().trim() ?? "";
   const fechaPartido = formData.get("fechapartido")?.toString().trim() ?? "";
 
-  const validationsErrors: Record<string, string> = {
-    idTorneo:
-      idTorneo === "" || idTorneo === "Selecciona un torneo"
-        ? "Debe seleccionar un torneo."
-        : "",
+  // limpiar errores previos
+  clearFieldError("idtorneo");
+  clearFieldError("idequipolocal");
+  clearFieldError("idequipovisitante");
+  clearFieldError("marcadorequipolocal");
+  clearFieldError("marcadorequipovisitante");
+  clearFieldError("fechapartido");
 
-    equipos:
-      idEquipoLocal === ""
-        ? "Debe seleccionar un equipo local."
-        : idEquipoVisitante === ""
-          ? "Debe seleccionar un equipo visitante."
-          : "",
+  let hasErrors = false;
 
-    equiposIguales:
-      idEquipoLocal !== "" &&
-      idEquipoVisitante !== "" &&
-      idEquipoLocal === idEquipoVisitante
-        ? "El equipo local y el visitante no pueden ser el mismo."
-        : "",
+  if (idTorneo === "" || idTorneo === "Selecciona un torneo") {
+    setFieldError("idtorneo", "Debe seleccionar un torneo.");
+    hasErrors = true;
+  }
 
-    marcadorLocal:
-      marcadorLocal === ""
-        ? "El marcador del equipo local es obligatorio."
-        : isNaN(Number(marcadorLocal)) || Number(marcadorLocal) < 0
-          ? "El marcador del equipo local debe ser un número mayor o igual a 0."
-          : "",
+  if (idEquipoLocal === "") {
+    setFieldError("idequipolocal", "Debe seleccionar un equipo local.");
+    hasErrors = true;
+  } else if (idEquipoVisitante === "") {
+    setFieldError("idequipovisitante", "Debe seleccionar un equipo visitante.");
+    hasErrors = true;
+  }
 
-    marcadorVisitante:
-      marcadorVisitante === ""
-        ? "El marcador del equipo visitante es obligatorio."
-        : isNaN(Number(marcadorVisitante)) || Number(marcadorVisitante) < 0
-          ? "El marcador del equipo visitante debe ser un número mayor o igual a 0."
-          : "",
+  if (marcadorLocal === "") {
+    setFieldError(
+      "marcadorequipolocal",
+      "El marcador del equipo local es obligatorio.",
+    );
+    hasErrors = true;
+  }
 
-    fecha:
-      fechaPartido === ""
-        ? "La fecha del partido es obligatoria."
-        : isNaN(new Date(fechaPartido).getTime())
-          ? "La fecha del partido no es válida."
-          : "",
-  };
+  if (marcadorVisitante === "") {
+    setFieldError(
+      "marcadorequipovisitante",
+      "El marcador del equipo visitante es obligatorio.",
+    );
+    hasErrors = true;
+  }
 
-  const errorMessages = Object.values(validationsErrors).filter((msg) => msg !== "");
+  if (fechaPartido === "") {
+    setFieldError("fechapartido", "La fecha del partido es obligatoria.");
+    hasErrors = true;
+  } else if (isNaN(new Date(fechaPartido).getTime())) {
+    setFieldError("fechapartido", "La fecha del partido no es válida.");
+    hasErrors = true;
+  }
 
-  return errorMessages.length > 0 ? errorMessages.join("<br/>") : "";
+  return hasErrors;
 };
 
 /**
  * Compara un partido existente con los valores del formulario.
  * Retorna true si hubo alguna modificación.
  */
-export const isPartidoUpdated = (partido: Partido, formData: FormData): boolean => {
+export const isPartidoUpdated = (
+  partido: Partido,
+  formData: FormData,
+): boolean => {
   const idTorneo = Number(formData.get("idtorneo")) || 0;
   const idEquipoLocal = Number(formData.get("idequipolocal")) || 0;
   const idEquipoVisitante = Number(formData.get("idequipovisitante")) || 0;
   const marcadorLocal = Number(formData.get("marcadorequipolocal")) || 0;
-  const marcadorVisitante = Number(formData.get("marcadorequipovisitante")) || 0;
+  const marcadorVisitante =
+    Number(formData.get("marcadorequipovisitante")) || 0;
   const fechaStr = (formData.get("fechapartido") as string)?.trim() ?? "";
   const fechaIso = fechaStr ? new Date(fechaStr).toISOString() : "";
 

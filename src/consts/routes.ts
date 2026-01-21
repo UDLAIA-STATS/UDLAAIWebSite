@@ -26,7 +26,7 @@ export const privateRoutesMap = {
 
 export const publicRoutesMap = {
     HOME: "/",
-    PLAYER_STATS: "/equipo/jugadores/estadisticas",
+    PLAYER_STATS: "/equipo/jugadores/estadisticas?page=1",
     PLAYER_DETAIL: "/equipo/jugadores/jugador",
     AUTH_LOGIN: "/auth/login",
     404: "/404",

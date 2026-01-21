@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import Hero from "../../src/components/landing_page/Hero.astro";
+import Hero from "@components/templates/landing_page/Hero.astro";
 import { renderAstroComponent } from "../helpers";
 
 test("Hero renders correctly with title and buttons", async () => {

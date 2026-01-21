@@ -2,6 +2,7 @@
 import "@styles/global.css";
 import Layout from "@layouts/Layout.astro";
 import arrowNext from "@assets/arrow_next.svg";
+import { Input, FormButtons } from "@components/molecules/forms/index";
 
 export const prerender = false;
 
@@ -26,30 +27,14 @@ const loggedInUser = Astro.cookies.get("user")
       </div>
       <div id="register-form" class="flex flex-col gap-5">
         <form autocomplete="on" data-astro-reload>
-          <div class="flex flex-col gap-2 mb-4 px-5">
-            <label class="text-base font-medium" for="name">Usuario</label>
-            <input
-              type="text"
-              maxlength="70"
-              id="name"
-              name="name"
-              class={inputClass}
-              required
-            />
-          </div>
-          <div class="flex flex-col gap-2 mb-4 px-5">
-            <label class="text-base font-medium" for="password"
-              >Contraseña</label
-            >
-            <input
-              type="password"
-              maxlength="30"
-              id="password"
-              name="password"
-              class={inputClass}
-              required
-            />
-          </div>
+          <Input id="name" label="Usuario" maxlength={70} />
+
+          <Input
+            type="password"
+            id="password"
+            label="Contraseña"
+            maxlength={30}
+          />
           <div class="flex flex-row gap-2 mb-4 px-5 justify-between" hidden>
             <div>
               <input
@@ -80,58 +65,4 @@ const loggedInUser = Astro.cookies.get("user")
   </section>
 </Layout>
 
-<script>
-  import validateLogin from "@utils/validation/auth/login-validation";
-import { actions } from "astro:actions";
-  import { navigate } from "astro:transitions/client";
-  import Swal from "sweetalert2";
-
-  const form = document.querySelector("form") as HTMLFormElement;
-  form.addEventListener("submit", (e) => e.preventDefault());
-  const btnSubmit = form.querySelector("button[type='button']") as HTMLButtonElement;
-
-  document.addEventListener("astro:page-load", async () => {
-      btnSubmit.addEventListener("click", async () => {
-    btnSubmit.disabled = true;
-    btnSubmit.classList.add("opacity-50", "cursor-not-allowed");
-
-    const formData = new FormData(form);
-    const username = formData.get("name")?.toString().trim() ?? "";
-    const password = formData.get("password")?.toString().trim() ?? "";
-
-    const errorMessages = validateLogin(formData);
-    if (errorMessages.length > 0) {
-      Swal.fire({
-        icon: "error",
-        title: "Error de validación",
-        html: errorMessages,
-      });
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-      return;
-    }
-
-    formData.set("name", username);
-    formData.set("password", password);
-
-    const { data, error } = await actions.login(formData);
-
-    if (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Error al iniciar sesión",
-        text: "Usuario o contraseña incorrectos.",
-      });
-      btnSubmit.disabled = false;
-      btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-      return;
-    }
-
-    btnSubmit.disabled = false;
-    btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
-    navigate("/");
-  });
-  });
-
-
-</script>
+<script src="./scripts/login.ts"></script>
