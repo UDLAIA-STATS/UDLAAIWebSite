@@ -55,10 +55,8 @@ try {
   };
 
   let data = await getProcessedData(processedValues);
-  data = filterDataOnSeason(data, Number(groupBy));
-
   temporadasData = getSeasonsOnData(data);
-
+  data = filterDataOnSeason(data, Number(groupBy));
   totalPages = filterData.pages;
   analyzedData = data;
 } catch (err) {
