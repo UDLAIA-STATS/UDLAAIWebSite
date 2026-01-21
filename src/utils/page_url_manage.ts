@@ -17,7 +17,7 @@ const fetchUrlParameters = () => {
   const sortBy = (document.getElementById("sortBy") as HTMLSelectElement).value;
   const orderBy = (document.getElementById("orderBy") as HTMLSelectElement)
     .value;
-  const groupBy = (document.getElementById("groupBy") as HTMLSelectElement)
+  const groupBy = (document.getElementById("groupBySeason") as HTMLSelectElement)
     .value;
   return { search, sortBy, orderBy, groupBy };
 };
