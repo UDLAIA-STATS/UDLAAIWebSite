@@ -1,0 +1,43 @@
+---
+interface Props {
+    search: string;
+    sortBy: string;
+    orderBy: string;
+}
+const { search, sortBy, orderBy } = Astro.props;
+---
+
+<div>
+  <label for="search" class="block text-sm font-medium">Buscar</label>
+  <input
+    id="search"
+    type="text"
+    placeholder="Jugador, torneo o fecha..."
+    class="border border-gray-300 rounded px-3 py-2 w-64"
+    value={search}
+  />
+</div>
+<div>
+  <label for="sortBy" class="block text-sm font-medium">Ordenar por</label>
+  <select id="sortBy" class="border border-gray-300 rounded px-3 py-2">
+    <option selected={sortBy === "player"} value="player">Jugador</option>
+    <option selected={sortBy === "shirt_number"} value="shirt_number"
+      >N° Camiseta</option
+    >
+    <option selected={sortBy === "tournament"} value="tournament">Torneo</option
+    >
+    <option selected={sortBy === "match_date"} value="match_date"
+      >Fecha de Partido</option
+    >
+    <option selected={sortBy === "analysis_date"} value="analysis_date"
+      >Fecha de Análisis</option
+    >
+  </select>
+</div>
+<div>
+  <label for="orderBy" class="block text-sm font-medium">Orden</label>
+  <select id="orderBy" class="border border-gray-300 rounded px-3 py-2">
+    <option selected={orderBy === "asc"} value="asc">Ascendente</option>
+    <option selected={orderBy === "desc"} value="desc">Descendente</option>
+  </select>
+</div>

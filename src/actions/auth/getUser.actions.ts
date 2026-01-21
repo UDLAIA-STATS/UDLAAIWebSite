@@ -7,6 +7,7 @@ import {
   paginationResponseSerializer,
   successResponseSerializer,
 } from "@utils/index";
+import debug from "debug";
 
 const sortableFields: Set<keyof User> = new Set([
   "nombre_usuario",
@@ -111,6 +112,8 @@ export const getUserByUsername = defineAction({
         }
         throw new Error(errorMessage || `Error ${response.status}: ${response.statusText}`);
       }
+      console.log("Usuario obtenido:", successResponseSerializer(details).data);
+      debug.log("Usuario obtenido:", details);
       return successResponseSerializer(details);
     } catch (error) {
       console.error(

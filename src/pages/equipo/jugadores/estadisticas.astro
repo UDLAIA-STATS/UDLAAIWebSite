@@ -5,17 +5,18 @@ import { actions } from "astro:actions";
 import type { AnalyzedData, AnalyzedDataTable, ProcessDataValues } from "@interfaces/analyzedData.interface";
 import type { Partido } from "@interfaces/torneos.interface";
 import type { Player } from "@interfaces/player.interface";
-import DetailsIcon from "@assets/details_icon.svg";
-import { publicRoutesMap } from "@consts/index";
 import { getProcessedData } from "@services/index";
+import EstadisticasPartidos from "@components/templates/estadisticas/EstadisticasPartidos.astro";
+import EstadisticasPartidosFilters from "@components/templates/estadisticas/EstadisticasPartidosFilters.astro";
+import { ToggleButton } from "@components/atoms/buttons/ToggleButton";
+import { publicRoutesMap } from "@consts/routes";
 
 const page = Number(Astro.url.searchParams.get("page") ?? 1);
 const search = Astro.url.searchParams.get("search") ?? "";
 const sortBy = Astro.url.searchParams.get("sortBy") ?? "";
 const orderBy = Astro.url.searchParams.get("orderBy") ?? "asc";
 let limit: number = search ? 1000 : 15;
-const detailsRoute = publicRoutesMap.PLAYER_DETAIL;
-
+const { PLAYER_STATS, PLAYER_STATS_SEASONS } = publicRoutesMap;
 let analyzedData: AnalyzedDataTable[] = [];
 let totalPages = 1;
 
@@ -54,87 +55,17 @@ try {
   <section class="max-w-6xl mx-auto p-6">
     <h1 class="text-2xl font-bold mb-4">Partidos Analizados</h1>
 
-    <!-- controles -->
+    <div class="flex flex-row flex-wrap justify-center self-center-safe px-5 py-4 gap-5">
+      <ToggleButton label="Jugador" active={true} href={PLAYER_STATS} />
+      <ToggleButton label="Temporadas" active={false} href={PLAYER_STATS_SEASONS} />
+    </div>
+
     <div class="mb-4 flex flex-wrap gap-4 items-end">
-      <div>
-        <label for="search" class="block text-sm font-medium">Buscar</label>
-        <input
-          id="search"
-          type="text"
-          placeholder="Jugador, torneo o fecha..."
-          class="border border-gray-300 rounded px-3 py-2 w-64"
-          value={search}
-        />
-      </div>
-      <div>
-        <label for="sortBy" class="block text-sm font-medium">Ordenar por</label
-        >
-        <select id="sortBy" class="border border-gray-300 rounded px-3 py-2">
-          <option selected={sortBy === "player"} value="player">Jugador</option>
-          <option selected={sortBy === "shirt_number"} value="shirt_number">N° Camiseta</option>
-          <option selected={sortBy === "tournament"} value="tournament">Torneo</option>
-          <option selected={sortBy === "match_date"} value="match_date">Fecha de Partido</option>
-          <option selected={sortBy === "analysis_date"} value="analysis_date">Fecha de Análisis</option>
-        </select>
-      </div>
-      <div>
-        <label for="orderBy" class="block text-sm font-medium">Orden</label>
-        <select id="orderBy" class="border border-gray-300 rounded px-3 py-2">
-          <option selected={orderBy === "asc"} value="asc">Ascendente</option>
-          <option selected={orderBy === "desc"} value="desc">Descendente</option>
-        </select>
-      </div>
+      <EstadisticasPartidosFilters search={search} sortBy={sortBy} orderBy={orderBy} />
     </div>
 
     <div class="overflow-x-auto min-h-1/2">
-      <table
-        class="min-w-full bg-white border border-gray-200 rounded-lg shadow"
-      >
-        <thead class="bg-gray-100">
-          <tr>
-            <th class="px-4 py-2 text-left">Jugador</th>
-            <th class="px-4 py-2 text-left">N° Camiseta</th>
-            <th class="px-4 py-2 text-left">Torneo</th>
-            <th class="px-4 py-2 text-left">Resultado</th>
-            <th class="px-4 py-2 text-left">Fecha de Partido</th>
-            <th class="px-4 py-2 text-left">Fecha de Análisis</th>
-            <th class="px-4 py-2 text-left">Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="table-body">
-          {
-            analyzedData.map((data) => (
-              <tr
-                data-id={data.id}
-                data-match={data.match_id}
-                data-player={data.player_id}
-              >
-                <td class="px-4 py-2 name">
-                  {data.player_name}
-                </td>
-                <td class="px-4 py-2">{data.shirt_number}</td>
-                <td class="px-4 py-2 tournament">
-                  {data.tournament_name}
-                </td>
-                <td class="px-4 py-2 score">
-                  {data.score}
-                </td>
-                <td class="px-4 py-2 matchdate">
-                  {data.match_date}
-                </td>
-                <td class="px-4 py-2">
-                  {data.analysis_date}
-                </td>
-                <td class="px-4 py-2">
-                  <a href={`${detailsRoute}/${data.id}`}>
-                    <img src={DetailsIcon.src} alt="detalles" class="size-8" />
-                  </a>
-                </td>
-              </tr>
-            ))
-          }
-        </tbody>
-      </table>
+      <EstadisticasPartidos data={analyzedData} />
     </div>
 
     {totalPages > 1 && <Pagination totalPages={totalPages} />}
