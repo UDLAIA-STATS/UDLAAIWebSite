@@ -1,0 +1,171 @@
+---
+import type { AnalyzedData, Equipo, Partido, Player } from "@interfaces/index";
+import { Image } from "astro:assets";
+import { parseColor } from "@utils/index";
+
+type PlayerBundle = {
+  data: AnalyzedData;
+  equipo: Equipo;
+  jugador: Player;
+  partido: Partido;
+} | null;
+
+interface Props {
+  first: PlayerBundle;
+  second: PlayerBundle;
+}
+
+const { first, second } = Astro.props;
+
+function resolveData(bundle: PlayerBundle) {
+  if (!bundle || !bundle.data ) {
+    return null;
+  }
+  return bundle.data;
+}
+
+const firstData = resolveData(first);
+const secondData = resolveData(second);
+
+const firstColor =
+  firstData?.team_color && typeof firstData.team_color === "string"
+    ? parseColor(firstData.team_color)
+    : null;
+
+const secondColor =
+  secondData?.team_color && typeof secondData.team_color === "string"
+    ? parseColor(secondData.team_color)
+    : null;
+---
+<div class="overflow-x-auto bg-white rounded-2xl shadow-sm border border-gray-100">
+  <table class="min-w-full text-sm text-gray-700">
+    <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+      <tr>
+        <th class="px-4 py-3 text-left">Métrica</th>
+        <th class="px-4 py-3 text-center">
+          {firstData ? new Date(first?.partido.fechapartido ?? "").toLocaleDateString("es-ES", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              }) : "No se encontró el partido"}
+        </th>
+        <th class="px-4 py-3 text-center">
+          {secondData ? new Date(second?.partido.fechapartido ?? "").toLocaleDateString("es-ES", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              }) : "No se encontró el partido"}
+            </th>
+      </tr>
+    </thead>
+
+    <tbody class="divide-y">
+      
+      <tr>
+        <td class="px-4 py-3 font-medium">Participación</td>
+        <td class="px-4 py-3 text-center">
+          {firstData ? "Participó" : "No participó"}
+        </td>
+        <td class="px-4 py-3 text-center">
+          {secondData ? "Participó" : "No participó"}
+        </td>
+      </tr>
+
+      <!-- Camiseta -->
+      <tr>
+        <td class="px-4 py-3 font-medium">Camiseta</td>
+        <td class="px-4 py-3 text-center">
+          {firstData ? `#${firstData.shirt_number ?? "N/A"}` : "—"}
+        </td>
+        <td class="px-4 py-3 text-center">
+          {secondData ? `#${secondData.shirt_number ?? "N/A"}` : "—"}
+        </td>
+      </tr>
+
+      <!-- Color equipo -->
+      <tr>
+        <td class="px-4 py-3 font-medium">Color equipo</td>
+        <td class="px-4 py-3 text-center">
+          {firstColor ? (
+            <input type="color" value={firstColor} disabled class="h-6 w-12 border rounded" />
+          ) : "—"}
+        </td>
+        <td class="px-4 py-3 text-center">
+          {secondColor ? (
+            <input type="color" value={secondColor} disabled class="h-6 w-12 border rounded" />
+          ) : "—"}
+        </td>
+      </tr>
+
+      <!-- Pases -->
+      <tr>
+        <td class="px-4 py-3 font-medium">Pases</td>
+        <td class="px-4 py-3 text-center">{firstData?.passes ?? "—"}</td>
+        <td class="px-4 py-3 text-center">{secondData?.passes ?? "—"}</td>
+      </tr>
+
+      <!-- Tiros -->
+      <tr>
+        <td class="px-4 py-3 font-medium">Tiros al arco</td>
+        <td class="px-4 py-3 text-center">{firstData?.shots_on_target ?? "—"}</td>
+        <td class="px-4 py-3 text-center">{secondData?.shots_on_target ?? "—"}</td>
+      </tr>
+
+      <!-- Velocidad -->
+      <tr>
+        <td class="px-4 py-3 font-medium">Velocidad promedio</td>
+        <td class="px-4 py-3 text-center">
+          {firstData ? `${Number(firstData.avg_speed_kmh).toFixed(3)} km/h` : "—"}
+        </td>
+        <td class="px-4 py-3 text-center">
+          {secondData ? `${Number(secondData.avg_speed_kmh).toFixed(3)} km/h` : "—"}
+        </td>
+      </tr>
+
+      <!-- Distancia -->
+      <tr>
+        <td class="px-4 py-3 font-medium">Distancia recorrida</td>
+        <td class="px-4 py-3 text-center">
+          {firstData ? `${Number(firstData.distance_km).toFixed(3)} km` : "—"}
+        </td>
+        <td class="px-4 py-3 text-center">
+          {secondData ? `${Number(secondData.distance_km).toFixed(3)} km` : "—"}
+        </td>
+      </tr>
+
+      <!-- Posesión -->
+      <tr>
+        <td class="px-4 py-3 font-medium">Tiempo promedio de posesión</td>
+        <td class="px-4 py-3 text-center">
+          {firstData ? `${Number(firstData.avg_possession_time_s).toFixed(3)} s` : "—"}
+        </td>
+        <td class="px-4 py-3 text-center">
+          {secondData ? `${Number(secondData.avg_possession_time_s).toFixed(3)} s` : "—"}
+        </td>
+      </tr>
+
+      <!-- Heatmap -->
+      <tr>
+        <td class="px-4 py-3 font-medium">Mapa de calor</td>
+        <td class="px-4 py-3 text-center">
+          {firstData?.heatmap_image_path ? (
+            <Image src={firstData.heatmap_image_path} alt="Heatmap jugador 1" width={250} height={180} class="mx-auto rounded" />
+          ) : (
+            "No disponible"
+          )}
+        </td>
+        <td class="px-4 py-3 text-center">
+          {secondData?.heatmap_image_path ? (
+            <Image src={secondData.heatmap_image_path} alt="Heatmap jugador 2" width={250} height={180} class="mx-auto rounded" />
+          ) : (
+            "No disponible"
+          )}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

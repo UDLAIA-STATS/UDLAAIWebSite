@@ -1,0 +1,223 @@
+---
+import type { Partido } from "@interfaces/index";
+import type { Player } from "@interfaces/player.interface";
+import { actions } from "astro:actions";
+
+interface Props {
+  players: Player[];
+  matchIds: number[];
+}
+
+const playerId = Astro.url.searchParams.get("player")
+  ? Number(Astro.url.searchParams.get("player"))
+  : null;
+const partido1 = Astro.url.searchParams.get("partido1")
+  ? Number(Astro.url.searchParams.get("partido1"))
+  : null;
+const partido2 = Astro.url.searchParams.get("partido2")
+  ? Number(Astro.url.searchParams.get("partido2"))
+  : null;
+
+const { players, matchIds } = Astro.props;
+
+const partidosData = Astro.callAction(actions.getPartidos.orThrow, {
+  pageSize: 10000,
+});
+
+let partidos = ((await partidosData).results as Partido[]) ?? [];
+partidos = partidos.filter((p) => matchIds.includes(p.idpartido));
+---
+
+<span class="text-center align-middle self-center font-semibold"
+  >Seleccione el jugador y partidos a comparar:</span
+>
+<div
+  id="com pare-selectors"
+  class="flex flex-row flex-wrap gap-4 justify-center"
+>
+  <select
+    name="player"
+    id="player"
+    class="border rounded-lg p-2 w-3xs h-auto"
+  >
+    <option value="" disabled selected>Jugador 1</option>
+    {
+      players.map((p) => (
+        <option value={p.idjugador} selected={p.idjugador === playerId}>
+          {p.nombrejugador} {p.apellidojugador}
+        </option>
+      ))
+    }
+  </select>
+  <select
+    name="partido1"
+    id="partido1"
+    class="border rounded-lg p-2 w-3xs h-auto"
+  >
+    <option value="" disabled selected>Partido 1</option>
+    {
+      partidos.map((p) => (
+        <option value={p.idpartido} selected={p.idpartido === partido1}>
+          {new Date(p.fechapartido).toLocaleDateString("es-ES", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "2-digit",
+          })}{" "}
+          - {p.torneo_nombre}
+        </option>
+      ))
+    }
+  </select>
+  <select
+    name="partido2"
+    id="partido2"
+    class="border rounded-lg p-2 w-3xs h-auto"
+  >
+    <option value="" disabled selected>Partido 2</option>
+    {
+      partidos.map((p) => (
+        <option value={p.idpartido} selected={p.idpartido === partido2}>
+          {new Date(p.fechapartido).toLocaleDateString("es-ES", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "2-digit",
+          })}{" "}
+          - {p.torneo_nombre}
+        </option>
+      ))
+    }
+  </select>
+  <button
+    id="submit"
+    class="bg-[#C10230] text-white rounded-lg px-4 py-2 hover:bg-[#a10127]"
+  >
+    Comparar
+  </button>
+</div>
+
+<script>
+  import type { Partido } from "@interfaces/index";
+import { filterMatchsByPlayer } from "@services/index";
+import { navigate } from "astro:transitions/client";
+import Swal from "sweetalert2";
+
+  const playerSelect = document.getElementById("player") as HTMLSelectElement;
+  const partido1Select = document.getElementById(
+    "partido1"
+  ) as HTMLSelectElement;
+  const partido2Select = document.getElementById(
+    "partido2"
+  ) as HTMLSelectElement;
+  const button = document.getElementById("submit") as HTMLButtonElement;
+  const form = document.getElementById("compare-selectors") as HTMLFormElement;
+
+  const submit = () => {
+    const playerId = playerSelect.value;
+    const partido1Id = partido1Select.value;
+    const partido2Id = partido2Select.value;
+
+    if (!playerId || !partido1Id || !partido2Id) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Por favor, seleccione un jugador y ambos partidos para comparar.",
+      }).then(({isConfirmed}) => {
+        if (isConfirmed) {
+          Swal.close();
+        }
+      })
+      return false;
+    }
+
+    if (partido1Id === partido2Id) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Por favor, seleccione dos partidos diferentes para comparar.",
+      }).then(({isConfirmed}) => {
+        if (isConfirmed) {
+          Swal.close();
+        }
+      })
+      return false;
+    }
+
+    return true;
+  };
+
+  const changeParameters = () => {
+    const playerId = playerSelect.value;
+    const partido1Id = partido1Select.value;
+    const partido2Id = partido2Select.value;
+
+    const url = new URL(globalThis.location.href);
+    url.searchParams.set("player", playerId);
+    url.searchParams.set("partido1", partido1Id);
+    url.searchParams.set("partido2", partido2Id);
+    navigate(url.toString());
+  }
+
+  button.addEventListener("click", () => {
+    const res= submit();
+    console.log("Submit result:", res);
+    if (res) {
+      changeParameters();
+    }
+  });
+
+  playerSelect.addEventListener("change", async () => {
+    const playerId = playerSelect.value;
+    const partidos = await filterMatchsByPlayer(Number(playerId));
+    console.log("Partidos filtrados por jugador:", partidos.length);
+    updateSelectOptions(partidos);
+    partido1Select.value = "";
+    partido2Select.value = "";
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const playerId = playerSelect.value;
+    if (playerId) {
+      filterMatchsByPlayer(Number(playerId)).then((partidos) => {
+        console.log("Partidos filtrados por jugador al cargar:", partidos.length);
+        updateSelectOptions(partidos);
+      });
+    }
+  });
+
+  const updateSelectOptions = (partidos: Partido[]) => {
+    // Clear existing options
+    const selectedPartido1 = partido1Select.value;
+    const selectedPartido2 = partido2Select.value;
+    partido1Select.innerHTML = '<option value="" disabled selected>Partido 1</option>';
+    partido2Select.innerHTML = '<option value="" disabled selected>Partido 2</option>';
+
+    partidos.forEach((p) => {
+      const option1 = document.createElement("option");
+      option1.value = p.idpartido.toString();
+      option1.text = `${new Date(p.fechapartido).toLocaleDateString("es-ES", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+      })} - ${p.torneo_nombre}`;
+      partido1Select.appendChild(option1);
+
+      const option2 = document.createElement("option");
+      option2.value = p.idpartido.toString();
+      option2.text = `${new Date(p.fechapartido).toLocaleDateString("es-ES", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+      })} - ${p.torneo_nombre}`;
+      partido2Select.appendChild(option2);
+    });
+
+    if (partido1Select.querySelector(`option[value="${selectedPartido1}"]`)) {
+      partido1Select.value = selectedPartido1;
+    }
+
+    if (partido2Select.querySelector(`option[value="${selectedPartido2}"]`)) {
+      partido2Select.value = selectedPartido2;
+    }
+  };
+
+</script>

@@ -5,18 +5,31 @@ import type {
   Player,
   ProcessDataValues,
 } from "@interfaces/index";
+import { actions } from "astro:actions";
+
+export const getTeamsIds = (data: AnalyzedDataTable[]): Set<number> => {
+  const teamsSet = new Set<number>();
+
+  for (const item of data) {
+    if (!teamsSet.has(Number(item.team))) {
+      teamsSet.add(Number(item.team));
+    }
+  }
+
+  return teamsSet;
+};
 
 export const getSeasonsOnData = (
   data: AnalyzedDataTable[],
 ): Set<{ id: number; name: string }> => {
-  const seasonsSet: Set<{ id: number; name: string }> = new Set();
+  const seasonsMap = new Map<number, string>();
+  const seasonsSet = new Set<{ id: number; name: string }>();
+
   for (const item of data) {
-    if (
-      seasonsSet.has({ id: item.temporada_id, name: item.temporada_nombre })
-    ) {
-      continue;
+    if (!seasonsMap.has(item.temporada_id)) {
+      seasonsMap.set(item.temporada_id, item.temporada_nombre);
+      seasonsSet.add({ id: item.temporada_id, name: item.temporada_nombre });
     }
-    seasonsSet.add({ id: item.temporada_id, name: item.temporada_nombre });
   }
 
   return seasonsSet;
@@ -26,6 +39,27 @@ export const filterDataOnSeason = (
   data: AnalyzedDataTable[],
   seasonId: number,
 ) => data.filter((item) => item.temporada_id === seasonId);
+
+export const filterDataOnDateRange = (
+  data: AnalyzedDataTable[],
+  startDate: Date,
+  endDate: Date,
+) =>
+  data.filter((item) => {
+    return (
+      new Date(parseDDMMYYYY(item.match_date)) >= startDate &&
+      new Date(parseDDMMYYYY(item.match_date)) <= endDate
+    );
+  });
+
+const parseDDMMYYYY = (dateStr: string): Date => {
+  const [day, month, year] = dateStr.split(",")[0].split("/").map(Number);
+  console.log("Parsed date:", { day, month, year });
+  return new Date(year, month - 1, day);
+};
+
+export const filterDataOnTeam = (data: AnalyzedDataTable[], teamId: number) =>
+  data.filter((item) => Number(item.team) === teamId);
 
 export const getProcessedData = async (
   dataValues: ProcessDataValues,
@@ -54,6 +88,7 @@ export const getProcessedData = async (
         temporada_nombre: partido?.temporada_nombre || "No encontrado",
         temporada_id: partido?.idtemporada || 0,
         player_id: item.player_id,
+        team: item.team,
         player_name: player
           ? `${player.nombrejugador} ${player.apellidojugador}`
           : "No Reconocido",
@@ -139,4 +174,25 @@ const matchesSearch = (
     tournament.includes(s) ||
     matchDate.includes(s)
   );
+};
+
+export const filterMatchsByPlayer = async (
+  player_id: number,
+): Promise<Partido[]> => {
+  const analyzedDataRes = await actions.getAnalyzedData.orThrow({
+    limit: 10000,
+    player_id: player_id,
+  });
+
+  const partidos: Map<number, Partido> = new Map();
+
+  for (const analyzed of analyzedDataRes.results as AnalyzedData[]) {
+    const matchId = analyzed.match_id;
+    if (!partidos.has(matchId) && analyzed.player_id === player_id) {
+      const partidoRes = await actions.getPartidoById.orThrow({ id: matchId });
+      partidos.set(matchId, partidoRes.data as Partido);
+    }
+  }
+
+  return Array.from(partidos.values());
 };

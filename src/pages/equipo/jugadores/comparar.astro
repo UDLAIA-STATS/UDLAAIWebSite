@@ -1,0 +1,109 @@
+---
+import Layout from "@layouts/Layout.astro";
+
+import type { AnalyzedData, Equipo, Partido, Player } from "@interfaces/index";
+import { actions } from "astro:actions";
+import CompareSelector from "@components/templates/compareStats/CompareSelector.astro";
+import CompareTable from "@components/templates/compareStats/CompareTable.astro";
+
+const url = new URL(Astro.request.url);
+const playerId = Number(url.searchParams.get("player"));
+const partido1Id = Number(url.searchParams.get("partido1"));
+const partido2Id = Number(url.searchParams.get("partido2"));
+console.log("Comparar jugadores:", playerId, partido1Id, partido2Id);
+
+async function getPlayerBundle(playerId: number, matchId: number) {
+  if (!playerId || isNaN(playerId)) return null;
+  if (!matchId || isNaN(matchId)) return null;
+  let processedData: AnalyzedData | null = null;
+
+  const res = await Astro.callAction(actions.getAnalyzedData.orThrow, { 
+    match_id: matchId,
+    player_id: playerId,
+    limit: 10000
+   });
+  let data: AnalyzedData[] | null = res.results as AnalyzedData[] ?? null;
+  
+  if (!data) return null;
+
+  if (!data || data.length === 0) return null;
+  if (data.length > 0) {
+    for (let i = 0; i < data.length; i++) {
+      const item = data[i];
+      if (item.player_id === playerId && item.match_id === matchId) {
+        processedData = item;
+        break;
+    }
+  }
+}
+
+  if(!processedData) {
+    return null;
+  }
+
+  const partidoData = await Astro.callAction(actions.getPartidoById.orThrow, {
+    id: matchId,
+  });
+
+
+  const equipoData = await Astro.callAction(
+    actions.getEquipoById.orThrow,
+    {
+      id: Number(processedData.team),
+    }
+  );
+
+  const jugadorData = await Astro.callAction(
+    actions.getJugadorById.orThrow,
+    {
+      idjugador: playerId,
+    }
+  );
+
+  return {
+    data: processedData,
+    equipo: equipoData.data as Equipo,
+    jugador: jugadorData.data as Player,
+    partido: partidoData.data as Partido,
+  };
+}
+
+const bulkData = await Astro.callAction(actions.getAnalyzedData.orThrow, {
+  limit: 10000,
+});
+const setPlayersIds = new Set<number>();
+const setMatchIds = new Set<number>();
+
+  for (const item of bulkData.results as AnalyzedData[]) {
+  if (!setPlayersIds.has(item.player_id)) {
+    setPlayersIds.add(item.player_id);
+  }
+  if (!setMatchIds.has(item.match_id)) {
+    setMatchIds.add(item.match_id);
+  }
+}
+
+const firstData = await getPlayerBundle(playerId, partido1Id);
+const secondData = await getPlayerBundle(playerId, partido2Id);
+
+const playersRes = await Astro.callAction(actions.getJugadores.orThrow, {
+  pageSize: 10000,
+});
+let players: Player[] = playersRes.results ?? [];
+if (players.length > 0) {
+  players = players.filter((p) => setPlayersIds.has(p.idjugador));
+}
+---
+
+<Layout title="Comparar jugadores">
+  <section class="max-w-7xl w-full mx-auto px-4 py-6">
+    <div class="flex flex-col gap-2 py-5 flex-wrap">
+      <CompareSelector players={players} matchIds={Array.from(setMatchIds)} />
+    </div>
+      <div id="compare-table">
+        <CompareTable first={firstData} second={secondData} />
+      </div>
+
+  </section>
+</Layout>
+

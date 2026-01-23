@@ -38,6 +38,43 @@ export const getJugadores = defineAction({
   },
 });
 
+export const searchJugadores = defineAction({
+  accept: "json",
+  input: z.object({
+    search: z.string().min(1),
+    pageSize: z.number().int().positive().optional().default(1000),
+  }),
+  handler: async ({ search, pageSize }) => {
+    try {
+      const baseUrl = import.meta.env.JUGADORES_API;
+      const response = await fetch(
+        `${baseUrl}/jugadores/all/?page=${1}&offset=${pageSize}`
+      );
+      if (!response.ok) {
+        const error = errorResponseSerializer(await response.json());
+        let errorMessage = error.error;
+        if (error.data) {
+          errorMessage = error.data;
+        }
+        throw new Error(errorMessage);
+      }
+      const data = paginationResponseSerializer(await response.json());
+      const players = data.results as Player[];
+
+      data.results = players.filter((player) => {
+        const fullName = `${player.nombrejugador} ${player.apellidojugador}`.toLowerCase();
+        return (fullName.includes(search.toLowerCase()) || player.idbanner.toLowerCase().includes(search.toLowerCase()));
+      });
+      return data;
+    } catch (error) {
+      console.error("Error en searchJugadores:", error);
+      throw new Error(
+        "No se pudieron obtener los jugadores. Intente nuevamente más tarde."
+      );
+    }
+  },
+});
+
 export const getJugadorByBanner = defineAction({
   accept: "json",
   input: z.object({ idJugador: z.string() }),

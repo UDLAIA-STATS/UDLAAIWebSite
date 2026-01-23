@@ -28,7 +28,9 @@ export const publicRoutesMap = {
     HOME: "/",
     PLAYER_STATS: "/equipo/jugadores/estadisticas?page=1",
     PLAYER_STATS_SEASONS: "/equipo/temporadas/estadisticas?page=1",
+    PLAYER_STATS_TEAM: "/equipo/equipos/estadisticas?page=1",
     PLAYER_DETAIL: "/equipo/jugadores/jugador",
+    PLAYER_COMPARE: "/equipo/jugadores/comparar",
     AUTH_LOGIN: "/auth/login",
     404: "/404",
 }

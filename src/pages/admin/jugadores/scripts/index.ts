@@ -1,32 +1,17 @@
+import { updateUrl } from "@utils/index";
 import { actions } from "astro:actions";
+import { navigate } from "astro:transitions/client";
 import Swal from "sweetalert2";
 
 document.addEventListener("DOMContentLoaded", () => {
   const searchBox = document.getElementById("search-box") as HTMLInputElement;
 
   searchBox.addEventListener("input", (e) => {
-    const query = searchBox.value.trim();
-    const rows = document.querySelectorAll("tr[id^='user-row-']");
-    rows.forEach((row) => {
-      const banner = row.children[0];
-      const nombre = row.children[1];
-      const apellido = row.children[2];
-      if (banner && nombre && apellido) {
-        const bannerText = banner.textContent || "";
-        const nombreText = nombre.textContent || "";
-        const apellidoText = apellido.textContent || "";
-
-        if (
-          bannerText.toLowerCase().includes(query.toLowerCase()) ||
-          nombreText.toLowerCase().includes(query.toLowerCase()) ||
-          apellidoText.toLowerCase().includes(query.toLowerCase())
-        ) {
-          row.classList.remove("hidden");
-        } else {
-          row.classList.add("hidden");
-        }
-      }
-    });
+    window.setTimeout(() => {
+      console.log("Search box value:", searchBox.value);
+      const url = updateUrl(new URL(globalThis.location.href), "search", searchBox.value)
+      navigate(url.toString());
+    }, 1500);
   });
 
   document.addEventListener("click", async (event) => {

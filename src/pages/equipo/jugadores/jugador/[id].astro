@@ -108,14 +108,14 @@ if (data?.team_color != null && typeof data.team_color === "string") {
           <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
             <p class="text-xs text-gray-500 uppercase">Velocidad promedio</p>
             <p class="text-2xl font-semibold text-gray-800">
-              {parseFloat(data.avg_speed_kmh).toFixed(2)} km/h
+              {parseFloat(data.avg_speed_kmh).toFixed(3)} km/h
             </p>
           </div>
 
           <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
             <p class="text-xs text-gray-500 uppercase">Distancia recorrida</p>
             <p class="text-2xl font-semibold text-gray-800">
-              {parseFloat(data.distance_km).toFixed(2)} km
+              {parseFloat(data.distance_km).toFixed(3)} km
             </p>
           </div>
 
@@ -124,7 +124,7 @@ if (data?.team_color != null && typeof data.team_color === "string") {
               Tiempo promedio de posesión
             </p>
             <p class="text-2xl font-semibold text-gray-800">
-              {parseFloat(data.avg_possession_time_s).toFixed(2)} s
+              {parseFloat(data.avg_possession_time_s).toFixed(3)} s
             </p>
           </div>
 

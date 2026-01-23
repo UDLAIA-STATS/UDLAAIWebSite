@@ -10,13 +10,12 @@ import type {
   AnalyzedData,
 } from "@interfaces/analyzedData.interface";
 import type { Player } from "@interfaces/player.interface";
-import type { Partido } from "@interfaces/torneos.interface";
+import type { Equipo, Partido } from "@interfaces/torneos.interface";
 import Layout from "@layouts/Layout.astro";
 import {
-  filterDataOnSeason,
+  filterDataOnTeam,
   getProcessedData,
-  getSeasonsOnData,
-  filterDataOnDateRange,
+  getTeamsIds,
 } from "@services/analyzeDataProcess";
 import { actions } from "astro:actions";
 
@@ -25,13 +24,10 @@ const search = Astro.url.searchParams.get("search") ?? "";
 const sortBy = Astro.url.searchParams.get("sortBy") ?? "";
 const orderBy = Astro.url.searchParams.get("orderBy") ?? "asc";
 const groupBy = Astro.url.searchParams.get("groupBy") ?? "";
-const startDate = Astro.url.searchParams.get("startDate") ?? "";
-const endDate = Astro.url.searchParams.get("endDate") ?? "";
 let limit: number = search ? 1000 : 15;
-const { PLAYER_STATS, PLAYER_STATS_SEASONS, PLAYER_STATS_TEAM } =
-  publicRoutesMap;
+const { PLAYER_STATS, PLAYER_STATS_SEASONS, PLAYER_STATS_TEAM } = publicRoutesMap;
 let analyzedData: AnalyzedDataTable[] = [];
-let temporadasData: Set<{ id: number; name: string }> = new Set();
+let teamsData: Set<{ id: number; name: string }> = new Set();
 let totalPages = 1;
 
 try {
@@ -59,14 +55,19 @@ try {
   };
 
   let data = await getProcessedData(processedValues);
+  const teamsIds = getTeamsIds(data);
 
-  temporadasData = getSeasonsOnData(data);
-  data = filterDataOnSeason(data, Number(groupBy));
-
-  if (startDate && endDate) {
-    data = filterDataOnDateRange(data, new Date(startDate), new Date(endDate));
+  for (const id of teamsIds) {
+    const teamResult = await Astro.callAction(
+      actions.getEquipos.orThrow,
+      { pageSize: 10000 }
+    )
+    const teamFounded = (teamResult.results as Equipo[]).find(t => t.idequipo === id);
+    teamsData.add({ id: Number(id), name: teamFounded ? teamFounded.nombreequipo : "" });
   }
 
+  data = filterDataOnTeam(data, Number(groupBy));
+  
   totalPages = filterData.pages;
   analyzedData = data;
 } catch (err) {
@@ -75,7 +76,7 @@ try {
 ---
 
 <Layout>
-  <section class="max-w-6xl mx-auto px-4 py-6">
+  <section class="max-w-6xl mx-auto p-6">
     <h1 class="text-2xl font-bold mb-4">Partidos Analizados</h1>
 
     <div
@@ -84,19 +85,19 @@ try {
       <ToggleButton label="Jugador" active={false} href={PLAYER_STATS} />
       <ToggleButton
         label="Temporadas"
-        active={true}
+        active={false}
         href={PLAYER_STATS_SEASONS}
       />
-      <!-- <ToggleButton
+      <ToggleButton
         label="Equipos"
-        active={false}
+        active={true}
         href={PLAYER_STATS_TEAM}
-      /> -->
+      />
     </div>
 
     <EstadisticasPartidosFilters
-      groupLabel="Agrupar por Temporada"
-      groupData={temporadasData}
+      groupLabel="Agrupar por Equipo"
+      groupData={teamsData}
       canGroupBySeason={true}
     />
 
@@ -116,39 +117,13 @@ try {
   const sort = document.getElementById("sortBy") as HTMLSelectElement;
   const search = document.getElementById("search") as HTMLInputElement;
   const group = document.getElementById("groupBy") as HTMLSelectElement;
-  const startDate = document.getElementById("startDate") as HTMLInputElement;
-  const endDate = document.getElementById("endDate") as HTMLInputElement;
 
   search.addEventListener("input", async () => {
     clearTimeout(timeout);
-    timeout = window.setTimeout(
-      () => updateUrlParams("search", search.value),
-      1000,
-    );
+    timeout = window.setTimeout(() => updateUrlParams("search", search.value), 1000);
   });
 
   sort.addEventListener("change", () => updateUrlParams("sortBy", sort.value));
-  order.addEventListener("change", () =>
-    updateUrlParams("orderBy", order.value),
-  );
-  group.addEventListener("change", () =>
-    updateUrlParams("groupBy", group.value),
-  );
-
-  startDate.addEventListener("change", () => {
-    if (startDate.value && endDate.value) {
-      timeout = window.setTimeout(
-        () => updateUrlParams("startDate", startDate.value),
-        1500,
-      );
-    }
-  });
-  endDate.addEventListener("change", () => {
-    if (startDate.value && endDate.value) {
-      timeout = window.setTimeout(
-        () => updateUrlParams("endDate", endDate.value),
-        1500,
-      );
-    }
-  });
+  order.addEventListener("change", () => updateUrlParams("orderBy", order.value));
+  group.addEventListener("change", () => updateUrlParams("groupBy", group.value));
 </script>

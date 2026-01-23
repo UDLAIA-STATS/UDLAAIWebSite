@@ -6,19 +6,15 @@ import Swal from "sweetalert2";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const form = document.querySelector("form") as HTMLFormElement;
-  const btnSubmit = form!.querySelector(
-    "button[type='submit']"
-  ) as HTMLButtonElement;
+  const btnSubmit = document.getElementById("btn-submit") as HTMLButtonElement;
   const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
 
   btnCancel.addEventListener("click", (e) => {
     navigate(privateRoutesMap.ADMINS_USERS);
   });
 
-  form.addEventListener("submit", (e) => e.preventDefault());
 
-  btnSubmit.addEventListener("click", async (e) => {
-    e.preventDefault();
+  btnSubmit.addEventListener("click", async () => {
     disableButton(btnSubmit);
     const formData = new FormData(form);
 

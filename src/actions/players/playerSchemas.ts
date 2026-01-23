@@ -15,6 +15,7 @@ export const jugadorUpdateSchema = z.object({
   nombrejugador: z.string().optional(),
   idbanner: z.string().optional(),
   apellidojugador: z.string().optional(),
+  imagenjugador: z.string().optional().nullable(),
   posicionjugador: z
     .enum(["Delantero", "Mediocampista", "Defensa", "Portero"])
     .optional(),

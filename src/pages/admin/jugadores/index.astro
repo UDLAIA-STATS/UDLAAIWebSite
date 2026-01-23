@@ -19,18 +19,21 @@ const searchParams = Astro.url.searchParams;
 const pageParam = Number(searchParams.get("page") ?? 1);
 const sortParam = searchParams.get("sortBy") ?? "";
 const orderParam = searchParams.get("orderBy") ?? "asc";
+const searchParam = searchParams.get("search") ?? "";
 
 const user = Astro.cookies.get("user")
   ? (JSON.parse(Astro.cookies.get("user")?.value as string) as LoggedUser)
   : null;
 
-const { data: playerData, error: playerError } = await Astro.callAction(
-  actions.getJugadores,
-  {
-    page: pageParam,
-    pageSize: 10,
-  },
-);
+const { data: playerData, error: playerError } =
+  searchParam.trim() === ""
+    ? await Astro.callAction(actions.getJugadores, {
+        page: pageParam,
+        pageSize: 10,
+      })
+    : await Astro.callAction(actions.searchJugadores, {
+        search: searchParam,
+      });
 
 if (playerError || !playerData) {
   throw new Error("Error al obtener jugadores");

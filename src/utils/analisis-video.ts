@@ -124,6 +124,7 @@ export async function startAnalysis(
   partido.partidosubido = true;
 
   const { data, error } = await actions.partidoSubido(partido);
+  console.log("Partido subido")
   if (error || !data) {
     await Swal.fire({
       icon: "error",

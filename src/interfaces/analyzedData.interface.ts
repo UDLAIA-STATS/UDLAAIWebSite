@@ -31,6 +31,8 @@ export interface AnalyzedDataTable {
   match_date: string;
   analysis_date: string;
 
+  team: string; // Team id
+
   temporada_nombre: string;
   temporada_id: number;
 
