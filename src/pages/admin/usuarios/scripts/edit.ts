@@ -76,8 +76,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
+      console.log("Password before check:", password);
+
       if (password === "") {
         formData.delete("password");
+        console.log("Password field removed from formData");
       }
 
       try {

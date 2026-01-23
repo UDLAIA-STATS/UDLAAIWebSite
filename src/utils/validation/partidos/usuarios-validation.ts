@@ -62,10 +62,11 @@ export const validateChanges = (formData: FormData, originalData: User) => {
   const newPassword = formData.get("password")?.toString().trim() ?? "";
   const is_active = (formData.get("is_active")?.toString().trim() ?? "") === "true" ? true : false;
 
-  if (newName === originalData.nombre_usuario && 
+  if ((newName === originalData.nombre_usuario && 
     newEmail === originalData.email_usuario && 
     newRol.trim() === originalData.rol.trim() && 
-    is_active === originalData.is_active) {
+    is_active === originalData.is_active) && 
+    (newPassword === "" || newPassword === null)) {
       return "No se han realizado cambios. Modifique al menos un campo para continuar." 
     }
 
