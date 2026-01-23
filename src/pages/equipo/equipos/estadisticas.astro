@@ -13,6 +13,7 @@ import type { Player } from "@interfaces/player.interface";
 import type { Equipo, Partido } from "@interfaces/torneos.interface";
 import Layout from "@layouts/Layout.astro";
 import {
+filterDataOnDateRange,
   filterDataOnTeam,
   getProcessedData,
   getTeamsIds,
@@ -24,6 +25,9 @@ const search = Astro.url.searchParams.get("search") ?? "";
 const sortBy = Astro.url.searchParams.get("sortBy") ?? "";
 const orderBy = Astro.url.searchParams.get("orderBy") ?? "asc";
 const groupBy = Astro.url.searchParams.get("groupBy") ?? "";
+const startDate = Astro.url.searchParams.get("startDate") ?? "";
+const endDate = Astro.url.searchParams.get("endDate") ?? "";
+
 let limit: number = search ? 1000 : 15;
 const { PLAYER_STATS, PLAYER_STATS_SEASONS, PLAYER_STATS_TEAM } = publicRoutesMap;
 let analyzedData: AnalyzedDataTable[] = [];
@@ -67,7 +71,11 @@ try {
   }
 
   data = filterDataOnTeam(data, Number(groupBy));
-  
+
+  if (startDate && endDate) {
+    data = filterDataOnDateRange(data, new Date(startDate), new Date(endDate));
+  }
+
   totalPages = filterData.pages;
   analyzedData = data;
 } catch (err) {
@@ -117,6 +125,9 @@ try {
   const sort = document.getElementById("sortBy") as HTMLSelectElement;
   const search = document.getElementById("search") as HTMLInputElement;
   const group = document.getElementById("groupBy") as HTMLSelectElement;
+   const startDate = document.getElementById("startDate") as HTMLInputElement;
+  const endDate = document.getElementById("endDate") as HTMLInputElement;
+
 
   search.addEventListener("input", async () => {
     clearTimeout(timeout);
@@ -126,4 +137,21 @@ try {
   sort.addEventListener("change", () => updateUrlParams("sortBy", sort.value));
   order.addEventListener("change", () => updateUrlParams("orderBy", order.value));
   group.addEventListener("change", () => updateUrlParams("groupBy", group.value));
+
+  startDate.addEventListener("change", () => {
+    if (startDate.value && endDate.value) {
+      timeout = window.setTimeout(
+        () => updateUrlParams("startDate", startDate.value),
+        1500,
+      );
+    }
+  });
+  endDate.addEventListener("change", () => {
+    if (startDate.value && endDate.value) {
+      timeout = window.setTimeout(
+        () => updateUrlParams("endDate", endDate.value),
+        1500,
+      );
+    }
+  });
 </script>
