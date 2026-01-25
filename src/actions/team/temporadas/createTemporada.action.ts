@@ -1,4 +1,3 @@
-import type { Temporada } from "@interfaces/torneos.interface";
 import { defineAction } from "astro:actions";
 import { temporadaSchema } from "./temporadasSchema";
 import {
@@ -38,7 +37,7 @@ export const createTemporada = defineAction({
           errorMessage = errorData.data;
         }
         throw new Error(
-          errorMessage || `Error ${res.status}: ${res.statusText}`
+          errorMessage || `Error ${res.status}: ${res.statusText}`,
         );
       }
 

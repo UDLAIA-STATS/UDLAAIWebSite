@@ -2,14 +2,17 @@ import Swal from "sweetalert2";
 import { actions } from "astro:actions";
 import { navigate } from "astro:transitions/client";
 import { privateRoutesMap } from "@consts/routes";
-import { setLimitDatesTorneo, validateTorneo } from "@utils/validation/partidos/torneo-validation";
+import {
+  setLimitDatesTorneo,
+  validateTorneo,
+} from "@utils/validation/partidos/torneo-validation";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const btnSubmit = document.getElementById("btn-submit") as HTMLButtonElement;
   const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
   const form = document.getElementById("form-torneo") as HTMLFormElement;
   const temporadasSelect = document.getElementById(
-    "idtemporada"
+    "idtemporada",
   ) as HTMLSelectElement;
 
   temporadasSelect.addEventListener("change", async () => {

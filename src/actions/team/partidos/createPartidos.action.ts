@@ -1,6 +1,5 @@
 import { defineAction } from "astro:actions";
 import { partidoSchema } from "./partidoSchemas";
-import type { Partido } from "@interfaces/index";
 import {
   errorResponseSerializer,
   successResponseSerializer,
@@ -42,7 +41,7 @@ export const createPartido = defineAction({
           errorMessage = errorData.data;
         }
         throw new Error(
-          errorMessage || `Error ${res.status}: ${res.statusText}`
+          errorMessage || `Error ${res.status}: ${res.statusText}`,
         );
       }
 
@@ -51,7 +50,7 @@ export const createPartido = defineAction({
     } catch (err) {
       console.error("Error al crear partido:", err);
       throw new Error(
-        err instanceof Error ? err.message : "No se pudo crear el partido"
+        err instanceof Error ? err.message : "No se pudo crear el partido",
       );
     }
   },

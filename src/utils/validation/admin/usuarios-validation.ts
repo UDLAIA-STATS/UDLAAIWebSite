@@ -1,5 +1,8 @@
 import type { User } from "@interfaces/user.interface";
-import { setFieldError, clearFieldError } from "@utils/validation/validation-utils";
+import {
+  setFieldError,
+  clearFieldError,
+} from "@utils/validation/validation-utils";
 
 export const validateUsers = (formData: FormData, isUpdate = false) => {
   const username = formData.get("name")?.toString().trim() ?? "";

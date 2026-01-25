@@ -1,5 +1,8 @@
 import type { Equipo } from "@interfaces/torneos.interface";
-import { setFieldError, clearFieldError } from "@utils/validation/validation-utils";
+import {
+  setFieldError,
+  clearFieldError,
+} from "@utils/validation/validation-utils";
 
 export const validateEquipos = (formData: FormData): boolean => {
   const nombre = (formData.get("nombreequipo") as string)?.trim() ?? "";

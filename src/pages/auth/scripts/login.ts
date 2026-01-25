@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const form = document.querySelector("form") as HTMLFormElement;
   form.addEventListener("submit", (e) => e.preventDefault());
   const btnSubmit = form.querySelector(
-    "button[type='button']"
+    "button[type='button']",
   ) as HTMLButtonElement;
 
   document.addEventListener("astro:page-load", async () => {
@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       formData.set("name", username);
       formData.set("password", password);
 
-      const { data, error } = await actions.login(formData);
+      const { error } = await actions.login(formData);
 
       if (error) {
         Swal.fire({

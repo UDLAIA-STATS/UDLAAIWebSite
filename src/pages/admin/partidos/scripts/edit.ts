@@ -12,7 +12,7 @@ import { activateButton, disableButton } from "@utils/index";
 document.addEventListener("DOMContentLoaded", async () => {
   const form = document.querySelector("#form-partido") as HTMLFormElement;
   const btnSubmit = form.querySelector(
-    'button[type="submit"]'
+    'button[type="submit"]',
   ) as HTMLButtonElement;
   const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
 
@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const torneos: Torneo[] = (torneosData.results as Torneo[]) ?? [];
 
   const selectTemporada = document.getElementById(
-    "idtemporada"
+    "idtemporada",
   ) as HTMLSelectElement;
   const selectTorneo = document.getElementById("idtorneo") as HTMLSelectElement;
 
@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       '<option value="" disabled selected>Selecciona un torneo</option>';
 
     const torneosFiltrados = torneos.filter(
-      (torneo) => torneo.idtemporada === Number(temporadaSeleccionada)
+      (torneo) => torneo.idtemporada === Number(temporadaSeleccionada),
     );
 
     if (torneosFiltrados.length === 0) {
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // === Acciones de los botones ===
   btnCancel.addEventListener("click", () =>
-    navigate(privateRoutesMap.VER_PARTIDOS)
+    navigate(privateRoutesMap.VER_PARTIDOS),
   );
 
   form.addEventListener("submit", (e) => {
@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       Swal.fire(
         "Error",
         "Se detectaron errores en el formulario, corrige los campos y vuelve a intentarlo",
-        "error"
+        "error",
       );
       activateButton(btnSubmit);
       return;
@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       await Swal.fire(
         "Información",
         "No se han detectado cambios en el partido.",
-        "info"
+        "info",
       );
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     formData.set(
       "fechapartido",
-      new Date(formData.get("fechapartido") as string).toISOString()
+      new Date(formData.get("fechapartido") as string).toISOString(),
     );
 
     try {
@@ -110,11 +110,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      Swal.fire("Partido actualizado", data.mensaje, "success").then((result) => {
-        if (result.isConfirmed) {
-          navigate(privateRoutesMap.VER_PARTIDOS);
-        }
-      });
+      Swal.fire("Partido actualizado", data.mensaje, "success").then(
+        (result) => {
+          if (result.isConfirmed) {
+            navigate(privateRoutesMap.VER_PARTIDOS);
+          }
+        },
+      );
     } catch (err) {
       console.error(err);
       Swal.fire("Error", "Error inesperado al actualizar el partido", "error");

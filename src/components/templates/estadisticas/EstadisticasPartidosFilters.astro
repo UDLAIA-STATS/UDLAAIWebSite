@@ -1,21 +1,30 @@
 ---
+import { publicRoutesMap } from "@consts/index";
+import { buttonClass } from "@consts/index";
+
 interface Props {
-  search: string;
-  sortBy: string;
-  orderBy: string;
   groupBy?: string;
-  temporadasData?: Set<{ id: number; name: string }>;
+  groupLabel?: string;
+  groupData?: Set<{ id: number; name: string }>;
   canGroupBySeason?: boolean;
 }
 const {
-  search,
-  sortBy,
-  orderBy,
-  temporadasData,
-  groupBy = "",
+  groupData,
+  groupLabel = "Agrupar por",
   canGroupBySeason = false,
 } = Astro.props;
 const componentClass = "flex flex-col flex-wrap gap-1";
+
+
+const endDate = Astro.url.searchParams.get("endDate") ?? "";
+const startDate = Astro.url.searchParams.get("startDate") ?? "";
+const search = Astro.url.searchParams.get("search") ?? "";
+const groupBy = Astro.url.searchParams.get("groupBy") ?? "";
+const orderBy = Astro.url.searchParams.get("orderBy") ?? "";
+const sortBy = Astro.url.searchParams.get("sortBy") ?? "";
+
+const { PLAYER_COMPARE } =
+  publicRoutesMap;
 ---
 
 <section class="flex flex-wrap gap-7 flex-row pt-5 pb-7">
@@ -30,9 +39,7 @@ const componentClass = "flex flex-col flex-wrap gap-1";
     />
   </div>
   <div class:list={[componentClass, canGroupBySeason ? "" : "hidden"]}>
-    <label for="groupBy" class="block text-sm font-medium"
-      >Agrupar por Temporada</label
-    >
+    <label for="groupBy" class="block text-sm font-medium">{groupLabel}</label>
     <select
       id="groupBy"
       class="bg-white text-black rounded-md p-2 w-4xs focus:outline-none focus:ring-1 focus:ring-black"
@@ -41,13 +48,10 @@ const componentClass = "flex flex-col flex-wrap gap-1";
         >-- Selecciona --</option
       >
       {
-        temporadasData ? (
-          [...temporadasData].map((temporada) => (
-            <option
-              selected={groupBy === String(temporada.id)}
-              value={temporada.id}
-            >
-              {temporada.name}
+        groupData ? (
+          [...groupData].map((data) => (
+            <option selected={groupBy === String(data.id)} value={data.id}>
+              {data.name}
             </option>
           ))
         ) : (
@@ -89,4 +93,59 @@ const componentClass = "flex flex-col flex-wrap gap-1";
       <option selected={orderBy === "desc"} value="desc">Descendente</option>
     </select>
   </div>
+  <div class={componentClass}>
+    <label for="startDate">Fecha Inicial</label>
+    <input
+      type="date"
+      id="startDate"
+      value={startDate}
+      class="bg-white text-black rounded-md p-2 w-4xs focus:outline-none ring-2 ring-gray-300 focus:ring-1 focus:ring-black"
+    />
+  </div>
+  <div class={componentClass}>
+    <label for="endDate">Fecha Final</label>
+    <input
+      type="date"
+      id="endDate"
+      value={endDate}
+      class="bg-white text-black rounded-md p-2 w-4xs focus:outline-none ring-2 ring-gray-300 focus:ring-1 focus:ring-black"
+    />
+  </div>
+  <div class={componentClass}>
+    <button
+      id="clearFilters"
+      class={buttonClass}
+    >
+      Limpiar Filtros
+    </button>
+  </div>
+  <div class={componentClass}>
+    <a
+      id="compareStats"
+      class={buttonClass}
+      href={PLAYER_COMPARE}
+    >
+      Comparar
+    </a>
+  </div>
 </section>
+
+<script>
+  import { updateUrl } from "@utils/index";
+  import { navigate } from "astro:transitions/client";
+
+  const clearFiltersButton = document.getElementById(
+    "clearFilters",
+  ) as HTMLButtonElement;
+
+  clearFiltersButton.addEventListener("click", () => {
+    const url = new URL(globalThis.location.href);
+    updateUrl(url, "search", "");
+    updateUrl(url, "sortBy", "");
+    updateUrl(url, "orderBy", "");
+    updateUrl(url, "groupBy", "");
+    updateUrl(url, "startDate", "");
+    updateUrl(url, "endDate", "");
+    navigate(url.toString());
+  });
+</script>

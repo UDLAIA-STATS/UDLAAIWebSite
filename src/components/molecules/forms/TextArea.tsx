@@ -37,6 +37,9 @@ export const TextArea: Component<Props> = ({
           rows={rows}
           class={`${inputClass} resize-none`}
           aria-describedby={errorId}
+          hidden={hidden}
+          minlength={minlength}
+          required={required}
         >
           {value}
         </textarea>

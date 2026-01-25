@@ -12,7 +12,6 @@ export const deleteUser = defineAction({
   }),
   handler: async ({ nickname }, { cookies }) => {
     const authUrl = import.meta.env.AUTH_URL;
-    const adminKey = import.meta.env.DEFAULT_ADMIN_PASSWORD;
     const loggedInUser = cookies.get("user")
       ? (JSON.parse(cookies.get("user")?.value as string) as LoggedUser)
           .nickname

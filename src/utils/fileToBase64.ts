@@ -16,15 +16,14 @@ export async function fileToBase64(file: File): Promise<string> {
   });
 }
 
+export async function imageToBase64(file: File) {
+  try {
+    const buffer = await file.arrayBuffer();
+    const base64Image = Buffer.from(buffer).toString("base64");
+    const imageType = file.type.split("/")[1];
 
-export async function imageToBase64(file:File) {
-    try {
-        const buffer = await file.arrayBuffer();
-        const base64Image = Buffer.from(buffer).toString('base64');
-        const imageType = file.type.split('/')[1];
-
-        return `data:image/${imageType};base64,${base64Image}`;
-    } catch (error) {
-        throw new Error(`Error al convertir imagen a Base64: ${error}`);
-    }
+    return `data:image/${imageType};base64,${base64Image}`;
+  } catch (error) {
+    throw new Error(`Error al convertir imagen a Base64: ${error}`);
+  }
 }

@@ -1,4 +1,7 @@
-import { errorResponseSerializer, successResponseSerializer } from "@utils/serializers";
+import {
+  errorResponseSerializer,
+  successResponseSerializer,
+} from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 
@@ -17,7 +20,9 @@ export const deletePartido = defineAction({
         if (errorData.data) {
           errorMessage = errorData.data;
         }
-        throw new Error(errorMessage || `Error ${res.status}: ${res.statusText}`);
+        throw new Error(
+          errorMessage || `Error ${res.status}: ${res.statusText}`,
+        );
       }
 
       const data = await res.json();
@@ -25,7 +30,9 @@ export const deletePartido = defineAction({
       return successResponseSerializer(data);
     } catch (error) {
       console.error(`Error al eliminar partido ID ${idpartido}:`, error);
-      throw new Error("No se pudo eliminar el partido (posiblemente asociado a torneos)");
+      throw new Error(
+        "No se pudo eliminar el partido (posiblemente asociado a torneos)",
+      );
     }
   },
 });

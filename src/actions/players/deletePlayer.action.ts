@@ -14,7 +14,7 @@ export const deleteJugador = defineAction({
         `${baseUrl}/jugadores/${idJugador}/delete/`,
         {
           method: "DELETE",
-        }
+        },
       );
       if (!response.ok) {
         const errorData = errorResponseSerializer(await response.json());
@@ -23,7 +23,7 @@ export const deleteJugador = defineAction({
           errorMessage = errorData.data;
         }
         throw new Error(
-          errorMessage || `Error ${response.status}: ${response.statusText}`
+          errorMessage || `Error ${response.status}: ${response.statusText}`,
         );
       }
       const data = successResponseSerializer(await response.json());
@@ -31,7 +31,7 @@ export const deleteJugador = defineAction({
     } catch (error) {
       console.error(`Error al eliminar el jugador:`, error);
       throw new Error(
-        "No se pudo eliminar el jugador. Verifique dependencias o intente más tarde."
+        "No se pudo eliminar el jugador. Verifique dependencias o intente más tarde.",
       );
     }
   },

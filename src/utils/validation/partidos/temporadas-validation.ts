@@ -14,7 +14,6 @@ export const validateTemporadas = (formData: FormData): boolean => {
   const fechaInicio =
     (formData.get("fechainiciotemporada") as string)?.trim() ?? "";
   const fechaFin = (formData.get("fechafintemporada") as string)?.trim() ?? "";
-  const torneo = (formData.get("idtorneo") as string)?.trim() ?? "";
   const temporadaActiva =
     (formData.get("temporadaactiva") as string)?.trim() ?? "";
 
@@ -33,13 +32,13 @@ export const validateTemporadas = (formData: FormData): boolean => {
   if (nombreTemporada.length === 0) {
     setFieldError(
       "nombretemporada",
-      "El nombre de la temporada es obligatorio."
+      "El nombre de la temporada es obligatorio.",
     );
     hasErrors = true;
   } else if (nombreTemporada.length < 5) {
     setFieldError(
       "nombretemporada",
-      "El nombre de la temporada es muy corto (mínimo 5 caracteres)."
+      "El nombre de la temporada es muy corto (mínimo 5 caracteres).",
     );
     hasErrors = true;
   } else {
@@ -49,13 +48,13 @@ export const validateTemporadas = (formData: FormData): boolean => {
   if (descripcionTemporada.length === 0) {
     setFieldError(
       "descripciontemporada",
-      "La descripción de la temporada es obligatoria."
+      "La descripción de la temporada es obligatoria.",
     );
     hasErrors = true;
   } else if (descripcionTemporada.length < 10) {
     setFieldError(
       "descripciontemporada",
-      "La descripción de la temporada es muy corta (mínimo 10 caracteres)."
+      "La descripción de la temporada es muy corta (mínimo 10 caracteres).",
     );
     hasErrors = true;
   } else {
@@ -89,7 +88,7 @@ export const validateTemporadas = (formData: FormData): boolean => {
   if (fechaInicio && fechaFin && new Date(fechaFin) < new Date(fechaInicio)) {
     setFieldError(
       "fechafintemporada",
-      "La fecha de fin no puede ser anterior a la fecha de inicio."
+      "La fecha de fin no puede ser anterior a la fecha de inicio.",
     );
     hasErrors = true;
   }
@@ -97,7 +96,7 @@ export const validateTemporadas = (formData: FormData): boolean => {
   if (temporadaActiva.length === 0) {
     setFieldError(
       "temporadaactiva",
-      "Debe indicar si la temporada está activa o no."
+      "Debe indicar si la temporada está activa o no.",
     );
     hasErrors = true;
   } else {
@@ -109,7 +108,7 @@ export const validateTemporadas = (formData: FormData): boolean => {
 
 export const isTemporadaUpdated = (
   temporada: Temporada,
-  formData: FormData
+  formData: FormData,
 ): boolean => {
   // Extraer valores del formulario con normalización
   const nombreTemporada =

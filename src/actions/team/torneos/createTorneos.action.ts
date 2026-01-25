@@ -39,7 +39,7 @@ export const createTorneo = defineAction({
           errorMessage = errorData.data;
         }
         throw new Error(
-          errorMessage || `Error ${res.status}: ${res.statusText}`
+          errorMessage || `Error ${res.status}: ${res.statusText}`,
         );
       }
 

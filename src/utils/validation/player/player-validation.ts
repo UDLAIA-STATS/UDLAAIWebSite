@@ -1,5 +1,8 @@
 import type { Player } from "@interfaces/index";
-import { setFieldError, clearFieldError } from "@utils/validation/validation-utils";
+import {
+  setFieldError,
+  clearFieldError,
+} from "@utils/validation/validation-utils";
 
 export const validateJugador = (formData: FormData) => {
   const idbanner = formData.get("idbanner")?.toString().trim() ?? "";
@@ -8,7 +11,6 @@ export const validateJugador = (formData: FormData) => {
   const posicion = formData.get("posicionjugador")?.toString().trim() ?? "";
   const numero = Number(formData.get("numerocamisetajugador")) || 0;
   const activo = formData.get("jugadoractivo")?.toString().trim() ?? "";
-  const imagenjugador = formData.get("imagenjugador") as File | null;
 
   // limpiar errores previos
   clearFieldError("idbanner");

@@ -1,14 +1,15 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { suscribeVideoUpload } from "./suscribe_websocket";
 
 export const uploadFile = async (
   file: File,
   partidoId: number,
   color: string,
-  onProgress?: (percent: number) => void
+  onProgress?: (percent: number) => void,
 ): Promise<{ ok: true; key: string }> => {
   try {
     const uploadApi = import.meta.env.PUBLIC_UPLOAD_SERVICE_URL;
+    console.log("Upload API URL:", uploadApi);
     const generatedKey = await axios.post(`${uploadApi}/generate-key/`, {
       video_name: file.name,
     });

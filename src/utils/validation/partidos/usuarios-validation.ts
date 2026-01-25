@@ -1,5 +1,8 @@
 import type { User } from "@interfaces/user.interface";
-import { setFieldError, clearFieldError } from "@utils/validation/validation-utils";
+import {
+  setFieldError,
+  clearFieldError,
+} from "@utils/validation/validation-utils";
 
 export const validateUsers = (formData: FormData, isUpdate = false) => {
   const username = formData.get("name")?.toString().trim() ?? "";
@@ -60,14 +63,20 @@ export const validateChanges = (formData: FormData, originalData: User) => {
   const newEmail = formData.get("email")?.toString().trim().toLowerCase() ?? "";
   const newRol = formData.get("rol")?.toString().trim() ?? "";
   const newPassword = formData.get("password")?.toString().trim() ?? "";
-  const is_active = (formData.get("is_active")?.toString().trim() ?? "") === "true" ? true : false;
+  const is_active =
+    (formData.get("is_active")?.toString().trim() ?? "") === "true"
+      ? true
+      : false;
 
-  if (newName === originalData.nombre_usuario && 
-    newEmail === originalData.email_usuario && 
-    newRol.trim() === originalData.rol.trim() && 
-    is_active === originalData.is_active) {
-      return "No se han realizado cambios. Modifique al menos un campo para continuar." 
-    }
+  if (
+    newName === originalData.nombre_usuario &&
+    newEmail === originalData.email_usuario &&
+    newRol.trim() === originalData.rol.trim() &&
+    is_active === originalData.is_active &&
+    (newPassword === "" || newPassword === null)
+  ) {
+    return "No se han realizado cambios. Modifique al menos un campo para continuar.";
+  }
 
   return "";
 };

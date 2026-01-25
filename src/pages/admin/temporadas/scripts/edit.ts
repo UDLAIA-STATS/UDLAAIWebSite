@@ -28,9 +28,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
     const temporadaActual = data.data as Temporada;
     const cambiosDetectados = isTemporadaUpdated(temporadaActual, formData);
-    
+
     if (errorMessage) {
-      Swal.fire("Error", "Se detectaron errores en el formulario, corrige los campos y vuelve a intentarlo", "error").then(() => {
+      Swal.fire(
+        "Error",
+        "Se detectaron errores en el formulario, corrige los campos y vuelve a intentarlo",
+        "error",
+      ).then(() => {
         btnSubmit.disabled = false;
         btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
       });
@@ -41,14 +45,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       Swal.fire(
         "Información",
         "No se han detectado cambios en la temporada.",
-        "info"
+        "info",
       ).then(() => {
         btnSubmit.disabled = false;
         btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
       });
       return;
     }
-
 
     // 🧠 Normalización de datos (solo ajuste de formato)
     const tipo = formData.get("tipotemporada")?.toString().trim() ?? "";
@@ -63,18 +66,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     formData.set("idtemporada", formData.get("idtemporada")?.toString() ?? "");
     formData.set(
       "nombretemporada",
-      formData.get("nombretemporada")?.toString().trim() ?? ""
+      formData.get("nombretemporada")?.toString().trim() ?? "",
     );
     formData.set(
       "descripciontemporada",
-      formData.get("descripciontemporada")?.toString().trim() ?? ""
+      formData.get("descripciontemporada")?.toString().trim() ?? "",
     );
     formData.set("tipotemporada", tipo);
     formData.set("fechainiciotemporada", fechaInicioISO);
     formData.set("fechafintemporada", fechaFinISO);
     formData.set(
       "temporadaactiva",
-      formData.get("temporadaactiva")?.toString() ?? ""
+      formData.get("temporadaactiva")?.toString() ?? "",
     );
 
     try {
@@ -90,7 +93,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         Swal.fire(
           "Temporada Actualizada",
           data.mensaje ?? "Temporada actualizada correctamente",
-          "success"
+          "success",
         ).then(() => {
           navigate(privateRoutesMap.VER_TEMPORADAS);
         });
@@ -100,7 +103,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       Swal.fire(
         "Error",
         "Ocurrió un problema al actualizar la temporada",
-        "error"
+        "error",
       );
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");

@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnCancel = document.querySelector("#btn-cancel") as HTMLButtonElement;
 
   btnCancel.addEventListener("click", () =>
-    navigate(privateRoutesMap.VER_EQUIPOS)
+    navigate(privateRoutesMap.VER_EQUIPOS),
   );
 
   form.addEventListener("submit", (e) => e.preventDefault());
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
       await Swal.fire(
         "Información",
         "No se han detectado cambios en el equipo.",
-        "info"
+        "info",
       );
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
@@ -67,16 +67,20 @@ document.addEventListener("DOMContentLoaded", () => {
         formData.set("imagenequipo", base64);
       }
 
-      const { data, error } = await actions.updateEquipo(formData);
+      const { error } = await actions.updateEquipo(formData);
       if (error) {
         await Swal.fire("Error", error.message, "error");
       } else {
-        await Swal.fire("Equipo actualizado", "Equipo actualizado correctamente", "success");
+        await Swal.fire(
+          "Equipo actualizado",
+          "Equipo actualizado correctamente",
+          "success",
+        );
         navigate(privateRoutesMap.VER_EQUIPOS);
       }
     } catch (err) {
       console.error("Error al actualizar equipo:", err);
-      Swal.fire("Error", "No se pudo actualizar el equipo", "error");
+      await Swal.fire("Error", "No se pudo actualizar el equipo", "error");
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
     } finally {

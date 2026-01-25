@@ -1,6 +1,9 @@
 import type { Torneo } from "@interfaces/index";
 import { actions } from "astro:actions";
-import { setFieldError, clearFieldError } from "@utils/validation/validation-utils";
+import {
+  setFieldError,
+  clearFieldError,
+} from "@utils/validation/validation-utils";
 
 export const validateTorneo = (formData: FormData): boolean => {
   const nombreTorneo = (formData.get("nombretorneo") as string)?.trim() ?? "";
@@ -13,16 +16,12 @@ export const validateTorneo = (formData: FormData): boolean => {
   const torneoActivoStr =
     (formData.get("torneoactivo") as string)?.trim() ?? "";
 
-  // limpiar errores previos
   clearFieldError("nombretorneo");
   clearFieldError("descripciontorneo");
   clearFieldError("idtemporada");
   clearFieldError("fechainiciotorneo");
   clearFieldError("fechafintorneo");
   clearFieldError("torneoactivo");
-
-  const fechaInicio = fechaInicioStr ? new Date(fechaInicioStr) : null;
-  const fechaFin = fechaFinStr ? new Date(fechaFinStr) : null;
 
   const torneoActivo =
     torneoActivoStr === "true" || torneoActivoStr === "false"

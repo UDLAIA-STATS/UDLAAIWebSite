@@ -11,12 +11,11 @@ export const notifyVideoUpload = defineAction({
       debug.log("Notificando video subido con URL:", url);
       if (
         url.trim() === "" ||
-        !(url.startsWith("http://") ||
-        url.startsWith("https://"))
+        !(url.startsWith("http://") || url.startsWith("https://"))
       ) {
         debug.log("URL inválida proporcionada:", url);
         throw new Error(
-          "La URL proporcionada es inválida, no se pudo notificar el envío del video."
+          "La URL proporcionada es inválida, no se pudo notificar el envío del video.",
         );
       }
       const kafkaServiceUrl = import.meta.env.KAFKA_SERVICE;
@@ -30,7 +29,7 @@ export const notifyVideoUpload = defineAction({
       if (!health.ok || healtStatus.status !== "ok") {
         debug.log("El servicio de notificación no está disponible.");
         throw new Error(
-          "El servicio de notificación no está disponible en este momento."
+          "El servicio de notificación no está disponible en este momento.",
         );
       }
 
@@ -54,16 +53,17 @@ export const notifyVideoUpload = defineAction({
 
       debug.log("Respuesta del servicio de notificación:", result);
 
-    if (!response.ok) {
-      debug.log("Error al notificar el video subido:", result);
-      const error = JSON.stringify(result.detail) || "Error desconocido al notificar el video subido.";
-      throw new Error(error);
-    }
+      if (!response.ok) {
+        debug.log("Error al notificar el video subido:", result);
+        const error =
+          JSON.stringify(result.detail) ||
+          "Error desconocido al notificar el video subido.";
+        throw new Error(error);
+      }
 
-    return {
+      return {
         status: result.status,
-    }
-
+      };
     } catch (err) {
       console.error("Error al notificar video subido:", err);
       throw err;

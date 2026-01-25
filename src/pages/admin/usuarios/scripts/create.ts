@@ -1,24 +1,19 @@
 import { privateRoutesMap } from "@consts/routes";
 import { actions } from "astro:actions";
 import { navigate } from "astro:transitions/client";
-import { activateButton, disableButton, validateUsers } from "@utils/index"
+import { activateButton, disableButton, validateUsers } from "@utils/index";
 import Swal from "sweetalert2";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const form = document.querySelector("form") as HTMLFormElement;
-  const btnSubmit = form!.querySelector(
-    "button[type='submit']"
-  ) as HTMLButtonElement;
+  const btnSubmit = document.getElementById("btn-submit") as HTMLButtonElement;
   const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
 
-  btnCancel.addEventListener("click", (e) => {
+  btnCancel.addEventListener("click", () => {
     navigate(privateRoutesMap.ADMINS_USERS);
   });
 
-  form.addEventListener("submit", (e) => e.preventDefault());
-
-  btnSubmit.addEventListener("click", async (e) => {
-    e.preventDefault();
+  btnSubmit.addEventListener("click", async () => {
     disableButton(btnSubmit);
     const formData = new FormData(form);
 
@@ -38,13 +33,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (error) {
         console.error("Error:", error);
-          await Swal.fire({
-            icon: "error",
-            title: "Error al registrar el usuario",
-            html: error.message,
-          });
-          activateButton(btnSubmit);
-          return;
+        await Swal.fire({
+          icon: "error",
+          title: "Error al registrar el usuario",
+          html: error.message,
+        });
+        activateButton(btnSubmit);
+        return;
       }
 
       if (data) {

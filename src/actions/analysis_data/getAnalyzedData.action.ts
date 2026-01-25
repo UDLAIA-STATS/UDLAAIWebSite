@@ -1,4 +1,7 @@
-import { paginationResponseSerializer, successResponseSerializer } from "@utils/serializers";
+import {
+  paginationResponseSerializer,
+  successResponseSerializer,
+} from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import axios, { AxiosError } from "axios";
@@ -31,23 +34,23 @@ export const getAnalyzedData = defineAction({
           "Error desconocido del servicio de estadísticas.";
 
         throw new Error(
-          `Error al obtener datos analizados (HTTP ${status ?? "N/A"}): ${message}`
+          `Error al obtener datos analizados (HTTP ${status ?? "N/A"}): ${message}`,
         );
       }
 
       throw new Error(
-        "Error inesperado al obtener los datos analizados. Intente nuevamente."
+        "Error inesperado al obtener los datos analizados. Intente nuevamente.",
       );
     }
   },
 });
 
 export const getAnalyzedDetails = defineAction({
-input: z.object({
-id: z.number().int().positive(),
-}),
-handler: async ( { id } ) => {
-  const statsApi = import.meta.env.STATS_SERVICE;
+  input: z.object({
+    id: z.number().int().positive(),
+  }),
+  handler: async ({ id }) => {
+    const statsApi = import.meta.env.STATS_SERVICE;
     try {
       let endpoint = `${statsApi}/consolidated/${id}/`;
       const res = await axios.get(endpoint);
@@ -64,13 +67,13 @@ handler: async ( { id } ) => {
           "Error desconocido del servicio de estadísticas.";
 
         throw new Error(
-          `Error al obtener datos analizados (HTTP ${status ?? "N/A"}): ${message}`
+          `Error al obtener datos analizados (HTTP ${status ?? "N/A"}): ${message}`,
         );
       }
 
       throw new Error(
-        "Error inesperado al obtener los datos analizados. Intente nuevamente."
+        "Error inesperado al obtener los datos analizados. Intente nuevamente.",
       );
     }
-},
+  },
 });

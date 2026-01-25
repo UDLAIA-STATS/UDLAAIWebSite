@@ -16,7 +16,7 @@ export const getTorneos = defineAction({
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
       const res = await fetch(
-        `${baseUrl}/torneos/all/?page=${page}&offset=${pageSize}`
+        `${baseUrl}/torneos/all/?page=${page}&offset=${pageSize}`,
       );
       if (!res.ok) {
         const errorData = errorResponseSerializer(await res.json());
@@ -25,7 +25,7 @@ export const getTorneos = defineAction({
           errorMessage = errorData.data;
         }
         throw new Error(
-          errorMessage || `Error ${res.status}: ${res.statusText}`
+          errorMessage || `Error ${res.status}: ${res.statusText}`,
         );
       }
       const data = paginationResponseSerializer(await res.json());
@@ -50,7 +50,7 @@ export const getTorneoById = defineAction({
           errorMessage = errorData.data;
         }
         throw new Error(
-          errorMessage || `Error ${res.status}: ${res.statusText}`
+          errorMessage || `Error ${res.status}: ${res.statusText}`,
         );
       }
       const data = successResponseSerializer(await res.json());

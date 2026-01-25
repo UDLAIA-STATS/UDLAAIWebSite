@@ -1,4 +1,7 @@
-import { setFieldError, clearFieldError } from "@utils/validation/validation-utils";
+import {
+  setFieldError,
+  clearFieldError,
+} from "@utils/validation/validation-utils";
 
 const validateLogin = (formData: FormData): boolean => {
   const username = formData.get("name")?.toString().trim() ?? "";

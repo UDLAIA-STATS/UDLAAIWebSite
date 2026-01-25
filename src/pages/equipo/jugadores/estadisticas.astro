@@ -2,10 +2,14 @@
 import Layout from "@layouts/Layout.astro";
 import Pagination from "@components/organisms/Pagination.astro";
 import { actions } from "astro:actions";
-import type { AnalyzedData, AnalyzedDataTable, ProcessDataValues } from "@interfaces/analyzedData.interface";
+import type {
+  AnalyzedData,
+  AnalyzedDataTable,
+  ProcessDataValues,
+} from "@interfaces/analyzedData.interface";
 import type { Partido } from "@interfaces/torneos.interface";
 import type { Player } from "@interfaces/player.interface";
-import { getProcessedData } from "@services/index";
+import { getProcessedData, filterDataOnDateRange } from "@services/index";
 import EstadisticasPartidos from "@components/templates/estadisticas/EstadisticasPartidos.astro";
 import EstadisticasPartidosFilters from "@components/templates/estadisticas/EstadisticasPartidosFilters.astro";
 import { ToggleButton } from "@components/atoms/buttons/ToggleButton";
@@ -15,20 +19,27 @@ const page = Number(Astro.url.searchParams.get("page") ?? 1);
 const search = Astro.url.searchParams.get("search") ?? "";
 const sortBy = Astro.url.searchParams.get("sortBy") ?? "";
 const orderBy = Astro.url.searchParams.get("orderBy") ?? "asc";
+const startDate = Astro.url.searchParams.get("startDate") ?? "";
+const endDate = Astro.url.searchParams.get("endDate") ?? "";
+
 let limit: number = search ? 1000 : 15;
-const { PLAYER_STATS, PLAYER_STATS_SEASONS } = publicRoutesMap;
+const { PLAYER_STATS, PLAYER_STATS_SEASONS, PLAYER_STATS_TEAM } =
+  publicRoutesMap;
 let analyzedData: AnalyzedDataTable[] = [];
 let totalPages = 1;
 
 try {
-  if( search ) {
+  if (search) {
     limit = 1000;
   }
   const [filterData, partidosData, playersData] = await Promise.all([
-      Astro.callAction(actions.getAnalyzedData.orThrow, { page: page, limit: limit }),
-      Astro.callAction(actions.getPartidos.orThrow, { page: 1, pageSize: 1000 }),
-      Astro.callAction(actions.getJugadores.orThrow, { page: 1, pageSize: 1000 }),
-    ]);
+    Astro.callAction(actions.getAnalyzedData.orThrow, {
+      page: page,
+      limit: limit,
+    }),
+    Astro.callAction(actions.getPartidos.orThrow, { page: 1, pageSize: 1000 }),
+    Astro.callAction(actions.getJugadores.orThrow, { page: 1, pageSize: 1000 }),
+  ]);
 
   const processedValues: ProcessDataValues = {
     players: playersData.results as Player[],
@@ -37,13 +48,15 @@ try {
     page: page,
     query: search,
     sortBy: sortBy,
-    orderBy: orderBy
+    orderBy: orderBy,
+  };
+
+  let data = await getProcessedData(processedValues);
+
+  if (startDate && endDate) {
+    data = filterDataOnDateRange(data, new Date(startDate), new Date(endDate));
+    console.log("Data filtrada por rango de fechas:", data, "desde", startDate, "hasta", endDate);
   }
-
-  const data = await getProcessedData(
-    processedValues
-  );
-
   totalPages = filterData.pages;
   analyzedData = data;
 } catch (err) {
@@ -55,12 +68,23 @@ try {
   <section class="max-w-6xl mx-auto p-6">
     <h1 class="text-2xl font-bold mb-4">Partidos Analizados</h1>
 
-    <div class="flex flex-row flex-wrap justify-center self-center-safe px-5 py-4 gap-5">
+    <div
+      class="flex flex-row flex-wrap justify-center self-center-safe px-5 py-4 gap-5"
+    >
       <ToggleButton label="Jugador" active={true} href={PLAYER_STATS} />
-      <ToggleButton label="Temporadas" active={false} href={PLAYER_STATS_SEASONS} />
+      <ToggleButton
+        label="Temporadas"
+        active={false}
+        href={PLAYER_STATS_SEASONS}
+      />
+      <ToggleButton
+        label="Equipos"
+        active={false}
+        href={PLAYER_STATS_TEAM}
+      />
     </div>
 
-      <EstadisticasPartidosFilters search={search} sortBy={sortBy} orderBy={orderBy} />
+    <EstadisticasPartidosFilters />
 
     <div class="overflow-x-auto min-h-1/2">
       <EstadisticasPartidos data={analyzedData} />
@@ -71,15 +95,48 @@ try {
 </Layout>
 
 <script>
-import { updateURL } from "@utils/index";
+  import { updateUrlParams } from "@utils/index";
 
   let timeout: number | undefined;
+  const order = document.getElementById("orderBy") as HTMLSelectElement;
+  const sort = document.getElementById("sortBy") as HTMLSelectElement;
+  const search = document.getElementById("search") as HTMLInputElement;
+  const group = document.getElementById("groupBy") as HTMLSelectElement;
 
-  document.getElementById("search")?.addEventListener("input", async () => {
+  const startDate = document.getElementById("startDate") as HTMLInputElement;
+  const endDate = document.getElementById("endDate") as HTMLInputElement;
+
+  search.addEventListener("input", async () => {
     clearTimeout(timeout);
-    timeout = window.setTimeout(updateURL, 1000);
+    timeout = window.setTimeout(
+      () => updateUrlParams("search", search.value),
+      1000,
+    );
   });
 
-  document.getElementById("sortBy")?.addEventListener("change", updateURL);
-  document.getElementById("orderBy")?.addEventListener("change", updateURL);
+  sort.addEventListener("change", () => updateUrlParams("sortBy", sort.value));
+  order.addEventListener("change", () =>
+    updateUrlParams("orderBy", order.value),
+  );
+  group.addEventListener("change", () =>
+    updateUrlParams("groupBy", group.value),
+  );
+
+  startDate.addEventListener("change", () => {
+    if (startDate.value && endDate.value) {
+      timeout = window.setTimeout(
+        () => updateUrlParams("startDate", startDate.value),
+        1500,
+      );
+    }
+  });
+
+  endDate.addEventListener("change", () => {
+    if (startDate.value && endDate.value) {
+      timeout = window.setTimeout(
+        () => updateUrlParams("endDate", endDate.value),
+        1500,
+      );
+    }
+  });
 </script>

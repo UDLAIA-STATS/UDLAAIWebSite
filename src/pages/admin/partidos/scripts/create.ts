@@ -9,7 +9,7 @@ import { activateButton, disableButton } from "@utils/index";
 document.addEventListener("DOMContentLoaded", async () => {
   const form = document.querySelector("#form-partido") as HTMLFormElement;
   const btnSubmit = form.querySelector(
-    'button[type="submit"]'
+    'button[type="submit"]',
   ) as HTMLButtonElement;
   const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
 
@@ -17,11 +17,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const torneos: Torneo[] = (data.results as Torneo[]) ?? [];
 
   const selectTemporada = document.getElementById(
-    "idtemporada"
+    "idtemporada",
   ) as HTMLSelectElement;
   const selectTorneo = document.getElementById("idtorneo") as HTMLSelectElement;
   const fechaInput = document.getElementById(
-    "fechapartido"
+    "fechapartido",
   ) as HTMLInputElement;
 
   selectTorneo.addEventListener("change", async (e) => {
@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Filtrar torneos según la temporada
     const torneosFiltrados = torneos.filter(
-      (torneo) => torneo.idtemporada === Number(temporadaSeleccionada)
+      (torneo) => torneo.idtemporada === Number(temporadaSeleccionada),
     );
 
     if (torneosFiltrados.length === 0) {
@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // === Botones y envío del formulario ===
   btnCancel.addEventListener("click", () =>
-    navigate(privateRoutesMap.VER_PARTIDOS)
+    navigate(privateRoutesMap.VER_PARTIDOS),
   );
 
   btnSubmit.addEventListener("click", async () => {
@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       Swal.fire(
         "Error",
         "Se detectaron errores en el formulario, corrige los campos y vuelve a intentarlo",
-        "error"
+        "error",
       );
       activateButton(btnSubmit);
       return;
@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     formData.set(
       "fechapartido",
-      new Date(formData.get("fechapartido") as string).toISOString()
+      new Date(formData.get("fechapartido") as string).toISOString(),
     );
 
     try {
@@ -137,7 +137,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         err instanceof Error
           ? err.message
           : "Error inesperado al crear el partido",
-        "error"
+        "error",
       );
       activateButton(btnSubmit);
     } finally {

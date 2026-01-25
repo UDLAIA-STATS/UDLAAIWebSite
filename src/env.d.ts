@@ -24,11 +24,11 @@ interface ImportMeta {
 }
 
 type LoggedUser = {
-    nickname: string,
-    email: string,
-    rol: string,
-    loginTime: Date
-}
+  nickname: string;
+  email: string;
+  rol: string;
+  loginTime: Date;
+};
 
 declare namespace App {
   interface Locals {

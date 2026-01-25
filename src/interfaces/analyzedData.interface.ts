@@ -8,6 +8,7 @@ export interface AnalyzedData {
   shirt_number: number;
   team: string;
   team_color: string;
+  goals: number;
   passes: number;
   shots_on_target: number;
   has_goal: boolean;
@@ -30,6 +31,8 @@ export interface AnalyzedDataTable {
   score: string;
   match_date: string;
   analysis_date: string;
+
+  team: string; // Team id
 
   temporada_nombre: string;
   temporada_id: number;

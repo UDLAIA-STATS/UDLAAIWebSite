@@ -1,1 +1,1 @@
-export * from './getAnalyzedData.action';
+export * from "./getAnalyzedData.action";

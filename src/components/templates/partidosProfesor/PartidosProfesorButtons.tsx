@@ -1,12 +1,10 @@
 import {
   highlightedButtonClass,
   disabledButtonClass,
-  privateRoutesMap,
-  inputClass,
 } from "@consts/index";
 import { getAddHref, MatchOptionClient, matchOptions } from "@utils/index";
 import { navigate } from "astro/virtual-modules/transitions-router.js";
-import { createSignal, onMount, For, type Component } from "solid-js";
+import { createSignal, For, type Component } from "solid-js";
 
 interface Props {
   options: matchOptions[];
@@ -27,7 +25,7 @@ export const PartidosButtons: Component<Props> = ({ options }: Props) => {
     window.dispatchEvent(new CustomEvent("partidos:filter-changed"));
   };
 
-  const handleAddElement = async (option: matchOptions) => {
+  const handleAddElement = async () => {
     const href =getAddHref(filter())
     await navigate(href);
   }
@@ -55,7 +53,7 @@ export const PartidosButtons: Component<Props> = ({ options }: Props) => {
       <div class="flex h-fit">
         <button
           class={`px-4 py-2 rounded-md font-medium transition-all cursor-pointer ${disabledButtonClass}`}
-          onclick={() => handleAddElement(filter())}
+          onclick={() => handleAddElement()}
         >
           Agregar {filter()}
         </button>
