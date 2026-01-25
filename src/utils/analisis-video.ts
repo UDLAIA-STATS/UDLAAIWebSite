@@ -43,7 +43,7 @@ export const generateVideoThumbnail = (videoFile: File) =>
           resolve(thumbnailUrl);
         },
         "image/png",
-        0.8
+        0.8,
       );
     };
 
@@ -56,9 +56,9 @@ export const generateVideoThumbnail = (videoFile: File) =>
 async function uploadWithProgress(
   file: File,
   partidoId: number,
-  color: string
+  color: string,
 ): Promise<string> {
-  const progressPopup = Swal.fire({
+    Swal.fire({
     title: "Subiendo video…",
     text: "Este proceso puede tardar varios minutos según el tamaño del archivo.",
     html: `
@@ -72,6 +72,7 @@ async function uploadWithProgress(
   });
 
   try {
+    console.log("Subiendo video");
     const { key } = await uploadFile(file, partidoId, color, (pct) => {
       const bar = document.getElementById("progress-bar") as HTMLElement;
       const txt = document.getElementById("progress-text") as HTMLElement;
@@ -89,7 +90,7 @@ async function uploadWithProgress(
 export async function startAnalysis(
   video: File,
   partido: Partido,
-  color: string
+  color: string,
 ): Promise<void> {
   if (partido.partidosubido) {
     await Swal.fire({
@@ -100,12 +101,13 @@ export async function startAnalysis(
     return;
   }
 
-  let key: string;
   const rgb = colorHexToRgb(color);
   const rgbString = rgb ? `${rgb.r},${rgb.g},${rgb.b}` : "193,2,48";
   console.log("Color seleccionado:", color, rgb);
   try {
-    key = await uploadWithProgress(video, partido.idpartido, rgbString);
+    console.log("Subiendo video");
+    const res = await uploadWithProgress(video, partido.idpartido, rgbString);
+    console.log("Video subido con clave:", res);
   } catch (e: any) {
     await Swal.fire({
       icon: "error",
@@ -124,7 +126,7 @@ export async function startAnalysis(
   partido.partidosubido = true;
 
   const { data, error } = await actions.partidoSubido(partido);
-  console.log("Partido subido")
+  console.log("Partido subido");
   if (error || !data) {
     await Swal.fire({
       icon: "error",

@@ -17,7 +17,7 @@ export const getJugadores = defineAction({
     try {
       const baseUrl = import.meta.env.JUGADORES_API;
       const response = await fetch(
-        `${baseUrl}/jugadores/all/?page=${page}&offset=${pageSize}`
+        `${baseUrl}/jugadores/all/?page=${page}&offset=${pageSize}`,
       );
       if (!response.ok) {
         const error = errorResponseSerializer(await response.json());
@@ -32,7 +32,7 @@ export const getJugadores = defineAction({
     } catch (error) {
       console.error("Error en getJugadores:", error);
       throw new Error(
-        "No se pudieron obtener los jugadores. Intente nuevamente más tarde."
+        "No se pudieron obtener los jugadores. Intente nuevamente más tarde.",
       );
     }
   },
@@ -48,7 +48,7 @@ export const searchJugadores = defineAction({
     try {
       const baseUrl = import.meta.env.JUGADORES_API;
       const response = await fetch(
-        `${baseUrl}/jugadores/all/?page=${1}&offset=${pageSize}`
+        `${baseUrl}/jugadores/all/?page=${1}&offset=${pageSize}`,
       );
       if (!response.ok) {
         const error = errorResponseSerializer(await response.json());
@@ -62,14 +62,18 @@ export const searchJugadores = defineAction({
       const players = data.results as Player[];
 
       data.results = players.filter((player) => {
-        const fullName = `${player.nombrejugador} ${player.apellidojugador}`.toLowerCase();
-        return (fullName.includes(search.toLowerCase()) || player.idbanner.toLowerCase().includes(search.toLowerCase()));
+        const fullName =
+          `${player.nombrejugador} ${player.apellidojugador}`.toLowerCase();
+        return (
+          fullName.includes(search.toLowerCase()) ||
+          player.idbanner.toLowerCase().includes(search.toLowerCase())
+        );
       });
       return data;
     } catch (error) {
       console.error("Error en searchJugadores:", error);
       throw new Error(
-        "No se pudieron obtener los jugadores. Intente nuevamente más tarde."
+        "No se pudieron obtener los jugadores. Intente nuevamente más tarde.",
       );
     }
   },

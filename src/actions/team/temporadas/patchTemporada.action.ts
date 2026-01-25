@@ -17,7 +17,7 @@ export const updateTemporada = defineAction({
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
-        }
+        },
       );
 
       if (!res.ok) {
@@ -28,7 +28,7 @@ export const updateTemporada = defineAction({
           errorMessage = errorData.data;
         }
         throw new Error(
-          errorMessage || `Error ${res.status}: ${res.statusText}`
+          errorMessage || `Error ${res.status}: ${res.statusText}`,
         );
       }
 
@@ -37,7 +37,7 @@ export const updateTemporada = defineAction({
     } catch (err) {
       console.error(
         `Error al actualizar temporada ${payload.idtemporada}:`,
-        err
+        err,
       );
       throw new Error("No se pudo actualizar la temporada");
     }

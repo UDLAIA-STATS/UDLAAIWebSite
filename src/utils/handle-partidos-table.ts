@@ -76,7 +76,7 @@ export const getRows = (
   torneos?: Torneo[] | null,
   partidos?: Partido[] | null,
   temporadas?: Temporada[] | null,
-  equipos?: Equipo[] | null
+  equipos?: Equipo[] | null,
 ): TableContent[][] => {
   const capitalize = (value?: string | null) => {
     if (!value) return "-";
@@ -100,18 +100,18 @@ export const getRows = (
       return partidos.map((p) => [
         { data: String(p.idpartido ?? "-"), isVisible: false },
         {
-          data: new Date(p.fechapartido).toLocaleDateString("es-ES", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          }) ??
-             "-",
+          data:
+            new Date(p.fechapartido).toLocaleDateString("es-ES", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            }) ?? "-",
         },
         { data: p.equipo_local_nombre ?? "-" },
         { data: p.equipo_visitante_nombre ?? "-" },
-        { data: p.partidosubido ? 'Sí' : "No" },
+        { data: p.partidosubido ? "Sí" : "No" },
         {
           data: `${p.marcadorequipolocal ?? 0} - ${p.marcadorequipovisitante ?? 0}`,
         },
@@ -146,7 +146,7 @@ export const getRows = (
 
 export const getActions = (
   filter: matchOptions,
-  handleDelete: (argument: any) => void
+  handleDelete: (argument: any) => void,
 ): TableActions[] => {
   const deleteAction: TableActions = {
     action: handleDelete,

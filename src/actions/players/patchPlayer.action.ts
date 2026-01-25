@@ -1,9 +1,11 @@
 import { defineAction } from "astro:actions";
 import { jugadorUpdateSchema } from "./playerSchemas";
-import { errorResponseSerializer, successResponseSerializer } from "@utils/serializers";
+import {
+  errorResponseSerializer,
+  successResponseSerializer,
+} from "@utils/serializers";
 
 export const updateJugador = defineAction({
-   
   accept: "form",
   input: jugadorUpdateSchema,
   handler: async (updates) => {
@@ -18,7 +20,7 @@ export const updateJugador = defineAction({
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(updates),
-        }
+        },
       );
       if (!response.ok) {
         const errorData = errorResponseSerializer(await response.json());

@@ -16,7 +16,7 @@ export const getTemporadas = defineAction({
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
       const res = await fetch(
-        `${baseUrl}/temporadas/all/?page=${page}&offset=${pageSize}`
+        `${baseUrl}/temporadas/all/?page=${page}&offset=${pageSize}`,
       );
       if (!res.ok) {
         const errorData = errorResponseSerializer(await res.json());
@@ -24,10 +24,11 @@ export const getTemporadas = defineAction({
         if (errorData.data) {
           errorMessage = errorData.data;
         }
-        throw new Error(errorMessage || `Error ${res.status}: ${res.statusText}`);
+        throw new Error(
+          errorMessage || `Error ${res.status}: ${res.statusText}`,
+        );
       }
 
-      
       const data = paginationResponseSerializer(await res.json());
       return data;
     } catch (err) {
@@ -50,7 +51,9 @@ export const getTemporadaById = defineAction({
         if (errorData.data) {
           errorMessage = errorData.data;
         }
-        throw new Error(errorMessage || `Error ${res.status}: ${res.statusText}`);
+        throw new Error(
+          errorMessage || `Error ${res.status}: ${res.statusText}`,
+        );
       }
       const data = successResponseSerializer(await res.json());
       return data;

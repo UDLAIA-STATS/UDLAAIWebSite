@@ -44,7 +44,7 @@ export const updateEquipo = defineAction({
         }
 
         throw new Error(
-          errorMessage || `Error ${response.status}: ${response.statusText}`
+          errorMessage || `Error ${response.status}: ${response.statusText}`,
         );
       }
 

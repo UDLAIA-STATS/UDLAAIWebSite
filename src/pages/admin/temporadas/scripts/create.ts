@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       Swal.fire(
         "Error",
         "Se detectaron errores en el formulario, corrige los campos y vuelve a intentarlo",
-        "error"
+        "error",
       ).then(() => {
         activateButton(btnSubmit);
       });
@@ -45,18 +45,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Creamos un nuevo FormData limpio con los tipos correctos
     formData.set(
       "nombretemporada",
-      formData.get("nombretemporada")?.toString().trim() ?? ""
+      formData.get("nombretemporada")?.toString().trim() ?? "",
     );
     formData.set(
       "descripciontemporada",
-      formData.get("descripciontemporada")?.toString().trim() ?? ""
+      formData.get("descripciontemporada")?.toString().trim() ?? "",
     );
     formData.set("tipotemporada", tipo);
     formData.set("fechainiciotemporada", fechaInicioISO);
     formData.set("fechafintemporada", fechaFinISO);
     formData.set(
       "temporadaactiva",
-      formData.get("temporadaactiva")?.toString() ?? ""
+      formData.get("temporadaactiva")?.toString() ?? "",
     );
 
     try {

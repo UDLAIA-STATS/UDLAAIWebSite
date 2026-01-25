@@ -1,5 +1,8 @@
 import type { Partido } from "@interfaces/torneos.interface";
-import { setFieldError, clearFieldError } from "@utils/validation/validation-utils";
+import {
+  setFieldError,
+  clearFieldError,
+} from "@utils/validation/validation-utils";
 
 export const validatePartidos = (formData: FormData): boolean => {
   const idTorneo = formData.get("idtorneo")?.toString().trim() ?? "";

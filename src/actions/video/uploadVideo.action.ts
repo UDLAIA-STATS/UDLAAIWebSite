@@ -18,10 +18,12 @@ export const uploadVideo = defineAction({
       const res = await axios.post(`${uploadApi}/upload/`, formData, {
         onUploadProgress: (progressEvent) => {
           if (!progressEvent.total) return;
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total,
+          );
           if (onProgress) onProgress(percentCompleted);
         },
-      })
+      });
 
       if (!res.status || res.status !== 200) {
         throw new Error("Error al comunicarse con Cloudflare.");

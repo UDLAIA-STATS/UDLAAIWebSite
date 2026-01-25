@@ -1,1 +1,1 @@
-export * from './videoAnalysisEvents.action';
+export * from "./videoAnalysisEvents.action";

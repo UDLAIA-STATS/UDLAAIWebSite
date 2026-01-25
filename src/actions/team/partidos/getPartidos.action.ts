@@ -1,31 +1,43 @@
-import { errorResponseSerializer, paginationResponseSerializer, successResponseSerializer } from "@utils/serializers";
+import {
+  errorResponseSerializer,
+  paginationResponseSerializer,
+  successResponseSerializer,
+} from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 
 export const getPartidos = defineAction({
   accept: "json",
-    input: z.object({
+  input: z.object({
     page: z.number().int().positive().optional().default(1),
     pageSize: z.number().int().positive().optional().default(10),
   }),
   handler: async ({ page, pageSize }) => {
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
-      const res = await fetch(`${baseUrl}/partidos/all/?page=${page}&offset=${pageSize}`);
+      const res = await fetch(
+        `${baseUrl}/partidos/all/?page=${page}&offset=${pageSize}`,
+      );
       if (!res.ok) {
         const errorData = errorResponseSerializer(await res.json());
         let errorMessage = errorData.error;
         if (errorData.data) {
           errorMessage = errorData.data;
         }
-        throw new Error(errorMessage || `Error ${res.status}: ${res.statusText}`);
-      };
+        throw new Error(
+          errorMessage || `Error ${res.status}: ${res.statusText}`,
+        );
+      }
       const data = paginationResponseSerializer(await res.json());
-      console.log('Datos obtenidos de partido' + data)
+      console.log("Datos obtenidos de partido" + data);
       return data;
     } catch (err) {
       console.error("Error al obtener partidos:", err);
-      throw new Error(err instanceof Error ? err.message : "No se pudo obtener la lista de partidos");
+      throw new Error(
+        err instanceof Error
+          ? err.message
+          : "No se pudo obtener la lista de partidos",
+      );
     }
   },
 });
@@ -44,7 +56,9 @@ export const getPartidoById = defineAction({
         if (errorData.data) {
           errorMessage = errorData.data;
         }
-        throw new Error(errorMessage || `Error ${res.status}: ${res.statusText}`);
+        throw new Error(
+          errorMessage || `Error ${res.status}: ${res.statusText}`,
+        );
       }
       const data = successResponseSerializer(await res.json());
       return data;

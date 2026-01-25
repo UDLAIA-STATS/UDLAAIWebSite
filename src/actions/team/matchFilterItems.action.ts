@@ -1,4 +1,7 @@
-import { errorResponseSerializer, paginationResponseSerializer } from "@utils/serializers";
+import {
+  errorResponseSerializer,
+  paginationResponseSerializer,
+} from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 
@@ -14,8 +17,10 @@ export const getDataByFilter = defineAction({
     const validFilters = ["torneos", "partidos", "temporadas", "equipos"];
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
 
-    if (!baseUrl) throw new Error("Variable de entorno TEAMSERVICE_URL no configurada");
-    if (!validFilters.includes(filterOption)) throw new Error(`Filtro inválido: ${filterOption}`);
+    if (!baseUrl)
+      throw new Error("Variable de entorno TEAMSERVICE_URL no configurada");
+    if (!validFilters.includes(filterOption))
+      throw new Error(`Filtro inválido: ${filterOption}`);
 
     const endpoint = `${baseUrl}/${encodeURIComponent(filterOption)}/all/?page=${page}&offset=${pageSize}`;
 
@@ -27,7 +32,9 @@ export const getDataByFilter = defineAction({
         if (errorData.data) {
           errorMessage = errorData.data;
         }
-        throw new Error(errorMessage || `Error ${response.status}: ${response.statusText}`);
+        throw new Error(
+          errorMessage || `Error ${response.status}: ${response.statusText}`,
+        );
       }
 
       const data = await response.json();
@@ -38,7 +45,7 @@ export const getDataByFilter = defineAction({
         count: content.count,
         page: content.page,
         offset: content.offset,
-        pages: content.pages
+        pages: content.pages,
       };
     } catch (err) {
       console.error(`Error al obtener datos (${filterOption}):`, err);

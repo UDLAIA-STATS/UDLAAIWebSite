@@ -6,10 +6,14 @@ import Swal from "sweetalert2";
 document.addEventListener("DOMContentLoaded", () => {
   const searchBox = document.getElementById("search-box") as HTMLInputElement;
 
-  searchBox.addEventListener("input", (e) => {
+  searchBox.addEventListener("input", () => {
     window.setTimeout(() => {
       console.log("Search box value:", searchBox.value);
-      const url = updateUrl(new URL(globalThis.location.href), "search", searchBox.value)
+      const url = updateUrl(
+        new URL(globalThis.location.href),
+        "search",
+        searchBox.value,
+      );
       navigate(url.toString());
     }, 1500);
   });
@@ -42,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   if (result.isConfirmed) {
                     window.location.reload();
                   }
-                }
+                },
               );
             }
           }

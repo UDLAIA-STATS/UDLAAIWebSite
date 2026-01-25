@@ -1,5 +1,4 @@
 import { expect, test } from "vitest";
-import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import OutlinedButton from "@components/atoms/buttons/OutlinedButton.astro"
 import { renderAstroComponent } from "../../helpers.ts";
 

@@ -1,7 +1,4 @@
-import { actions } from "astro:actions";
 import Swal from "sweetalert2";
-import { navigate } from "astro:transitions/client";
-import { privateRoutesMap } from "@consts/routes";
 import { deleteUser } from "@services/delete_user";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -42,8 +39,9 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error al desactivar el usuario:", error);
             await Swal.fire(
               "Error",
-              (error as Error).message || "Ocurrió un error al desactivar el usuario",
-              "error"
+              (error as Error).message ||
+                "Ocurrió un error al desactivar el usuario",
+              "error",
             );
             return;
           }

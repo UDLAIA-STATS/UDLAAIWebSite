@@ -47,7 +47,7 @@ export const login = defineAction({
           errorMessage = errorData.data;
         }
         throw new Error(
-          errorMessage || `Error ${response.status}: ${response.statusText}`
+          errorMessage || `Error ${response.status}: ${response.statusText}`,
         );
       }
 

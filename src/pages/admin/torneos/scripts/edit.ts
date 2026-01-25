@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const btnSubmit = document.getElementById("btn-submit") as HTMLButtonElement;
   const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
   const temporadasSelect = document.getElementById(
-    "idtemporada"
+    "idtemporada",
   ) as HTMLSelectElement;
 
   const selectedValue = temporadasSelect.value;
@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       Swal.fire(
         "Error",
         "Se detectaron errores en el formulario, corrige los campos y vuelve a intentarlo",
-        "error"
+        "error",
       );
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       Swal.fire(
         "Información",
         "No se han detectado cambios en el torneo.",
-        "info"
+        "info",
       );
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
@@ -98,7 +98,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       Swal.fire(
         "Error",
         "Ocurrió un problema al actualizar el torneo",
-        "error"
+        "error",
       );
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");

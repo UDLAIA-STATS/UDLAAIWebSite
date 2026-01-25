@@ -1,5 +1,5 @@
 import Swal from "sweetalert2/dist/sweetalert2.js";
-import { ActionError, actions } from "astro:actions";
+import { actions } from "astro:actions";
 import { privateRoutesMap } from "@consts/routes";
 import { navigate } from "astro:transitions/client";
 import type { User } from "@interfaces/user.interface";
@@ -14,7 +14,7 @@ import { getActualUser } from "@services/index";
 document.addEventListener("DOMContentLoaded", async () => {
   const form = document.querySelector("#form-usuario") as HTMLFormElement;
   const btnSubmit = form!.querySelector(
-    "button[type='submit']"
+    "button[type='submit']",
   ) as HTMLButtonElement;
   const btnCancel = document.getElementById("btn-cancel") as HTMLButtonElement;
 
@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   form.addEventListener("submit", (e) => e.preventDefault());
 
-  btnSubmit.addEventListener("click", async (e) => {
+  btnSubmit.addEventListener("click", async () => {
     disableButton(btnSubmit);
     const formData = new FormData(form);
     const name = formData.get("name")?.toString().trim();
@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       Swal.fire(
         "Error",
         "Se detectaron errores en el formulario, corrige los campos y vuelve a intentarlo",
-        "error"
+        "error",
       );
       btnSubmit.disabled = false;
       btnSubmit.classList.remove("opacity-50", "cursor-not-allowed");
@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       await Swal.fire(
         "Error",
         "Error al obtener los datos del usuario",
-        "error"
+        "error",
       );
       activateButton(btnSubmit);
       return;
@@ -96,11 +96,13 @@ document.addEventListener("DOMContentLoaded", async () => {
           activateButton(btnSubmit);
           return;
         }
-        Swal.fire("Usuario actualizado", data.mensaje, "success").then((result) => {
-          if (result.isConfirmed) {
-            navigate(privateRoutesMap.ADMINS_USERS);
-          }
-        });
+        Swal.fire("Usuario actualizado", data.mensaje, "success").then(
+          (result) => {
+            if (result.isConfirmed) {
+              navigate(privateRoutesMap.ADMINS_USERS);
+            }
+          },
+        );
         form.reset();
       } catch (err) {
         Swal.fire("Error", (err as Error).message, "error");

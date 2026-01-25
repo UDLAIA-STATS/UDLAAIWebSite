@@ -16,7 +16,7 @@ export const getEquipos = defineAction({
     const baseUrl = import.meta.env.TEAMSERVICE_URL;
     try {
       const response = await fetch(
-        `${baseUrl}/equipos/all/?page=${page}&offset=${pageSize}`
+        `${baseUrl}/equipos/all/?page=${page}&offset=${pageSize}`,
       );
       if (!response.ok) {
         const errorData = errorResponseSerializer(await response.json());
@@ -27,11 +27,11 @@ export const getEquipos = defineAction({
         }
 
         throw new Error(
-          errorMessage || `Error ${response.status}: ${response.statusText}`
+          errorMessage || `Error ${response.status}: ${response.statusText}`,
         );
       }
       const paginationData = paginationResponseSerializer(
-        await response.json()
+        await response.json(),
       );
       return paginationData;
     } catch (error) {
@@ -61,7 +61,7 @@ export const getEquipoById = defineAction({
         }
 
         throw new Error(
-          errorMessage || `Error ${response.status}: ${response.statusText}`
+          errorMessage || `Error ${response.status}: ${response.statusText}`,
         );
       }
       const data = successResponseSerializer(await response.json());
@@ -91,7 +91,7 @@ export const getEquipoByName = defineAction({
         }
 
         throw new Error(
-          errorMessage || `Error ${response.status}: ${response.statusText}`
+          errorMessage || `Error ${response.status}: ${response.statusText}`,
         );
       }
       const data = successResponseSerializer(await response.json());

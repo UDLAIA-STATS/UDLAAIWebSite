@@ -17,7 +17,7 @@ export const updatePartido = defineAction({
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
-        }
+        },
       );
 
       if (!res.ok) {
@@ -28,7 +28,7 @@ export const updatePartido = defineAction({
           errorMessage = errorData.data;
         }
         throw new Error(
-          errorMessage || `Error ${res.status}: ${res.statusText}`
+          errorMessage || `Error ${res.status}: ${res.statusText}`,
         );
       }
 
@@ -52,7 +52,7 @@ export const partidoSubido = defineAction({
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
-        }
+        },
       );
 
       if (!res.ok) {
@@ -63,7 +63,7 @@ export const partidoSubido = defineAction({
           errorMessage = errorData.data;
         }
         throw new Error(
-          errorMessage || `Error ${res.status}: ${res.statusText}`
+          errorMessage || `Error ${res.status}: ${res.statusText}`,
         );
       }
 

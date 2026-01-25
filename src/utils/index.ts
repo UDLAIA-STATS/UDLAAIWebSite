@@ -3,8 +3,8 @@ export * from "./dates";
 export * from "./fileToBase64";
 export * from "./handle-partidos-table";
 export * from "./match-option-cookies";
-export * from "./validation/index"
+export * from "./validation/index";
 export * from "./serializers/index";
 export * from "./forms/index";
-export * from './color_to_rgb';
-export * from './page_url_manage';
+export * from "./color_to_rgb";
+export * from "./page_url_manage";

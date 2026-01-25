@@ -4,7 +4,6 @@ import {
 } from "@utils/serializers";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import { log } from "console";
 
 export const registerUser = defineAction({
   accept: "form",
@@ -14,14 +13,10 @@ export const registerUser = defineAction({
     rol: z.enum(["superuser", "profesor"]),
     password: z.string(),
   }),
-  handler: async (
-    { email, password, name, rol },
-    { cookies }
-  ) => {
+  handler: async ({ email, password, name, rol }) => {
     try {
       console.log("Registrando usuario:", { name, email, password });
       const authUrl = import.meta.env.AUTH_URL;
-
 
       const response = await fetch(`${authUrl}/register/`, {
         method: "POST",

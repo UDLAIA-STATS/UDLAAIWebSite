@@ -21,7 +21,9 @@ export const deleteTemporada = defineAction({
         if (errorData.data) {
           errorMessage = errorData.data;
         }
-        throw new Error(errorMessage || `Error ${res.status}: ${res.statusText}`);
+        throw new Error(
+          errorMessage || `Error ${res.status}: ${res.statusText}`,
+        );
       }
       const response = successResponseSerializer(await res.json());
       return response;

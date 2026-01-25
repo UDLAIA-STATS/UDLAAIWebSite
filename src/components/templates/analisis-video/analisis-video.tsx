@@ -1,10 +1,9 @@
-import { createSignal, For, onCleanup, onMount } from "solid-js";
+import { createSignal, For, onMount } from "solid-js";
 import "@styles/global.css";
 import UploadIcon from "@assets/upload_icon.svg";
 import { actions } from "astro:actions";
 import Swal from "sweetalert2";
 import type { Partido, Temporada } from "@interfaces/torneos.interface";
-import { uploadFile } from "@services/uploadFile";
 import { generateVideoThumbnail, startAnalysis } from "@utils/analisis-video";
 import { PreviewImage } from "@components/atoms/image/PreviewImage";
 

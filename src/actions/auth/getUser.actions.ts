@@ -24,10 +24,7 @@ export const getUsers = defineAction({
     sortBy: z.string().optional(),
     orderBy: z.enum(["asc", "desc"]).optional(),
   }),
-  handler: async (
-    { page, pageSize, sortBy, orderBy },
-    { cookies }
-  ) => {
+  handler: async ({ page, pageSize, sortBy, orderBy }, { cookies }) => {
     const baseUrl = import.meta.env.AUTH_URL;
     const loggedInUser = cookies.get("user")
       ? (JSON.parse(cookies.get("user")?.value as string) as LoggedUser)
@@ -39,8 +36,6 @@ export const getUsers = defineAction({
     }
 
     try {
-
-
       const response = await fetch(
         `${baseUrl}/users/?page=${page}&offset=${pageSize}`,
         {
@@ -48,7 +43,7 @@ export const getUsers = defineAction({
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       const details = await response.json();
@@ -59,7 +54,9 @@ export const getUsers = defineAction({
         if (errorData.data) {
           errorMessage = errorData.data;
         }
-        throw new Error(errorMessage || `Error ${response.status}: ${response.statusText}`);
+        throw new Error(
+          errorMessage || `Error ${response.status}: ${response.statusText}`,
+        );
       }
 
       const result = paginationResponseSerializer(details);
@@ -92,7 +89,7 @@ export const getUserByUsername = defineAction({
       const response = await fetch(`${baseUrl}/users/${username}/`, {
         method: "GET",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
       });
 
@@ -104,7 +101,9 @@ export const getUserByUsername = defineAction({
         if (errorData.data) {
           errorMessage = errorData.data;
         }
-        throw new Error(errorMessage || `Error ${response.status}: ${response.statusText}`);
+        throw new Error(
+          errorMessage || `Error ${response.status}: ${response.statusText}`,
+        );
       }
       console.log("Usuario obtenido:", successResponseSerializer(details).data);
       debug.log("Usuario obtenido:", details);
@@ -112,7 +111,7 @@ export const getUserByUsername = defineAction({
     } catch (error) {
       console.error(
         `Error al obtener el usuario con nombre de usuario "${username}":`,
-        error
+        error,
       );
       throw new Error("No se pudo obtener el usuario solicitado");
     }
@@ -122,7 +121,7 @@ export const getUserByUsername = defineAction({
 const sortUsers = (
   items: User[],
   sortBy?: keyof User,
-  orderBy: "asc" | "desc" = "asc"
+  orderBy: "asc" | "desc" = "asc",
 ): User[] => {
   if (!sortBy || !sortableFields.has(sortBy)) {
     return items;

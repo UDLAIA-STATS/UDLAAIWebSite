@@ -30,12 +30,12 @@ export const notifyVideoAnalysis = defineAction({
           "Error desconocido del servicio de estadísticas.";
 
         throw new Error(
-          `Error al obtener datos analizados (HTTP ${status ?? "N/A"}): ${message}`
+          `Error al obtener datos analizados (HTTP ${status ?? "N/A"}): ${message}`,
         );
       }
 
       throw new Error(
-        "Error inesperado al obtener los datos analizados. Intente nuevamente."
+        "Error inesperado al obtener los datos analizados. Intente nuevamente.",
       );
     }
   },

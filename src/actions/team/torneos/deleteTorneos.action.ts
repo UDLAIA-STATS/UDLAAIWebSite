@@ -22,7 +22,9 @@ export const deleteTorneo = defineAction({
         if (errorData.data) {
           errorMessage = errorData.data;
         }
-        throw new Error(errorMessage || `Error ${res.status}: ${res.statusText}`);
+        throw new Error(
+          errorMessage || `Error ${res.status}: ${res.statusText}`,
+        );
       }
 
       const data = successResponseSerializer(await res.json());
@@ -30,7 +32,7 @@ export const deleteTorneo = defineAction({
     } catch (err) {
       console.error(`Error al eliminar torneo ${idtorneo}:`, err);
       throw new Error(
-        "No se puede eliminar el torneo, posiblemente tiene temporadas o partidos asociados."
+        "No se puede eliminar el torneo, posiblemente tiene temporadas o partidos asociados.",
       );
     }
   },

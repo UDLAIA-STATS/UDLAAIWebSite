@@ -1,36 +1,36 @@
 export interface Temporada {
-    idtemporada: number;
-    nombretemporada: string;
-    descripciontemporada: string;
-    tipotemporada: 'Amistosa' | 'Oficial';
-    fechainiciotemporada: string;
-    fechafintemporada: string;
-    temporadaactiva: boolean;
+  idtemporada: number;
+  nombretemporada: string;
+  descripciontemporada: string;
+  tipotemporada: "Amistosa" | "Oficial";
+  fechainiciotemporada: string;
+  fechafintemporada: string;
+  temporadaactiva: boolean;
 }
 
 export interface Torneo {
-    idtorneo: number;
-    idtemporada: number;
-    nombretorneo: string;
-    descripciontorneo: string;
-    fechainiciotorneo: string;
-    fechafintorneo: string;
-    torneoactivo: boolean;
+  idtorneo: number;
+  idtemporada: number;
+  nombretorneo: string;
+  descripciontorneo: string;
+  fechainiciotorneo: string;
+  fechafintorneo: string;
+  torneoactivo: boolean;
 }
 
 export interface Institucion {
-    idinstitucion: number;
-    nombreinstitucion: string;
-    institucionactiva: boolean;
+  idinstitucion: number;
+  nombreinstitucion: string;
+  institucionactiva: boolean;
 }
 
 export interface Equipo {
-    idequipo: number;
-    idinstitucion: number;
-    institucion_nombre: string;
-    nombreequipo: string;
-    imagenequipo?: string | null;
-    equipoactivo: boolean;
+  idequipo: number;
+  idinstitucion: number;
+  institucion_nombre: string;
+  nombreequipo: string;
+  imagenequipo?: string | null;
+  equipoactivo: boolean;
 }
 
 export interface Partido {

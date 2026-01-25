@@ -11,12 +11,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnCancel = document.querySelector("#btn-cancel") as HTMLButtonElement;
 
   btnCancel.addEventListener("click", () =>
-    navigate(privateRoutesMap.VER_EQUIPOS)
+    navigate(privateRoutesMap.VER_EQUIPOS),
   );
 
   form.addEventListener("submit", (e) => e.preventDefault());
 
-  btnSubmit.addEventListener("click", async (e) => {
+  btnSubmit.addEventListener("click", async () => {
     disableButton(btnSubmit);
 
     const formData = new FormData(form);

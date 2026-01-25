@@ -5,7 +5,7 @@ interface WebSocketMessage {
 
 export const suscribeVideoUpload = (
   videoId: string,
-  onProgress?: (percent: number) => void
+  onProgress?: (percent: number) => void,
 ): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
     try {
@@ -45,14 +45,14 @@ export const suscribeVideoUpload = (
 
       sock.onclose = (event) => {
         if (!event.wasClean) {
-            console.error("Conexión cerrada inesperadamente.");
+          console.error("Conexión cerrada inesperadamente.");
           reject(new Error("Conexión cerrada inesperadamente."));
         }
       };
     } catch (error) {
       console.error("Error al suscribirse a las actualizaciones del video.");
       reject(
-        new Error("Error al suscribirse a las actualizaciones del video.")
+        new Error("Error al suscribirse a las actualizaciones del video."),
       );
     }
   });

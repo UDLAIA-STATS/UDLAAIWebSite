@@ -126,7 +126,7 @@ const rows = buildRows(filter);
                   .getActions(filter, (id: number) =>
                     console.log(`${filter} con id ${id} eliminado`)
                   )
-                  .map((action, actionIndex) =>
+                  .map((action) =>
                     action.type === "link" ? (
                       <td class="px-6 py-4 text-start">
                         <a

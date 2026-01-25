@@ -1,8 +1,9 @@
 import { navigate } from "astro:transitions/client";
 
-export const  updateUrlParams = (key?: string, value?: string) => {
+export const updateUrlParams = (key?: string, value?: string) => {
   const currentUrl = new URL(globalThis.location.href);
-  const { search, sortBy, orderBy, groupBy, startDate, endDate } = fetchUrlParameters();
+  const { search, sortBy, orderBy, groupBy, startDate, endDate } =
+    fetchUrlParameters();
 
   updateUrl(currentUrl, "search", search);
   updateUrl(currentUrl, "sortBy", sortBy);
@@ -15,7 +16,7 @@ export const  updateUrlParams = (key?: string, value?: string) => {
   if (key && value !== undefined) {
     updateUrl(currentUrl, key, value);
   }
-  
+
   navigate(currentUrl.toString());
 };
 
