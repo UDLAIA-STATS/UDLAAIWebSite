@@ -73,7 +73,17 @@ try {
   data = filterDataOnTeam(data, Number(groupBy));
 
   if (startDate && endDate) {
-    data = filterDataOnDateRange(data, new Date(startDate), new Date(endDate));
+    let column = "match_date";
+    if (groupBy == "analysis_date") {
+      column = "analysis_date";
+    }
+    data = filterDataOnDateRange(
+      data,
+      orderBy,
+      new Date(startDate),
+      new Date(endDate),
+      column
+    );
   }
 
   totalPages = filterData.pages;

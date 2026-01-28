@@ -42,14 +42,18 @@ export const filterDataOnSeason = (
 
 export const filterDataOnDateRange = (
   data: AnalyzedDataTable[],
+  orderBy: string,
   startDate: Date,
   endDate: Date,
+  column: string = "match_date",
 ) =>
   data.filter((item) => {
-    return (
-      new Date(parseDDMMYYYY(item.match_date)) >= startDate &&
-      new Date(parseDDMMYYYY(item.match_date)) <= endDate
-    );
+    const date = column === "match_date" ? new Date(parseDDMMYYYY(item.match_date)) : new Date(parseDDMMYYYY(item.analysis_date));
+
+    if (orderBy === "asc") {
+      return date >= startDate && date <= endDate;
+    }
+    return date >= startDate && date <= endDate;
   });
 
 const parseDDMMYYYY = (dateStr: string): Date => {
@@ -120,12 +124,13 @@ export const getProcessedData = async (
           vb = b.tournament_name;
           break;
         case "match_date":
-          va = new Date(a.match_date).getTime();
-          vb = new Date(b.match_date).getTime();
+          va = new Date(parseDDMMYYYY(a.match_date)).getTime();
+          vb = new Date(parseDDMMYYYY(b.match_date)).getTime();
           break;
         case "analysis_date":
-          va = new Date(a.analysis_date).getTime();
-          vb = new Date(b.analysis_date).getTime();
+          va = new Date(parseDDMMYYYY(a.analysis_date)).getTime();
+          vb = new Date(parseDDMMYYYY(b.analysis_date)).getTime();
+          console.log("Comparing dates:", va, vb);
           break;
         case "player":
         default:
